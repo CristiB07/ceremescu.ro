@@ -1,0 +1,23 @@
+<phpunit
+	bootstrap="elearning_tests/bootstrap.php"
+	colors="true"
+	backupGlobals="false"
+	beStrictAboutelearning_testsThatDoNotTestAnything="false">
+
+	<elearning_testsuites>
+		<elearning_testsuite name="elearning_tests">
+			<directory suffix="Test.php">./elearning_tests</directory>
+		</elearning_testsuite>
+	</elearning_testsuites>
+
+	<coverage processUncoveredFiles="true">
+		<include>
+			<directory suffix=".php">src</directory>
+		</include>
+		<report>
+			<html outputDirectory="build/coverage"/>
+			<text outputFile="php://stdout" showOnlySummary="true"/>
+		</report>
+	</coverage>
+
+</phpunit>

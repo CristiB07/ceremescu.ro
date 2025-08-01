@@ -1,0 +1,556 @@
+<!doctype html>
+<html class="no-js" lang="" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Magazin online de proceduri și alte documente a $strSiteOwnner" />
+<meta name="keywords" content="" />
+<meta name="rating" content="General" />
+<meta name="author" content="Cristian Banu"/>
+<meta name="copyright" content="Cert Plus SRL. Copyright (c) 2024"/>
+<title>eProceduri.ro: Administrare feeduri</title>
+<meta property="og:image" content="http://localhost/master.ro/img/certplus_image.jpg" />
+<link rel="stylesheet" href="http://localhost/master.ro/css/all.css"/>
+<link rel="stylesheet" href="http://localhost/master.ro/css/foundation.css"/>
+<link rel="stylesheet" href="http://localhost/master.ro/css/certplus.css"/>
+<link rel="shortcut icon" type="image/favicon" href="favicon.ico" />
+<script language="javascript" type="text/javascript">
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+  }
+</script>
+</head>
+</head>
+<body>
+<!-- Cookie alert -->
+<!-- Start header-->
+<div class="title-bar" data-responsive-toggle="responsive-menu" data-hide-for="medium">
+  <button class="menu-icon" type="button" data-toggle="responsive-menu"></button>
+  <div class="title-bar-title">Meniu</div>
+</div>
+ <div class="top-bar" data-sticky data-options="marginTop:0;" style="width:100%">
+	<div class="top-bar-left" id="responsive-menu">
+		<ul class="dropdown menu" data-dropdown-menu>
+			<li class="menu-text">Bine ați venit</li>
+			<li><a href="http://localhost/master.ro/admin/dashboard.php">Acasă</a></li>
+						<li>
+		<a href="#">Administrative</a>
+					<ul class="menu">
+							<li><a href="http://localhost/master.ro/administrative/personalexpenses.php"><i class="fas fa-file-invoice"></i>&nbsp;Deconturi</a></li>
+							<li><a href="http://localhost/master.ro/administrative/personalworkingdays.php"><i class="fas fa-calendar-alt"></i>&nbsp;Pontaje</a></li>
+							<li><a href="http://localhost/master.ro/administrative/gasfilling.php"><i class="fas fa-gas-pump"></i>&nbsp;Alimentări</a></li>
+							<li><a href="http://localhost/master.ro/administrative/personalcarsheets.php"><i class="fas fa-car-side"></i>&nbsp;Foi de parcurs</a></li>
+					</ul>
+		</li>
+			<li>
+				<a href="#">Administrare</a>
+					<ul class="menu">
+						<li><a href="../users/siteusers.php"><i class="fas fa-user"></i> Utilizatori</a></li>
+						<li><a href="siteactivities.php"><i class="far fa-list-alt"></i> Activități</a></li>
+						<li><a href="siteauthorizations.php"><i class="far fa-id-badge"></i> Autorizații</a></li>
+						<li><a href="sitedbbackup.php"><i class="fas fa-save"></i> Backup bază de date</a></li>
+						<li><a href="exportclients.php"><i class="far fa-copy"></i> Export clienți</a></li>
+						<li><a href="exportinvoices.php"><i class="far fa-copy"></i> Export facturi</a></li>
+						<li><a href="managetoken.php"><i class="far fa-file-code"></i> Gestiune token</a></li>
+					</ul>
+			</li>
+			<li>
+				<a href="#"> Clienți</a>
+					<ul class="menu">
+						<li><a href="http://localhost/master.ro/clients/siteclients.php"><i class="far fa-address-book"></i> Clienți</a></li>
+						<li><a href="http://localhost/master.ro/clients/sitecontracts.php"><i class="far fa-file-alt"></i> Contracte</a></li>
+						<li><a href="http://localhost/master.ro/clients/sitebranchcontracts.php"><i class="far fa-file-alt"></i> Contracte puncte de lucru</a></li>
+						<li><a href="http://localhost/master.ro/clients/sitesubscribtions.php"><i class="far fa-list-alt"></i> Abonamente</a></li>
+						<li><a href="siteclientfinancials.php"><i class="fas fa-file-alt"></i> Date financiare</a></li>
+						<li><a href="siteclientauthorizations.php"><i class="far fa-id-badge"></i>Autorizații clienți</a></li>
+						<li><a href="sitetasks.php"><i class="far fa-list-alt"></i> Sarcini</a></li>
+						<li><a href="http://localhost/master.ro/clients/datecontract.php"><i class="far fa-copy"></i> Preia date ptr. contract</a></li>
+					</ul>
+			</li>
+			<li>
+			<a href="#">Prospecți</a>
+					<ul class="menu">		
+				<li><a href="siteprospects.php"><i class="large fa fa-users"></i>&nbsp;Prospecți</a></li>
+				<li><a href="sitevisitreports.php"><i class="large fas fa-newspaper"></i>&nbsp;Vizite</a></li>
+							</ul>
+			</li>			
+			<li>
+			<a href="#"> Newsletter</a>
+					<ul class="menu">		
+				<li><a href="emailnewsletter.php"><i class="fas fa-envelope-open-text"></i>&nbsp;Newsletter</a></li>
+				<li><a href="newsletetrclients.php"><i class="fas fa-users"></i>&nbsp;Abonați newsletter</a></li>
+							</ul>
+			</li>	
+			<li>
+			<a href="#"> Reader RSSS </a>
+					<ul class="menu">		
+				<li><a href="../rssreader/feeds.php"><i class="fas fa-rss-square"></i>&nbsp;Feeds RSS</a></li>
+				<li><a href="../rssreader/reader.php"><i class="large fas fa-newspaper"></i>&nbsp;Citește RSSS </a></li>
+							</ul>
+			</li>
+				<li>
+				<a href="#">Date financiare</a>
+					<ul class="menu">		
+						<li><a href="siteinvoices.php">Facturi</a></li>
+						<li><a href="sitebulkinvoices.php">Facturare bulk</a></li>
+						<li><a href="sitecashin.php">Încasări</a></li>
+						<li><a href="sitereceipts.php">Chitanțe</a></li>
+						<li><a href="efacturi.php">Efacturi</a></li>
+						<li><a href="verify_messages.php?mode=verify">Mesaje efactura</a></li>
+
+					</ul>
+			</li>	
+	<li>
+				<a href="#">CMS</a>
+					<ul class="menu">
+						<li><a href="http://localhost/master.ro/cms/sitepages.php"><i class="far fa-file-alt"></i>Pagină(i)</a></li>
+					</ul>
+			</li>
+				<li>
+				<a href="#">Magazin</a>
+					<ul class="menu">
+			<li><a href="http://localhost/master.ro/shop/siteproducts.php"><i class="fas fa-cart-plus"></i>Produse</a></li>
+			<li><a href="http://localhost/master.ro/shop/siteshopclients.php"><i class="far fa-id-card"></i>Clienți</a></li>
+			<li><a href="http://localhost/master.ro/shop/siteorders.php"><i class="fas fa-shopping-cart"></i>Comenzi</a></li>
+					</ul>
+			</li>
+	</ul>
+</div>
+	    <div class="top-bar-right text-right">
+			<ul class="menu">
+			<li><a href="http://localhost/master.ro/login/logout.php"><i class="fas fa-sign-out-alt"></i></a></li>
+</ul>
+	  </div>
+	  </div>
+	  <div class="grid-container">
+	    <div class="grid-x grid-margin-x">
+			  <div class="large-12 medium-12 small-12 cell">&nbsp;
+	  </div>
+	  	  </div>
+	    <div class="grid-x grid-margin-x">
+			<div class="large-4 medium-4 small-4 cell">
+				<h1><a href="http://localhost/master.ro/index.php"><img src="http://localhost/master.ro/img/logo.png" width="300px"></a></h1>
+			</div>
+        <div class="large-8 medium-8 small-8 cell">
+        </div>
+      </div>
+	  <!-- Ends header-->	    
+	  <div class="grid-x grid-margin-x">
+			  <div class="large-12 medium-12 small-12 cell">
+<h1>Administrare feeduri</h1><a href="updatefeed.php?mode=all" class="button">Actualizează&nbsp;<i class="large fas fa-sync" title="Actualizează"></i></a>
+</div>
+</div>
+<div class="paginate">
+Total 213 mesaje <br /><br /><span class="disabled" href="#">&laquo; Previous</span> <a class="current" href="#">1</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=2&ipp=20">2</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=3&ipp=20">3</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=4&ipp=20">4</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=5&ipp=20">5</a>  ... <a class="paginate" href="/master.ro/rssreader/reader.php?page=11&ipp=20">11</a> <span class="disabled" href="#">&raquo; Next</span>
+<a class="paginate" style="margin-left:10px" href="/master.ro/rssreader/reader.php?page=1&ipp=All">All</a> 
+ <br /><br />
+ </div>
+ <div class="grid-x grid-margin-x">
+     <div class="large-12 medium-12 small-12 cell"> 
+	 
+<table width="100%">
+	      <thead>
+    	<tr>
+        	<th></th>
+        	<th>Feed</th>
+			<th>Articol</th>
+			<th>Perioada</th>
+			<th>Deschide</th>
+			<th>Detalii</th>
+			<th>marchează ca citit</th>
+        </tr>
+		</thead>
+<tbody>
+<tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/03/12/responsabil-de-securitate-cibernetica/"> Responsabil de securitate cibernetică</a>			<div class="reveal" id="213" data-reveal>
+  <h1>Responsabil de securitate cibernetică</h1>
+ <p>Contrar opiniei majoritară exprimată de Curtea Constituțională prin Decizia 70/2023 mie tot nu îmi sînt clare prevederile Legii 58/2023 privind securitatea și apărarea cibernetică a României, precum și pentru modificarea și completarea unor acte normative. La cursul de drept din anul I am învățat că atunci cînd legiuitorul nu face distincţia între anumite elemente avute&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Tue 12.03.2024</td>
+			<td><a href="https://adimunteanu.com/2024/03/12/responsabil-de-securitate-cibernetica/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=213" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/05/31/nis2-si-iso-27001-27002-2022/"> NIS2 și ISO 27001/27002: 2022</a>			<div class="reveal" id="212" data-reveal>
+  <h1>NIS2 și ISO 27001/27002: 2022</h1>
+ <p>Deși nu avem încă forma legii naționale de transpunere a directivei NIS2, îndrăznesc să scriu despre „alinierea„ termenilor și cerințelor dintre NIS2 și ISO27001/27002:2022 În standardul ISO 27001 regăsim termenul „control„ iar în NIS2 „măsură„. Controalele sînt împărție în: În NIS2 ”controalele” devin ”măsuri” și pot fi „tehnice, operaționale și organizatorice„ În NIS2 Art. 20:&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Fri 31.05.2024</td>
+			<td><a href="https://adimunteanu.com/2024/05/31/nis2-si-iso-27001-27002-2022/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=212" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/06/04/riscuri-controale-de-securitate-si-audit/"> Riscuri, controale (de securitate) și audit</a>			<div class="reveal" id="211" data-reveal>
+  <h1>Riscuri, controale (de securitate) și audit</h1>
+ <p>Într-o discuție sinceră despre ”riscuri IT” ar trebui să recunoaștem următoarea situație: dacă nu ar exista cerințe de conformitate, o mare parte din ”riscurile IT” nu vor fi luate în calcul de responsabilii cu ”guvernarea”. Acest lucru se întîmplă din cauza percepției: riscurile IT nu sînt percepute ca riscuri operaționale. Dacă lucrurile ar sta diferit&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Tue 04.06.2024</td>
+			<td><a href="https://adimunteanu.com/2024/06/04/riscuri-controale-de-securitate-si-audit/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=211" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/07/12/nis2-managementul-riscurilor-in-cazul-tertilor/"> NIS2 – managementul riscurilor în cazul terților</a>			<div class="reveal" id="210" data-reveal>
+  <h1>NIS2 – managementul riscurilor în cazul terților</h1>
+ <p>Art. 21 (3) din NIS2 spune așa: Statele membre se asigură că, atunci când analizează care măsuri menționate la alineatul (2) litera (d) (n.m &#8211; securitatea lanțului de aprovizionare, inclusiv aspectele legate de securitate referitoare la relațiile dintre fiecare entitate și prestatorii sau furnizorii săi direcți de servicii;) de la prezentul articol sunt adecvate, entitățile iau&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Fri 12.07.2024</td>
+			<td><a href="https://adimunteanu.com/2024/07/12/nis2-managementul-riscurilor-in-cazul-tertilor/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=210" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/08/01/numarul-de-identificare-digitala/"> Numărul de Identificare Digitală</a>			<div class="reveal" id="209" data-reveal>
+  <h1>Numărul de Identificare Digitală</h1>
+ <p>Ieri, Ministerul de Finanțe a lansat în dezbatere publică un proiect de modificare a Codului de procedură fiscală (”„Efectul sinergic (SIC!) al tuturor măsurilor pe care le implementăm pentru a ține sub control evaziunea fiscală va fi vizibil în contul de execuție bugetară.&#160;”) Introducerea numărului de identificare digitală, alternativ CNP-ului Se propune utilizarea de către&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Thu 01.08.2024</td>
+			<td><a href="https://adimunteanu.com/2024/08/01/numarul-de-identificare-digitala/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=209" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/08/12/masuri-de-gestionare-a-riscurilor-in-materie-de-securitate-cibernetica-si-igiena-cibernetica/"> Măsuri de gestionare a riscurilor în materie de securitate cibernetică și igiena cibernetică</a>			<div class="reveal" id="208" data-reveal>
+  <h1>Măsuri de gestionare a riscurilor în materie de securitate cibernetică și igiena cibernetică</h1>
+ <p>Despre igiena cibernetică este mai ușor de vorbit/scris decît de pus în practică. Lucrurile sînt de fapt asemănătoare cu igiena fizică: există un număr relativ mic de cauze fundamentale (root cause) pentru îmbolnăvirea noastră din cauza lipsei de igienă corporală. Implementare unor reguli simple (să ne spălăm pe mîini, de exemplu) pot preveni boli grave&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Mon 12.08.2024</td>
+			<td><a href="https://adimunteanu.com/2024/08/12/masuri-de-gestionare-a-riscurilor-in-materie-de-securitate-cibernetica-si-igiena-cibernetica/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=208" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/08/28/cind-scenariile-devin-realitate/"> Cînd scenariile devin realitate</a>			<div class="reveal" id="207" data-reveal>
+  <h1>Cînd scenariile devin realitate</h1>
+ <p>”Filosofia” pe care se bazează NIS2 este responsabilitatea managementului organizațiilor în relație cu riscurile IT care îi pot afecta pe beneficiarii serviciilor lor. Responsabilitatea de a asigura securitatea rețelelor și a sistemelor informatice revine în mare măsură entităților esențiale și entităților importante. Ar trebui să se promoveze și să se dezvolte o cultură a gestionării&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Wed 28.08.2024</td>
+			<td><a href="https://adimunteanu.com/2024/08/28/cind-scenariile-devin-realitate/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=207" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/10/09/ce-ar-fi-trebuit-sa-fie-auditul-sistemelor-informationale-securitatii-cibernetice/"> Ce ar fi trebuit să fie auditul sistemelor informaționale/securității cibernetice</a>			<div class="reveal" id="206" data-reveal>
+  <h1>Ce ar fi trebuit să fie auditul sistemelor informaționale/securității cibernetice</h1>
+ <p>Încep prin a repeta lucruri scrise sau spuse de multe ori pînă acum și binecunoscute de majoritatea actorilor: auditul sistemelor informaționale inclusiv auditul securității acestor sisteme nu se referă la completarea unor liste de verificare sau generarea de documente pentru a trece inspecțiile statului sau auditurile de la terți. Auditul securității informațiilor este vehiculul principal&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Wed 09.10.2024</td>
+			<td><a href="https://adimunteanu.com/2024/10/09/ce-ar-fi-trebuit-sa-fie-auditul-sistemelor-informationale-securitatii-cibernetice/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=206" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241017-ce-opinie-aperi/"> Ce opinie aperi...?</a>			<div class="reveal" id="40" data-reveal>
+  <h1>Ce opinie aperi...?</h1>
+ <p><p>Un trend absolut jenant în social media este să vezi tot felul de prompturi formulate la stilul „Ce opinie ai apăra în felul ăsta?”. Este o formă de a stimula angajamentul, genul ăla de tehnici pe care le foloseau și bloggerii la început (ca să nu mai vorbim de lepșe și alte mizerii similare inspirate din oracolele pe care le schimbam în școala generală). Trendul ăsta devine din ce în ce mai enervant și pentru că e un loc unde oamenii să vină și să expună cele mai controversate idei pe care le au, pentru a porni conversații neplăcute.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Thu 17.10.2024</td>
+			<td><a href="https://dorinlazar.ro/241017-ce-opinie-aperi/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=40" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241019-andrei-pogacias-setbv/"> Andrei Pogăciaș la SETBv</a>			<div class="reveal" id="39" data-reveal>
+  <h1>Andrei Pogăciaș la SETBv</h1>
+ <p><p>Ar trebui să știți cine e Andrei Pogăciaș, mai ales dacă sunteți pasionați de istorie. Are un podcast (show YouTube) unde este invitat permanent, <a href="https://www.youtube.com/@colectionaruldeistorie" target="_blank">Colecționarul de Istorie</a>, dar a căpătat foarte multă proeminență în momentul în care a colaborat la producția Rise of Empires, sezonul cu Vlad Țepeș, după care a fost invitat la mai multe show-uri YouTube. Înregistrările sunt populare și ușor de găsit, ceea ce îmi dă de înțeles că nu ar trebui să explic prea mult cine e omul😀.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Sat 19.10.2024</td>
+			<td><a href="https://dorinlazar.ro/241019-andrei-pogacias-setbv/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=39" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241021-referendum-moldova-eu/"> Gânduri la referendumul Moldovei legat de Uniunea Europeană</a>			<div class="reveal" id="38" data-reveal>
+  <h1>Gânduri la referendumul Moldovei legat de Uniunea Europeană</h1>
+ <p><p>Când scriu lucrurile astea referendumul Moldovei legat de Uniunea Europeană pare că trece. Nu știu rezultatul, și oricare ar fi mă interesează mai mult cei aproape 50% din votanți care au votat contra uniunii europene. Vorbim de un dezastru similar cu Brexitul, unde oamenii și-au tăiat singuri craca de sub picioare și după aia s-au așteptat de la ăia care i-au mințit să livreze ce au promis. Doar că spre deosebire de Marea Britanie, Moldova nu are secole de trecut colonial din care să se hrănească.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Mon 21.10.2024</td>
+			<td><a href="https://dorinlazar.ro/241021-referendum-moldova-eu/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=38" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/10/24/cui-ar-trebui-sa-raporteze-un-ciso/"> Cui ar trebui să raporteze un CISO?</a>			<div class="reveal" id="205" data-reveal>
+  <h1>Cui ar trebui să raporteze un CISO?</h1>
+ <p>De-a lungul anilor am fost întrebat în diferite ocazii unde ar trebui poziționat rolul CISO într-o organigramă. Răspundeam simplu: nu există o regulă general valabilă, dar nu la IT. Dar mai întîi o definiție pentru CISO: a qualified individual responsible for overseeing and implementing a covered entity’s cybersecurity program and enforcing its cybersecurity policy. &#8211;&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Thu 24.10.2024</td>
+			<td><a href="https://adimunteanu.com/2024/10/24/cui-ar-trebui-sa-raporteze-un-ciso/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=205" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241027-intrebare-alegeri/"> O singură întrebare</a>			<div class="reveal" id="37" data-reveal>
+  <h1>O singură întrebare</h1>
+ <p><p>Dacă aș avea acum un podcast de discuții cultural-politice așa cum era ICR Podcast aș trimite invitații către toți candidații la președinție. Nu aș publica podcasturile cu ei decât după ce le înregistrez pe toate, și aș avea o singură întrebare: „De ce candidezi la președinție?”. Totul va decurge de acolo. Cursa pentru postul de președinte e ilogică, e un post aproape lipsit de importanță, extrem de constrâns care nu îmbunătățește cu nimic starea populației. Cine e președinte e irelevant. Totuși, este considerat scrutinul „rege” - cel mai important. Nu e. Cel mai important post din România, cel de prim-ministru, nu e electiv, acela ar fi trebuit să fie scrutinul rege. Sunt puține națiuni care înțeleg lucrul ăsta (Marea Britanie, Canada și SUA sunt națiunile care își aleg prim-miniștri, nu par s-o ducă rău).</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Sun 27.10.2024</td>
+			<td><a href="https://dorinlazar.ro/241027-intrebare-alegeri/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=37" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241027-podcastul-de-istorie/"> Dar tu de ce mai faci podcastul de istorie?</a>			<div class="reveal" id="36" data-reveal>
+  <h1>Dar tu de ce mai faci podcastul de istorie?</h1>
+ <p><p>Nimeni nu m-a întrebat chestia asta, dar de ce să nu formulez un răspuns? În anul de grație 2024 nu mai suntem în 2017. În 2017 (2015 când am început conceptul, 2016 când am pregătit echipa) nu exista niciun podcast dedicat istoriei, cel puțin, nimic pus la punct cât de cât coerent. Mai avea Zaiafet pe canalul lui de youtube niște rezumate de cărți (pentru că asta erau majoritatea clipurilor lui, chiar dacă între timp și-a mai rafinat metodologia, cred), dar în rest doar câteva proiecte abandonate. <a href="https://podcastdeistorie.ro" target="_blank">Podcastul de istorie</a> mi s-a părut o treabă importantă; proiectul inițial vroiam să îl concentrăm pe Istoria României, chiar episoadele erau marcate în tagurile ID3 ca „Istoria României”. <a href="https://sergiumotreanu.ro" target="_blank">Sergiu</a> nici nu înțelegea prea bine ce vreau să fac - și sincer, chiar dacă am pregătit vreo doi ani podcastul de istorie, după câteva episoade am înțeles că o să tot învăț ce anume vreau să fie acest podcast. Habar n-aveam la episodul 5 ce o să fac la episodul 15, la 15 nici nu visam ce o să fac în episodul 50 și pentru un podcast de istorie a României am ajuns foarte târziu la Burebista, de exemplu.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Sun 27.10.2024</td>
+			<td><a href="https://dorinlazar.ro/241027-podcastul-de-istorie/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=36" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241028-invataturi-din-scandal-erika-isac/"> Ce învățături tragem din scandalul de zilele astea din jurul Erikăi Isac</a>			<div class="reveal" id="35" data-reveal>
+  <h1>Ce învățături tragem din scandalul de zilele astea din jurul Erikăi Isac</h1>
+ <p><p>S-a vorbit destul de mult zilele astea despre Erika Isac și despre faptul că artiștii români mari plagiază cam mult. Nu plagiază, se inspiră. Și sincer, nu mi se pare foarte important. Nu se va întâmpla nicio mare revoluție în muzica românească - nici originalitatea și nici integritatea actului artistic nu sunt elementele care fac piesele populare - lumea nu ascultă pentru că vrea să audă ceva original, ceva bun, ci vrea să fie stimulat și șocat. Și pentru că din ce în ce mai puțini învață engleză și alte limbi străine, le e mai ușor când se reîmpachetează în limba locală entertainment-ul. Nu putem la filme pentru că costă prea mult, dar muzica e mai ieftină, și metodele de producție sunt mai simple. Și muzica e mai simplu de copiat, aducând totuși o oarecare notorietate. Ăsta e motivul pentru care mulți influenceri români au și ceva piese la activ.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Mon 28.10.2024</td>
+			<td><a href="https://dorinlazar.ro/241028-invataturi-din-scandal-erika-isac/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=35" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241106-mormantul-democratiei/"> Să vărsăm o lacrimă la mormântul democrației</a>			<div class="reveal" id="34" data-reveal>
+  <h1>Să vărsăm o lacrimă la mormântul democrației</h1>
+ <p><p>În mod normal ar fi fost o colecție de idei legate de alegerile din SUA. Cumva, însă, m-a întristat prea tare rezultatul - nu pentru că a câștigat un fascist sexist care întruchipează, aparent, creștinul perfect, ci pentru că e doar încă o culme pe drumul înspre capătul de linie pentru ideea asta generoasă care a fost democrația liberală.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Wed 06.11.2024</td>
+			<td><a href="https://dorinlazar.ro/241106-mormantul-democratiei/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=34" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241108-cum-mutam-tehnologia-in-europa/"> Cum mutăm tehnologia în Europa?</a>			<div class="reveal" id="33" data-reveal>
+  <h1>Cum mutăm tehnologia în Europa?</h1>
+ <p><p>Evident, odată cu ridicarea la putere a lui Trump America va avea în curând alte probleme decât să susțină motorul economic și inovația internațională. Oricum majoritatea banilor sunt băgați în tocătoarea de bani numită AI, și la final o să vedem doar ferfeniță din ei, deci Europa oricum ar trebui să-și facă niște planuri.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Fri 08.11.2024</td>
+			<td><a href="https://dorinlazar.ro/241108-cum-mutam-tehnologia-in-europa/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=33" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="https://adimunteanu.com/wp-content/uploads/2023/02/cropped-cover-foto-am.jpg?w=32" width="32" height=width="32"></td>
+			<td>ADRIAN B. MUNTEANU</td>
+			<td><a href="https://adimunteanu.com/2024/11/08/avanpremiera-la-ce-ne-aduce-mosul/"> Avanpremieră la ce ne aduce Moșul</a>			<div class="reveal" id="204" data-reveal>
+  <h1>Avanpremieră la ce ne aduce Moșul</h1>
+ <p>Pe 17.10.2024 era publicat în Jurnalul Oficial al Uniunii Europene , cu intrare în vigoare la 20 de zile de la publicare REGULAMENTUL DE PUNERE ÎN APLICARE (UE) 2024/2690 AL COMISIEI de stabilire a normelor de aplicare a Directivei (UE)&#160;2022/2555 în ceea ce privește cerințele tehnice și metodologice ale măsurilor de gestionare a riscurilor în&#8230;</p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Fri 08.11.2024</td>
+			<td><a href="https://adimunteanu.com/2024/11/08/avanpremiera-la-ce-ne-aduce-mosul/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=204" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241110-reguli-fara-aplicare/"> Degeaba faci reguli dacă nu le aplici</a>			<div class="reveal" id="32" data-reveal>
+  <h1>Degeaba faci reguli dacă nu le aplici</h1>
+ <p><p>USR vrea să propună o chestie foarte utilă, să legifereze burnout-ul (epuizarea fizică și psihică datorată muncii) și să ai concediu medical când ai burnout. Excelent. E o experiență din ce în ce mai frecventă în societatea românească, mult mai frecventă în medii în care de obicei nu se admite că există așa ceva (medicină, educație, dar nu doar meserii intelectuale). În fine, idee bună, dar absolut inutilă pentru că:</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Sun 10.11.2024</td>
+			<td><a href="https://dorinlazar.ro/241110-reguli-fara-aplicare/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=32" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr><tr>
+			<td><img src="" width="32" height=width="32"></td>
+			<td>dorinlazar.ro</td>
+			<td><a href="https://dorinlazar.ro/241110-delir-neoconservator/"> Delir neoconservator la Bogdan Stoica</a>			<div class="reveal" id="31" data-reveal>
+  <h1>Delir neoconservator la Bogdan Stoica</h1>
+ <p><p>Umblă pe TikTok acest delir neoconservator al lui Bogdan Stoica, unul din jurnaliștii din categoria „scandalul sunt eu” care deodată s-a trezit vorbind de la sine fără să-l verifice nimeni la ce vorbește. Iată <a href="https://www.tiktok.com/@b.a.d.e.a.88/video/7435173988155804950" target="_blank">delirul aici</a>, dar, în principiu, Bogdan Stoica se plânge de tarele progresismului, o virează înspre Greta și ipocrizia ei după care explică cu educația cum stau lucrurile. E un tiktok de sub două minute dar la faza cu educația am cedat, deja e prea mult.</p></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+</td>
+			<td>;<p><button class="button" data-open="<?phpecho ["articol_ID"] ?>">&nbsp<i class="fab fa-readme"></i></button></p>
+<td/>
+<td>Sun 10.11.2024</td>
+			<td><a href="https://dorinlazar.ro/241110-delir-neoconservator/">
+			<i class="large far fa-newspaper" title="Deschide"></i>
+			</a>
+			  <td><a href="markasread.php?cID=31" class="ask"><i class="far fa-edit fa-xl" title="marchează ca citit"></i></a>
+			        </tr></tbody><tfoot><tr><td><td  colspan="5"><em></em><td>&nbsp;</tr></tfoot></table></div></div><div class="paginate">
+Total 213 mesaje <br /><br /><span class="disabled" href="#">&laquo; Previous</span> <a class="current" href="#">1</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=2&ipp=20">2</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=3&ipp=20">3</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=4&ipp=20">4</a> <a class="paginate" href="/master.ro/rssreader/reader.php?page=5&ipp=20">5</a>  ... <a class="paginate" href="/master.ro/rssreader/reader.php?page=11&ipp=20">11</a> <span class="disabled" href="#">&raquo; Next</span>
+<a class="paginate" style="margin-left:10px" href="/master.ro/rssreader/reader.php?page=1&ipp=All">All</a> 
+ <br /><br /></div>
+</div>
+</div>
+<!--Footer-->
+<footer>
+  <div class="grid-x grid-padding-x">
+        <div class="large-12 cell">
+					<p class="smaller" align="center">&copy; 2024 SC CERT PLUS SRL<br />
+					CUI: RO 48179521, R.C.: J40/9169/2023, CS: 500 lei<br />
+					Calea Rahovei 266-268, Corp 1, etaj 1, camera 10, sector 5, București, 050912<br />
+					Banca Transilvania: RO35 BTRL RONC RT06 7338 6801<br />
+					<a href="http://localhost/master.ro/termeni.php">Termeni și condiții</a> | <a href="http://localhost/master.ro/cookies.php">Politica privind cookies</a><br /></p>
+                </div>
+            </div>
+</footer>
+</div>
+<!-- Start scripts-->
+    <script src="http://localhost/master.ro/js/foundation/jquery.js"></script>
+    <script src="http://localhost/master.ro/js/foundation/what-input.js"></script>
+    <script src="http://localhost/master.ro/js/foundation/foundation.js"></script>
+    <script src="http://localhost/master.ro/js/foundation/app.js"></script>
+	    <script>
+      $(document).foundation();
+    </script>
+	<!-- Ends scrips-->
+	<!--end footer-->
+	
+</body>
+</html>
