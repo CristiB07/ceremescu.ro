@@ -8,6 +8,7 @@ Aplicație CRM cu următoarele module:
 6) magazin online - modul de magazin
 7) RSS Reader - cititor RSS
 8) Vânzări - aplicație de management a forței de vânzări, raportare vizite clienți, planificare vizite
+9) Newsletter - aplicație de transmis newslettere
 
 #Dependențe
 1) Mpdf
