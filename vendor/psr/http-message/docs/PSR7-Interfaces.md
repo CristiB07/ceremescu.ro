@@ -14,9 +14,9 @@ The interfaces defined in PSR-7 are the following:
 | [Psr\Http\Message\UriInterface](http://www.php-fig.org/psr/psr-7/#psrhttpmessageuriinterface) | Value object representing a URI. |
 | [Psr\Http\Message\UploadedFileInterface](http://www.php-fig.org/psr/psr-7/#psrhttpmessageuploadedfileinterface) | Value object representing a file uploaded through an HTTP request. |
 
-## `Psr\Http\Message\MessageInterface` Methods
+## `Psr\Http\Message\MessageInterface` methods
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `getProtocolVersion()`             | Retrieve HTTP protocol version          |  1.0 or 1.1 |
 | `withProtocolVersion($version)`    | Returns new message instance with given HTTP protocol version          |      |
@@ -31,25 +31,25 @@ The interfaces defined in PSR-7 are the following:
 | `withBody(StreamInterface $body)`  | Returns new message instance with given HTTP Message Body | |
 
 
-## `Psr\Http\Message\RequestInterface` Methods
+## `Psr\Http\Message\RequestInterface` methods
 
 Same methods as `Psr\Http\Message\MessageInterface`  + the following methods:
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `getRequestTarget()`                | Retrieves the message's request target              | origin-form, absolute-form, authority-form, asterisk-form ([RFC7230](https://www.rfc-editor.org/rfc/rfc7230.txt)) |
 | `withRequestTarget($requestTarget)` | Return a new message instance with the specific request-target |      |
-| `getMethod()`                       | Retrieves the HTTP method of the request.  |  GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE (defined in [RFC7231](https://tools.ietf.org/html/rfc7231)), PATCH (defined in [RFC5789](https://tools.ietf.org/html/rfc5789)) |
-| `withMethod($method)`               | Returns a new message instance with the provided HTTP method  | |
+| `getmethod()`                       | Retrieves the HTTP method of the request.  |  GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE (defined in [RFC7231](https://tools.ietf.org/html/rfc7231)), PATCH (defined in [RFC5789](https://tools.ietf.org/html/rfc5789)) |
+| `withmethod($method)`               | Returns a new message instance with the provided HTTP method  | |
 | `getUri()`                 | Retrieves the URI instance | |
 | `withUri(UriInterface $uri, $preserveHost = false)` | Returns a new message instance with the provided URI |  |
 
 
-## `Psr\Http\Message\ServerRequestInterface` Methods
+## `Psr\Http\Message\ServerRequestInterface` methods
 
 Same methods as `Psr\Http\Message\RequestInterface`  + the following methods:
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `getServerParams() `               | Retrieve server parameters  | Typically derived from `$_SERVER`  |
 | `getCookieParams()`                | Retrieves cookies sent by the client to the server. | Typically derived from `$_COOKIES` |
@@ -64,19 +64,19 @@ Same methods as `Psr\Http\Message\RequestInterface`  + the following methods:
 | `withAttribute($name, $value)` | Returns a new request instance with the specified derived request attribute  |  |
 | `withoutAttribute($name)` | Returns a new request instance that without the specified derived request attribute  |  |
 
-## `Psr\Http\Message\ResponseInterface` Methods:
+## `Psr\Http\Message\ResponseInterface` methods:
 
 Same methods as `Psr\Http\Message\MessageInterface`  + the following methods:
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `getStatusCode()` | Gets the response status code. | |
 | `withStatus($code, $reasonPhrase = '')` | Returns a new response instance with the specified status code and, optionally, reason phrase. | |
 | `getReasonPhrase()` | Gets the response reason phrase associated with the status code. | |
 
-##  `Psr\Http\Message\StreamInterface` Methods
+##  `Psr\Http\Message\StreamInterface` methods
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `__toString()` | Reads all data from the stream into a string, from the beginning to end. | |
 | `close()` | Closes the stream and any underlying resources. | |
@@ -93,9 +93,9 @@ Same methods as `Psr\Http\Message\MessageInterface`  + the following methods:
 | `getContents()` | Returns the remaining contents in a string | |
 | `getMetadata($key = null)()` | Get stream metadata as an associative array or retrieve a specific key. | |
 
-## `Psr\Http\Message\UriInterface` Methods
+## `Psr\Http\Message\UriInterface` methods
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `getScheme()` | Retrieve the scheme component of the URI. | |
 | `getAuthority()` | Retrieve the authority component of the URI. | |
@@ -114,9 +114,9 @@ Same methods as `Psr\Http\Message\MessageInterface`  + the following methods:
 | `withFragment($fragment)` | Return an instance with the specified URI fragment. | |
 | `__toString()` | Return the string representation as a URI reference. | |
 
-## `Psr\Http\Message\UploadedFileInterface` Methods
+## `Psr\Http\Message\UploadedFileInterface` methods
 
-| Method Name                        | Description | Notes |
+| method Name                        | Description | Notes |
 |------------------------------------| ----------- | ----- |
 | `getStream()` | Retrieve a stream representing the uploaded file. | |
 | `moveTo($targetPath)` | Move the uploaded file to a new location. | |

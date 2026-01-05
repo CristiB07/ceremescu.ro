@@ -40,7 +40,7 @@ class Foo
         }
            
         try {
-            $this->doSomethingElse();
+            $this->doSomethingelse();
         } catch (Exception $exception) {
             $this->logger->error('Oh no!', array('exception' => $exception));
         }

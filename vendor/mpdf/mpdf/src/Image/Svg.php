@@ -1479,11 +1479,11 @@ class Svg
 
 					for ($i = 0; $i < count($d); $i += 2) {
 
-						if ($d[$i] === 'none') {
+						if ($d[$i] === '' || $d[$i] === 'none') {
 							continue;
 						}
 
-						$arr .= sprintf('%.3F %.3F ', $d[$i] * $this->kp, $d[$i + 1] * $this->kp);
+						$arr .= sprintf('%.3F %.3F ', (float) $d[$i] * $this->kp, (float) $d[$i + 1] * $this->kp);
 					}
 
 					if (isset($critere_style['stroke-dashoffset'])) {
@@ -4266,7 +4266,7 @@ class Svg
 
 	private function testIntersectCircle($cx, $cy, $cr)
 	{
-		// elearning_tests whether a circle fully encloses a rectangle 0,0,1,1
+		// Tests whether a circle fully encloses a rectangle 0,0,1,1
 		// to see if any further radial gradients need adding (SVG)
 		// If centre of circle is inside 0,0,1,1 square
 		if ($cx >= 0 && $cx <= 1 && $cy >= 0 && $cy <= 1) {
@@ -4284,7 +4284,7 @@ class Svg
 
 	private function testIntersect($x1, $y1, $x2, $y2, $x3, $y3, $x4, $y4)
 	{
-		// elearning_tests whether line (x1, y1) and (x2, y2) [a gradient axis (perpendicular)]
+		// Tests whether line (x1, y1) and (x2, y2) [a gradient axis (perpendicular)]
 		// intersects with a specific line segment (x3, y3) and (x4, y4)
 		$a1 = $y2 - $y1;
 		$b1 = $x1 - $x2;

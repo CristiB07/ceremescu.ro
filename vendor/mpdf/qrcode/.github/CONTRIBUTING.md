@@ -5,15 +5,15 @@ Issue tracker
 -------------
 
 The Issue tracker serves mainly as a place to report bugs and request new features.
-Please do not abuse it as a general elearning_questions or troubleshooting location.
+Please do not abuse it as a general questions or troubleshooting location.
 
 General troubleshooting
 -------------
 
-For these elearning_questions please use [Discussions](https://github.com/mpdf/mpdf/discussions). Add your enquiry
+For these questions please use [Discussions](https://github.com/mpdf/mpdf/discussions). Add your enquiry
 to appropriate category and as always, include a reproducible code example when applicable (see code example guidelines below).
 
-You can also use the [mpdf tag](https://stackoverflow.com/elearning_questions/tagged/mpdf)
+You can also use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf)
 at [Stack Overflow](https://stackoverflow.com/)
 as the StackOverflow user base is more likely to answer you in a timely manner.
 When doing so, make sure you comply to StackOverflow question guidelines.

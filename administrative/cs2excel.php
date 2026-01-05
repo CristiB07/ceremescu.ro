@@ -1,24 +1,15 @@
 <?php
-//update 29.07.2025
-include '../settings.php';
-include '../classes/common.php';
-
-if(!isset($_SESSION)) 
-{ 
-	session_start(); 
-}
-if (!isSet($_SESSION['userlogedin']))
-{
-	header("location:$strSiteURL/login/login.php?message=MLF");
-}
-
-	if (!isSet($_SESSION['$lang'])) {
-	$_SESSION['$lang']="RO";
-	$lang=$_SESSION['$lang'];
+ if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+	}
+	if (!isSet($_SESSION['lang'])) {
+	$_SESSION['lang']="RO";
+	$lang=$_SESSION['lang'];
 }
 Else
 {
-	$lang=$_SESSION['$lang'];
+	$lang=$_SESSION['lang'];
 }
 if ($lang=="RO") {
 include '../lang/language_RO.php';
@@ -27,34 +18,91 @@ Else
 {
 	include '../lang/language_EN.php';
 }	
+if (!isSet($_SESSION['userlogedin']))
+{
+	header("location:$strSiteURL/login/login.php?message=MLF");
+}
 
+include '../settings.php';
+
+include '../classes/common.php';
 $uid=$_SESSION['uid'];
 $code=$_SESSION['code'];
 
-if ((isset( $_POST['month'])) && !empty( $_POST['month'])){
-$month=$_POST['month'];
-if ($month <10)
-{$month="0".$month;}
-Else
-{$month=$month;}
+// Validate month parameter
+if (!isset($_POST['month']) || !is_numeric($_POST['month']) || $_POST['month'] < 1 || $_POST['month'] > 12) {
+    die('<div class="callout alert">Invalid month parameter</div>');
 }
-Else
-{echo "<div class=\"callout alert\">$strThereWasAnError</div>";
-die;
-}
-if ((isset( $_POST['year'])) && !empty( $_POST['year'])){
-$year=$_POST['year'];}
-Else
-{echo "<div class=\"callout alert\">$strThereWasAnError</div>";
-die;}
 
-$sqlu=" SELECT * from date_utilizatori Where utilizator_ID='$uid'";
-$resultu=ezpub_query($conn,$sqlu);
-$rowu = ezpub_fetch_array($resultu);
-$User=$rowu["utilizator_Email"];
-$Pass=$rowu["utilizator_Parola"];
-$carplate=$rowu["utilizator_Carplate"];
-$Nume=$rowu["utilizator_Prenume"] ." ". $rowu["utilizator_Nume"];
+$month = intval($_POST['month']);
+if ($month < 10) {
+    $month = "0" . $month;
+}
+
+// Validate year parameter
+if (!isset($_POST['year']) || !is_numeric($_POST['year']) || $_POST['year'] < 2000 || $_POST['year'] > 2100) {
+    die('<div class="callout alert">Invalid year parameter</div>');
+}
+
+$year = intval($_POST['year']);
+
+// Use prepared statement
+$stmt = $conn->prepare("SELECT * FROM date_utilizatori WHERE utilizator_ID=?");
+$stmt->bind_param("i", $uid);
+$stmt->execute();
+$resultu = $stmt->get_result();
+$rowu = $resultu->fetch_assoc();
+$stmt->close();
+
+if (!$rowu) {
+    die('<div class="callout alert">User not found</div>');
+}
+//
+$User = $rowu["utilizator_Email"];
+$Pass = $rowu["utilizator_Parola"];
+
+// Decrypt password if encrypted
+if (intval($rowu['utilizator_Upgraded']) === 0) {
+    try {
+        $email_hash = hash('sha256', $User);
+        $stmt_key = $conn->prepare("SELECT cheie_secundara FROM date_utilizatori_chei WHERE cheie_primara = ?");
+        $stmt_key->bind_param("s", $email_hash);
+        $stmt_key->execute();
+        $result_key = $stmt_key->get_result();
+        $row_key = $result_key->fetch_assoc();
+        $stmt_key->close();
+        
+        if ($row_key && !empty($row_key['cheie_secundara'])) {
+            $encryption_key = hex2bin($row_key['cheie_secundara']);
+            $encrypted_data = base64_decode($Pass);
+            
+            if (strlen($encrypted_data) >= 16) {
+                $iv = substr($encrypted_data, 0, 16);
+                $ciphertext = substr($encrypted_data, 16);
+                $decrypted = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryption_key, OPENSSL_RAW_DATA, $iv);
+                
+                if ($decrypted !== false) {
+                    $Pass = $decrypted;
+                } else {
+                    error_log("Failed to decrypt password for user: " . $User);
+                    $Pass = '';
+                }
+            } else {
+                error_log("Encrypted data too short for user: " . $User);
+                $Pass = '';
+            }
+        } else {
+            error_log("Encryption key not found for user: " . $User);
+            $Pass = '';
+        }
+    } catch (Exception $e) {
+        error_log("Password decryption error: " . $e->getMessage());
+        $Pass = '';
+    }
+}
+
+$carplate = $rowu["utilizator_Carplate"];
+$Nume = $rowu["utilizator_Prenume"] ." ". $rowu["utilizator_Nume"];
     		//Create an option With the numeric value of the month
 			
 			$dateObj   = DateTime::createFromFormat('!m', $month);
@@ -95,28 +143,50 @@ $formatter = new IntlDateFormatter("ro_RO",
 $monthname = $formatter->format($dateObj);
 
 //
-$query1="SELECT SUM(fp_km) AS valoaretotala FROM administrative_foi_parcurs WHERE fp_luna='$month' AND fp_aloc='$code'";
-	$result1=ezpub_query($conn,$query1);
-	$rs1=ezpub_fetch_array($result1);
-	$kilometritotal=$rs1["valoaretotala"]; 
+// Use prepared statement
+$stmt = $conn->prepare("SELECT SUM(fp_km) AS valoaretotala FROM administrative_foi_parcurs WHERE fp_luna=? AND fp_aloc=?");
+$stmt->bind_param("ss", $month, $code);
+$stmt->execute();
+$result1 = $stmt->get_result();
+$rs1 = $result1->fetch_assoc();
+$stmt->close();
+$kilometritotal = $rs1["valoaretotala"]; 
 	
-$query2="SELECT fp_km_init FROM administrative_foi_parcurs WHERE fp_luna='$month' AND fp_an='$year' AND fp_aloc='$code' ORDER BY fp_zi ASC Limit 1";
-	$result2=ezpub_query($conn,$query2);
-	$rs2=ezpub_fetch_array($result2);
-	$kilometriinit=$rs2["fp_km_init"];
-$query3="SELECT fp_km_final FROM administrative_foi_parcurs WHERE fp_luna='$month' AND fp_an='$year' AND fp_aloc='$code' ORDER BY fp_zi DESC Limit 1";
-	$result3=ezpub_query($conn,$query3);
-	$rs3=ezpub_fetch_array($result3);
-	$kilometrifinal=$rs3["fp_km_final"]; 
-	$realmonth=$_POST['month'];
-$query="SELECT SUM(alimentare_litri) AS litri FROM administrative_alimentari WHERE MONTH(alimentare_data)='$realmonth' AND YEAR(alimentare_data)='$year' AND alimentare_aloc='$code'";
-	$result=ezpub_query($conn,$query);
-	$rs=ezpub_fetch_array($result);
-	$litri=romanize($rs["litri"]); 	
-$query6="SELECT SUM(alimentare_valoare) AS costtotal FROM administrative_alimentari WHERE MONTH(alimentare_data)='$realmonth' AND YEAR(alimentare_data)='$year' AND alimentare_aloc='$code'";
-	$result6=ezpub_query($conn,$query6);
-	$rs6=ezpub_fetch_array($result6);
-	$costtotal=romanize($rs6["costtotal"]); 	
+// Use prepared statement
+$stmt = $conn->prepare("SELECT fp_km_init FROM administrative_foi_parcurs WHERE fp_luna=? AND fp_an=? AND fp_aloc=? ORDER BY fp_zi ASC LIMIT 1");
+$stmt->bind_param("sis", $month, $year, $code);
+$stmt->execute();
+$result2 = $stmt->get_result();
+$rs2 = $result2->fetch_assoc();
+$stmt->close();
+$kilometriinit = $rs2["fp_km_init"];
+// Use prepared statement
+$stmt = $conn->prepare("SELECT fp_km_final FROM administrative_foi_parcurs WHERE fp_luna=? AND fp_an=? AND fp_aloc=? ORDER BY fp_zi DESC LIMIT 1");
+$stmt->bind_param("sis", $month, $year, $code);
+$stmt->execute();
+$result3 = $stmt->get_result();
+$rs3 = $result3->fetch_assoc();
+$stmt->close();
+$kilometrifinal = $rs3["fp_km_final"]; 
+
+$realmonth = intval($_POST['month']);
+
+// Use prepared statement
+$stmt = $conn->prepare("SELECT SUM(alimentare_litri) AS litri FROM administrative_alimentari WHERE MONTH(alimentare_data)=? AND YEAR(alimentare_data)=? AND alimentare_aloc=?");
+$stmt->bind_param("iis", $realmonth, $year, $code);
+$stmt->execute();
+$result = $stmt->get_result();
+$rs = $result->fetch_assoc();
+$stmt->close();
+$litri = romanize($rs["litri"]); 	
+// Use prepared statement
+$stmt = $conn->prepare("SELECT SUM(alimentare_valoare) AS costtotal FROM administrative_alimentari WHERE MONTH(alimentare_data)=? AND YEAR(alimentare_data)=? AND alimentare_aloc=?");
+$stmt->bind_param("iis", $realmonth, $year, $code);
+$stmt->execute();
+$result6 = $stmt->get_result();
+$rs6 = $result6->fetch_assoc();
+$stmt->close();
+$costtotal = romanize($rs6["costtotal"]); 	
 	
 $fp = fopen($hddpath .'/' . $carsheets_folder .'/foaie_parcurs_'.$code.'_'.$carplate.'_'.$month.'_'.$year.'.xml', "w");
 $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -128,12 +198,12 @@ $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 		</ss:Style>
 	</ss:Styles>
 	<DocumentProperties xmlns=\"urn:schemas-microsoft-com:office:office\">
-        <Author>". $Nume . "</Author>
-        <LastAuthor>". $Nume. "</LastAuthor>
+        <Author>". htmlspecialchars($Nume, ENT_XML1, 'UTF-8') . "</Author>
+        <LastAuthor>". htmlspecialchars($Nume, ENT_XML1, 'UTF-8'). "</LastAuthor>
         <Created>". date("d-m-Y H:i:s")."</Created>
         <Version>15.00</Version>
     </DocumentProperties>
-<Worksheet ss:Name=\"Foaie de parcurs " . $monthname ." \">
+<Worksheet ss:Name=\"Foaie de parcurs " . htmlspecialchars($monthname, ENT_XML1, 'UTF-8') ." \">
 <Table>
 <Column ss:Index=\"1\" ss:AutoFitWidth=\"0\" ss:Width=\"110\"/>
 <Row>
@@ -148,15 +218,15 @@ $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <Cell><Data ss:Type=\"String\">Cost total</Data></Cell>
 </Row>
 <Row>
-<Cell><Data ss:Type=\"String\">".$monthname."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$d."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$dd."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$carplate."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$kilometriinit."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$kilometrifinal."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$kilometritotal."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$litri."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$costtotal."</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($monthname, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($d, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($dd, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($carplate, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($kilometriinit, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($kilometrifinal, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($kilometritotal, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($litri, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($costtotal, ENT_XML1, 'UTF-8') . "</Data></Cell>
 </Row>
 <Row>
 <Cell><Data ss:Type=\"String\">Data alimentării</Data></Cell>
@@ -173,16 +243,19 @@ echo $header;
 fwrite($fp, $header);
 //adaugă alimentări
 
-$query="SELECT * FROM administrative_alimentari WHERE MONTH(alimentare_data)='$realmonth' AND YEAR(alimentare_data)='$year' AND alimentare_aloc='$code'";
-$result=ezpub_query($conn,$query);
-while($row = ezpub_fetch_array($result))
+// Use prepared statement
+$stmt = $conn->prepare("SELECT * FROM administrative_alimentari WHERE MONTH(alimentare_data)=? AND YEAR(alimentare_data)=? AND alimentare_aloc=?");
+$stmt->bind_param("iis", $realmonth, $year, $code);
+$stmt->execute();
+$result = $stmt->get_result();
+while($row = $result->fetch_assoc())
 {
 $alimentare_insert = "";
 $alimentare_insert .= "<Row>";	
-$alimentare_insert.="<Cell><Data ss:Type=\"String\">". date('d.m.Y',strtotime($row["alimentare_data"])) . "</Data></Cell>";
-$alimentare_insert.="<Cell><Data ss:Type=\"String\">". $row["alimentare_km"] . "</Data></Cell>";
-$alimentare_insert.="<Cell><Data ss:Type=\"String\">". romanize($row["alimentare_litri"]) . "</Data></Cell>";
-$alimentare_insert.="<Cell><Data ss:Type=\"String\">". romanize($row["alimentare_valoare"]) . "</Data></Cell>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(date('d.m.Y',strtotime($row["alimentare_data"])), ENT_XML1, 'UTF-8') . "</Data></Cell>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["alimentare_km"], ENT_XML1, 'UTF-8') . "</Data></Cell>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(romanize($row["alimentare_litri"]), ENT_XML1, 'UTF-8') . "</Data></Cell>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(romanize($row["alimentare_valoare"]), ENT_XML1, 'UTF-8') . "</Data></Cell>";
 If ($row["alimentare_platit"]==0)
 {
 	$alimentare_insert.="<Cell><Data ss:Type=\"String\">Achitat cardul firmei</Data></Cell>";
@@ -191,12 +264,13 @@ Else
 {
 	$alimentare_insert.="<Cell><Data ss:Type=\"String\">Achitat cardul de benzină</Data></Cell>";
 }
-$alimentare_insert.="<Cell><Data ss:Type=\"String\">". $row["alimentare_bf"] . "</Data></Cell>";
-$alimentare_insert.="<Cell><Data ss:Type=\"String\"></Data></Cell>";
-$alimentare_insert.="<Cell><Data ss:Type=\"String\"></Data></Cell>";
-$alimentare_insert.="</Row>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["alimentare_bf"], ENT_XML1, 'UTF-8') . "</Data></Cell>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\"></Data></Cell>";
+$alimentare_insert .= "<Cell><Data ss:Type=\"String\"></Data></Cell>";
+$alimentare_insert .= "</Row>";
 fwrite($fp, $alimentare_insert);
 }
+$stmt->close();
 
 //end of adding column names
 //start while loop to get data
@@ -219,9 +293,13 @@ for ( $i = 1; $i <= $d; $i ++) {
  $monthday=$i;
  $dayofmonth=$year."-".$month."-".$i;
  $namedayofthemonth= date('D', strtotime($dayofmonth));
- $query="SELECT * from administrative_foi_parcurs where fp_aloc='$code' and fp_an='$year' and fp_luna='$month' and fp_zi='$i'";
- $result=ezpub_query($conn,$query);
- $row = ezpub_fetch_array($result);
+ // Use prepared statement
+ $stmt = $conn->prepare("SELECT * FROM administrative_foi_parcurs WHERE fp_aloc=? AND fp_an=? AND fp_luna=? AND fp_zi=?");
+ $stmt->bind_param("sisi", $code, $year, $month, $i);
+ $stmt->execute();
+ $result = $stmt->get_result();
+ $row = $result->fetch_assoc();
+ $stmt->close();
  $schema_insert = "";
 $schema_insert .= "<Row>";
 $schema_insert.="<Cell><Data ss:Type=\"String\">". $i . "</Data></Cell>";
@@ -255,12 +333,12 @@ $schema_insert.="<Cell><Data ss:Type=\"String\">". $i . "</Data></Cell>";
                                     'EEEE, d MMMM Y');
 		$dayname = $formatter->format($dateObj);
 	 $schema_insert.="<Cell><Data ss:Type=\"String\">Zi lucrătoare</Data></Cell>";
-	  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["fp_plecare"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["fp_sosire"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["fp_km_init"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["fp_km"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["fp_km_final"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["fp_detalii"]."</Data></Cell>";
+	  $schema_insert.="<Cell><Data ss:Type=\"String\">".htmlspecialchars($row["fp_plecare"], ENT_XML1, 'UTF-8')."</Data></Cell>";
+  $schema_insert.="<Cell><Data ss:Type=\"String\">".htmlspecialchars($row["fp_sosire"], ENT_XML1, 'UTF-8')."</Data></Cell>";
+  $schema_insert.="<Cell><Data ss:Type=\"String\">".htmlspecialchars($row["fp_km_init"], ENT_XML1, 'UTF-8')."</Data></Cell>";
+  $schema_insert.="<Cell><Data ss:Type=\"String\">".htmlspecialchars($row["fp_km"], ENT_XML1, 'UTF-8')."</Data></Cell>";
+  $schema_insert.="<Cell><Data ss:Type=\"String\">".htmlspecialchars($row["fp_km_final"], ENT_XML1, 'UTF-8')."</Data></Cell>";
+  $schema_insert.="<Cell><Data ss:Type=\"String\">".htmlspecialchars($row["fp_detalii"], ENT_XML1, 'UTF-8')."</Data></Cell>";
  }
 $schema_insert.="</Row>";
 fwrite($fp, $schema_insert);
@@ -289,10 +367,10 @@ $emailbody=$emailbody . "th {font-size: 1.1em; font-family: 'Open Sans',sans-ser
 $emailbody=$emailbody . "table {border-collapse:collapse; border: 1px solid " . $color .";}";
 $emailbody=$emailbody . "</style>";
 $emailbody=$emailbody . "</head><body>";
-$emailbody=$emailbody . "<a href=\"$siteCompanyWebsite\"><img src=\"".$siteCompanyWebsite."/img/logo.png\" title=\"$strSiteOwner\" width=\"150\" height=\"auto\"/></a>";
+$emailbody=$emailbody . "<a href=\"".htmlspecialchars($siteCompanyWebsite, ENT_QUOTES, 'UTF-8')."\"><img src=\"".htmlspecialchars($siteCompanyWebsite, ENT_QUOTES, 'UTF-8')."/img/logo.png\" title=\"".htmlspecialchars($strSiteOwner, ENT_QUOTES, 'UTF-8')."\" width=\"150\" height=\"auto\"/></a>";
 $emailbody=$emailbody . "<p>Bună ziua,</p>";
-$emailbody=$emailbody . "<p>Atașat este foaia de parcurs pentru luna  ". $monthname.",</p>";
-$emailbody=$emailbody . "<p>Mulțumesc,<br />". $Nume.",</p>";
+$emailbody=$emailbody . "<p>Atașat este foaia de parcurs pentru luna  ". htmlspecialchars($monthname, ENT_QUOTES, 'UTF-8') .",</p>";
+$emailbody=$emailbody . "<p>Mulțumesc,<br />". htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8') .",</p>";
 $emailbody=$emailbody . "</body>";
 $emailbody=$emailbody. "</html>";
 
@@ -332,7 +410,7 @@ $mail->SMTPOptions = array(
     )
 );
 //Set the subject line
-$mail->Subject = 'Foaie de parcurs '.$Nume.' luna '.$monthname .' - auto '.$carplate;
+$mail->Subject = 'Foaie de parcurs '.htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8').' luna '.htmlspecialchars($monthname, ENT_QUOTES, 'UTF-8') .' - auto '.htmlspecialchars($carplate, ENT_QUOTES, 'UTF-8');
 //Read an HTML message body from an external file, convert referenced images to embedded,
 //convert HTML into a basic plain-text alternative body
     $mail->isHTML(true);                                  // Set email format to HTML
@@ -343,10 +421,13 @@ $mail->addAttachment($hddpath .'/' . $carsheets_folder .'/foaie_parcurs_'.$code.
 
 //send the message, check for errors
 if (!$mail->send()) {
-    echo '<div class=\"callout alert\">Mailer Error: ' . $mail->ErrorInfo . '</div>';
+    echo '<div class="callout alert">Mailer Error: ' . htmlspecialchars($mail->ErrorInfo, ENT_QUOTES, 'UTF-8') . '</div>';
 	header("location:$strSiteURL". "/administrative/personalcarsheets.php?message=Error");
+	exit();
 } else {
-    echo "<div class=\"callout success\">" . $strMessageSent ." ". $Nume ." ". $User . "</div>";
+    echo "<div class=\"callout success\">" . $strMessageSent ." ". htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8') ." ". htmlspecialchars($User, ENT_QUOTES, 'UTF-8') . "</div>";
 	header("location:$strSiteURL". "/administrative/personalcarsheets.php?message=Success");
+	exit();
 }
+
 ?>

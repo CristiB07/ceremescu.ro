@@ -12,6 +12,8 @@ Bugfixes
 --------
 
 * Replace character entities with characters when processing the `code` attribute in the `<barcode />` tag
+* Escape XML predefined entities in XMP metadata (Fix for #2090)
+* Enable Font Subsetting by Default (Fix for #1315)
 
 mPDF 8.1.x
 ===========================
@@ -108,7 +110,7 @@ mPDF 7.1.x
 * Added myclabs/deepcopy dependency, fixed TOC page numbering (thanks, @jakejackson)
 * Custom color for QR codes
 * Added support for orientation config key
-* Code and elearning_tests cleanups and enhancements
+* Code and tests cleanups and enhancements
     - PHPUnit dedicated assertions (thanks, @carusogabriel)
     - WriteHTML part constants (thanks, @tomtomau)
     - Various notice fixes (kudos to all respective authors)
@@ -256,8 +258,8 @@ mPDF 6.1.0
     - Converted all txt, php, css, and htm files to utf8
     - Removed closing PHP tags
     - Change all else if calls to elseif
-- Added base PHPUnit elearning_tests
-- Added Travis CI integration with unit elearning_tests
+- Added base PHPUnit tests
+- Added Travis CI integration with unit tests
 - Changed all `mPDF::Error` and `die()` calls to throwing `MpdfException`
 - PDF Import changes
     - FPDI updated to 1.6.0 to fix incompatible licenses

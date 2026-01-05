@@ -4,6 +4,10 @@ include '../settings.php';
 include '../classes/common.php';
 $strPageTitle="Administrare autorizații";
 include '../dashboard/header.php';
+?>
+<link rel="stylesheet" href="../js/simple-editor/simple-editor.css">
+<script src="../js/simple-editor/simple-editor.js"></script>
+<?php
 if(!isset($_SESSION)) 
 { 
 	session_start(); 
@@ -11,17 +15,42 @@ if(!isset($_SESSION))
 if (!isSet($_SESSION['userlogedin']))
 {
 	header("location:$strSiteURL/login/login.php?message=MLF");
+	exit();
+}
+
+// Check if user is admin
+if (!isset($_SESSION['clearence']) || $_SESSION['clearence'] != 'ADMIN') {
+	header("location:$strSiteURL/index.php?message=unauthorized");
+	exit();
+}
+
+// Generate CSRF token
+if (!isset($_SESSION['csrf_token'])) {
+	$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> 
-<?php
+<div class="grid-x grid-margin-x">
+    <div class="large-12 medium-12 small-12 cell">
+        <?php
 echo "<h1>$strPageTitle</h1>";
 If (IsSet($_GET['mode']) AND $_GET['mode']=="delete"){
 
-$nsql="DELETE FROM autorizatii WHERE ID_autorizatii=" .$_GET['cID']. ";";
-ezpub_query($conn,$nsql);
-echo "<div class=\"callout success\">$strRecordDeleted</div><>/div></div>" ;
+// CSRF validation
+if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+	die('<div class="callout alert">Invalid CSRF token</div>');
+}
+
+$cID = intval($_GET['cID']);
+if ($cID <= 0) {
+	die('<div class="callout alert">Invalid ID</div>');
+}
+
+$stmt = $conn->prepare("DELETE FROM clienti_autorizatii WHERE ID_autorizatii = ?");
+$stmt->bind_param("i", $cID);
+$stmt->execute();
+$stmt->close();
+
+echo "<div class=\"callout success\">$strRecordDeleted</div></div></div>" ;
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
@@ -29,53 +58,71 @@ function delayer(){
 }
 //-->
 </script>
-<body onLoad=\"setTimeout('delayer()', 500)\">";
+<body onLoad=\"setTimeout('delayer()', 1500)\">";
 include '../bottom.php';
 die;}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-check_inject();
-If ($_GET['mode']=="new"){
-//insert new user
 
-	$mSQL = "INSERT INTO autorizatii(";
-	$mSQL = $mSQL . "Autorizatie,";
-	$mSQL = $mSQL . "Descriere)";
-
-	$mSQL = $mSQL . "Values(";
-	$mSQL = $mSQL . "'" .str_replace("'","&#39;",$_POST["Autorizatie"]) . "', ";
-	$mSQL = $mSQL . "'" .str_replace("'","&#39;",$_POST["Descriere"]) . "') ";
-				
-//It executes the SQL
-if (!ezpub_query($conn,$mSQL))
-  {
-  die('Error: ' . ezpub_error($conn));
-  }
-Else{
-echo "<div class=\"callout success\">$strRecordAdded</div></div></div>" ;
-echo "<script type=\"text/javascript\">
-<!--
-function delayer(){
-    window.location = \"siteauthorizations.php\"
+// CSRF validation
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+	die('<div class="callout alert">Invalid CSRF token</div>');
 }
-//-->
-</script>
-<body onLoad=\"setTimeout('delayer()', 500)\">";
-include '../bottom.php';
-die;
-}}
-Else
-{// edit
-$strWhereClause = " WHERE autorizatii.ID_autorizatii=" . $_GET["cID"] . ";";
-$query= "UPDATE autorizatii SET autorizatii.Autorizatie='" .str_replace("'","&#39;",$_POST["Autorizatie"]) . "' ," ;
-$query= $query . " autorizatii.Descriere='" .str_replace("'","&#39;",$_POST["Descriere"]) . "' "; 
-$query= $query . $strWhereClause;
-if (!ezpub_query($conn,$query))
+
+If ($_GET['mode']=="new"){
+//insert new authorization
+
+	$autorizatie = htmlspecialchars(trim($_POST["Autorizatie"]), ENT_QUOTES, 'UTF-8');
+	$descriere = htmlspecialchars(trim($_POST["Descriere"]), ENT_QUOTES, 'UTF-8');
+	
+	if (empty($autorizatie)) {
+		die('<div class="callout alert">Title is required</div>');
+	}
+	
+	$stmt = $conn->prepare("INSERT INTO clienti_autorizatii (Autorizatie, Descriere) VALUES (?, ?)");
+	$stmt->bind_param("ss", $autorizatie, $descriere);
+	
+	if (!$stmt->execute())
   {
-  echo $query;
-  die('Error: ' . ezpub_error($conn));
+  die('Error: ' . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8'));
   }
-Else{
+	$stmt->close();
+	
+	echo "<div class=\"callout success\">$strRecordAdded</div></div></div>" ;
+	echo "<script type=\"text/javascript\">
+	<!--
+	function delayer(){
+	    window.location = \"siteauthorizations.php\"
+	}
+	//-->
+	</script>
+	<body onLoad=\"setTimeout('delayer()', 1500)\">";
+	include '../bottom.php';
+	die;
+}
+else
+{// edit
+$cID = intval($_GET["cID"]);
+if ($cID <= 0) {
+	die('<div class="callout alert">Invalid ID</div>');
+}
+
+$autorizatie = htmlspecialchars(trim($_POST["Autorizatie"]), ENT_QUOTES, 'UTF-8');
+$descriere = htmlspecialchars(trim($_POST["Descriere"]), ENT_QUOTES, 'UTF-8');
+
+if (empty($autorizatie)) {
+	die('<div class="callout alert">Title is required</div>');
+}
+
+$stmt = $conn->prepare("UPDATE clienti_autorizatii SET Autorizatie = ?, Descriere = ? WHERE ID_autorizatii = ?");
+$stmt->bind_param("ssi", $autorizatie, $descriere, $cID);
+
+if (!$stmt->execute())
+  {
+  die('Error: ' . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8'));
+  }
+$stmt->close();
+
 echo "<div class=\"callout success\">$strRecordModified</div></div></div>" ;
 echo "<script type=\"text/javascript\">
 <!--
@@ -84,149 +131,102 @@ function delayer(){
 }
 //-->
 </script>
-<body onLoad=\"setTimeout('delayer()', 500)\">";
+<body onLoad=\"setTimeout('delayer()', 1500)\">";
 include '../bottom.php';
 die;
 }
 }
-}
-Else {
+
+else {
 ?>
-   <script src="<?php echo $strSiteURL ?>/js/foundation/jquery.js"></script>
-
-<script language="JavaScript" type="text/JavaScript">
-$(document).ready(function() {
-	$("#users").validate();
-});
-</script>
-<script src='../js/tinymce/tinymce.min.js'></script>
-<script>
-tinymce.init({
-  selector: "textarea.myTextEditor",
-  menubar: false,
-  image_advtab: false,
-   plugins: [
-    'advlist autolink lists link imagetools charmap print preview anchor',
-    'searchreplace visualblocks code fullscreen preview',
-    'insertdatetime media table contextmenu paste code pagebreak'
-  ],
-  toolbar: 'insertfile undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link preview code pagebreak',
-  content_css: [
-    '//fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i',
-    '//www.tiny.cloud/css/codepen.min.css'],
-	 image_title: true, 
-  // enable automatic uploads of images represented by blob or data URIs
-  paste_data_images: false,
-  automatic_uploads: false,
-  // URL of our upload handler (for more details check: https://www.tinymce.com/docs/configure/file-image-upload/#images_upload_url)
-  images_upload_url: 'postAcceptor.php',
-    images_upload_base_path: '',
-  images_upload_credentials: true,
-  file_picker_types: 'file image media',
-  
- file_picker_callback: function(cb, value, meta) {
-    var input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image*');
-    
-    // Note: In modern browsers input[type="file"] is functional without 
-    // even adding it to the DOM, but that might not be the case in some older
-    // or quirky browsers like IE, so you might want to add it to the DOM
-    // just in case, and visually hide it. And do not forget do remove it
-    // once you do not need it anymore.
-
-    input.onchange = function() {
-      var file = this.files[0];
-      
-      var reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = function () {
-        // Note: Now we need to register the blob in TinyMCEs image blob
-        // registry. In the next release this part hopefully won't be
-        // necessary, as we are looking to handle it internally.
-        var id = 'blobid' + (new Date()).getTime();
-        var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
-        var base64 = reader.result.split(',')[1];
-        var blobInfo = blobCache.create(id, file, base64);
-        blobCache.add(blobInfo);
-
-        // call the callback and populate the Title field with the file name
-        cb(blobInfo.blobUri(), { title: file.name });
-      };
-    };
-    
-    input.click();
-  }
-});
-
-</script>
-
-<?php
+        <?php
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 ?>
-			    <div class="grid-x grid-margin-x">
-			  <div class="large-12 medium-12 small-12 cell">
-			  <p><a href="siteauthorizations.php" class="button"><?php echo $strBack?></a></p>
-</div>
-</div>
-<form Method="post" id="users" Action="siteauthorizations.php?mode=new" >
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> 
-	 <label><?php echo $strTitle?></label>
-	  <input name="Autorizatie" Type="text" size="50" class="required" />
-	<div>
-	<div>
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> 
-	  <label><?php echo $strDetails?></label>
-	  <textarea name="Descriere" id="myTextEditor" class="myTextEditor" rows="5"></textarea>
-	</div>	
+        <div class="grid-x grid-margin-x">
+            <div class="large-12 medium-12 small-12 cell">
+                <p><a href="siteauthorizations.php" class="button"><?php echo $strBack?>&nbsp;<i
+                            class="fas fa-backward fa-xl"></i></a></p>
+            </div>
+        </div>
+        <form method="post" id="users" Action="siteauthorizations.php?mode=new">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+            <div class="grid-x grid-margin-x">
+                <div class="large-12 medium-12 small-12 cell">
+                    <label><?php echo $strTitle?>
+                        <input name="Autorizatie" type="text" size="50" class="required" />
+                    </label>
+                    <div>
+                        <div>
+                            <div class="grid-x grid-margin-x">
+                                <div class="large-12 medium-12 small-12 cell">
+                                    <label><?php echo $strDetails?></label>
+                                        <textarea name="Descriere" class="simple-html-editor" rows="5"></textarea>
+                                </div>
+                            </div>
+                            <div class="grid-x grid-margin-x">
+                                <div class="large-12 medium-12 small-12 cell text-center">
+                                    <input type="submit" Value="<?php echo $strAdd?>" name="Submit"
+                                        class="button success" />
+                                </div>
+                            </div>
+        </form>
+        <?php
+}
+elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
+$cID = intval($_GET['cID']);
+if ($cID <= 0) {
+	die('<div class="callout alert">Invalid ID</div>');
+}
 
-     <div class="large-12 medium-12 small-12 cell text-center"> 
-	 <input Type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
-	</div>
-	</div>
-  </form>
-<?php
+$stmt = $conn->prepare("SELECT * FROM clienti_autorizatii WHERE ID_autorizatii = ?");
+$stmt->bind_param("i", $cID);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$stmt->close();
+
+if (!$row) {
+	die('<div class="callout alert">Record not found</div>');
 }
-ElseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
-$query="SELECT * FROM autorizatii WHERE ID_autorizatii=$_GET[cID]";
-$result=ezpub_query($conn,$query);
-$row=ezpub_fetch_array($result);
 ?>
-			    <div class="grid-x grid-margin-x">
-			  <div class="large-12 medium-12 small-12 cell">
-			  <p><a href="siteauthorizations.php" class="button"><?php echo $strBack?></a></p>
-</div>
-</div>
-<form Method="post" action="siteauthorizations.php?mode=edit&cID=<?php echo $row['ID_autorizatii']?>" >
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> 
-	  <label><?php echo $strTitle?></label>
-	<input name="Autorizatie" Type="text" size="50" value="<?php echo $row['Autorizatie'] ?>" class="required" />
-	  </div>
-	  </div>
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> 
-	  <label><?php echo $strDetails?></label>
-	  <textarea name="Descriere" id="myTextEditor" class="myTextEditor" rows="5"><?php echo $row['Descriere'] ?></textarea>
-	</div>	
-	</div>	
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> <p align="center">
-	 <input Type="submit" Value="<?php echo $strModify?>" name="Submit" class="button success" /> 
-</p>
-	</div>
-	</div>
-  </form>
-<?php
+        <div class="grid-x grid-margin-x">
+            <div class="large-12 medium-12 small-12 cell">
+                <p><a href="siteauthorizations.php" class="button"><?php echo $strBack?>&nbsp;<i
+                            class="fas fa-backward fa-xl"></i></a></p>
+            </div>
+        </div>
+        <form method="post" action="siteauthorizations.php?mode=edit&cID=<?php echo intval($row['ID_autorizatii']); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+            <div class="grid-x grid-margin-x">
+                <div class="large-12 medium-12 small-12 cell">
+                    <label><?php echo $strTitle?>
+                        <input name="Autorizatie" type="text" size="50" value="<?php echo htmlspecialchars($row['Autorizatie'], ENT_QUOTES, 'UTF-8'); ?>"
+                            class="required" />
+                    </label>
+                </div>
+            </div>
+            <div class="grid-x grid-margin-x">
+                <div class="large-12 medium-12 small-12 cell">
+                    <label><?php echo $strDetails?></label>
+                        <textarea name="Descriere" class="simple-html-editor" rows="5">
+                            <?php echo htmlspecialchars($row['Descriere'], ENT_QUOTES, 'UTF-8'); ?></textarea>
+                    
+                </div>
+            </div>
+            <div class="grid-x grid-margin-x">
+                <div class="large-12 medium-12 small-12 cell text-center">
+                    <input type="submit" Value="<?php echo $strModify?>" name="Submit" class="button success" />
+                </div>
+            </div>
+        </form>
+        <?php
 }
-Else
+else
 {
 echo " <div class=\"grid-x grid-margin-x\">
      <div class=\"large-12 medium-12 small-12 cell\">
-	 <a href=\"siteauthorizations.php?mode=new\" class=\"button\">$strAdd&nbsp;<i class=\"large fa fa-plus\" title=\"$strAdd\"></i></a></div></div>";
-$query="SELECT * FROM autorizatii";
+	 <a href=\"siteauthorizations.php?mode=new\" class=\"button\">$strAdd&nbsp;<i class=\"fa-xl fa fa-plus\" title=\"$strAdd\"></i></a></div></div>";
+$query="SELECT * FROM clienti_autorizatii";
 $result=ezpub_query($conn,$query);
 $numar=ezpub_num_rows($result,$query);
 echo ezpub_error($conn);
@@ -234,27 +234,30 @@ if ($numar==0)
 {
 echo "<div class=\"callout alert\">".$strNoRecordsFound."</div>";
 }
-Else {
+else {
 ?>
- <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> 
-<table width="100%">
-	      <thead>
-    	<tr>
-        	<th><?php echo $strID?></th>
-			<th><?php echo $strTitle?></th>
-			<th><?php echo $strEdit?></th>
-			<th><?php echo $strDelete?></th>
-        </tr>
-		</thead>
-<tbody>
-<?php 
+        <div class="grid-x grid-margin-x">
+            <div class="large-12 medium-12 small-12 cell">
+                <table width="100%">
+                    <thead>
+                        <tr>
+                            <th width="5%"><?php echo $strID?></th>
+                            <th width="85%"><?php echo $strTitle?></th>
+                            <th width="5%"><?php echo $strEdit?></th>
+                            <th width="5%"><?php echo $strDelete?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
 While ($row=ezpub_fetch_array($result)){
+	$safe_id = intval($row['ID_autorizatii']);
+	$safe_title = htmlspecialchars($row['Autorizatie'], ENT_QUOTES, 'UTF-8');
+	$csrf = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
     		echo"<tr>
-			<td>$row[ID_autorizatii]</td>
-			<td>$row[Autorizatie]</td>
-			  <td><a href=\"siteauthorizations.php?mode=edit&cID=$row[ID_autorizatii]\" ><i class=\"far fa-edit fa-xl\" title=\"$strEdit\"></i></a></td>
-			<td><a href=\"siteauthorizations.php?mode=delete&cID=$row[ID_autorizatii]\"  OnClick=\"return confirm('$strConfirmDelete');\"><i class=\"fa fa-eraser fa-xl\" title=\"$strDelete\"></i></a></td>
+			<td>$safe_id</td>
+			<td>$safe_title</td>
+			  <td><a href=\"siteauthorizations.php?mode=edit&cID=$safe_id\" ><i class=\"far fa-edit fa-xl\" title=\"$strEdit\"></i></a></td>
+			<td><a href=\"siteauthorizations.php?mode=delete&cID=$safe_id&csrf_token=$csrf\"  OnClick=\"return confirm('$strConfirmDelete');\"><i class=\"fa fa-eraser fa-xl\" title=\"$strDelete\"></i></a></td>
         </tr>";
 }
 echo "</tbody><tfoot><tr><td></td><td  colspan=\"2\"><em></em></td><td>&nbsp;</td></tr></tfoot></table></div></div>";
@@ -262,9 +265,9 @@ echo "</tbody><tfoot><tr><td></td><td  colspan=\"2\"><em></em></td><td>&nbsp;</t
 }
 }
 ?>
-</div>
-</div>
-</div>
+            </div>
+        </div>
+    </div>
 </div>
 <?php
 include '../bottom.php';

@@ -66,7 +66,7 @@ interface RequestInterface extends MessageInterface
      *
      * @return string Returns the request method.
      */
-    public function getMethod(): string;
+    public function getmethod(): string;
 
     /**
      * Return an instance with the provided HTTP method.
@@ -83,7 +83,7 @@ interface RequestInterface extends MessageInterface
      * @return static
      * @throws \InvalidArgumentException for invalid HTTP methods.
      */
-    public function withMethod(string $method): RequestInterface;
+    public function withmethod(string $method): RequestInterface;
 
     /**
      * Retrieves the URI instance.

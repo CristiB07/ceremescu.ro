@@ -81,7 +81,7 @@ function check_inject()
 function romanize($number) {
 	if ($number==0)
 	{$romanized=0;}
-Else {
+else {
     $romanized = number_format($number,2,',','.');
 }
     return $romanized;
@@ -250,17 +250,32 @@ class CursBNR
 		 */
 		function parseXMLDocument()
 		{
-	 		$xml = new SimpleXMLElement($this->xmlDocument);
-	 		
-	 		$this->date=$xml->Header->PublishingDate;
-	 		
-	 		foreach($xml->Body->Cube->Rate as $line)	
-	 		{ 		 			
-	 			$this->currency[]=array("name"=>$line["currency"], "value"=>$line, "multiplier"=>$line["multiplier"]);
-	 		}
+		// Prevent XXE attacks - libxml_disable_entity_loader() deprecated in PHP 8.0+
+		// External entity loading is disabled by default in PHP 8.0+
+		if (PHP_VERSION_ID < 80000) {
+			libxml_disable_entity_loader(true);
 		}
 		
-		/**
+		// Validate XML content before parsing
+		if (empty($this->xmlDocument) || !preg_match('/^<\?xml/i', trim($this->xmlDocument))) {
+			throw new Exception('Invalid XML response from BNR: ' . substr($this->xmlDocument, 0, 100));
+		}
+		
+		try {
+			$xml = new SimpleXMLElement($this->xmlDocument, LIBXML_NONET | LIBXML_NOCDATA);
+			
+			$this->date=$xml->Header->PublishingDate;
+			
+			foreach($xml->Body->Cube->Rate as $line)	
+			{ 		 			
+				$this->currency[]=array("name"=>$line["currency"], "value"=>$line, "multiplier"=>$line["multiplier"]);
+			}
+		} catch (Exception $e) {
+			throw new Exception('Failed to parse XML: ' . $e->getMessage());
+		}
+	}
+
+	/**
 		 * getCurs method
 		 * 
 		 * get current exchange rate: example getExchangeRate("USD")
@@ -470,4 +485,52 @@ function xml2array($contents, $get_attributes=1, $priority = 'tag') {
     return($xml_array);
 }	
 
- 	?>
+ 	
+
+    function getUserIP() {
+    if( array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER) && !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ) {
+        if (strpos($_SERVER['HTTP_X_FORWARDED_FOR'], ',')>0) {
+            $addr = explode(",",$_SERVER['HTTP_X_FORWARDED_FOR']);
+            return trim($addr[0]);
+        } else {
+            return $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
+    }
+    else {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+}
+// Funcție pentru conversie format românesc în numeric standard
+function parseRomanianNumber($value) {
+    // Elimină spații albe
+    $value = trim($value);
+    // Înlocuiește punct (separator de mii) cu nimic
+    $value = str_replace('.', '', $value);
+    // Înlocuiește virgulă (separator zecimal) cu punct
+    $value = str_replace(',', '.', $value);
+    return $value;
+}
+
+/**
+ * Normalizează diacriticele românești (caractere vechi → caractere corecte)
+ * Înlocuiește Ş cu Ș și Ţ cu Ț (sedilă → virgulă)
+ * 
+ * @param string $text Text de normalizat
+ * @return string Text cu diacritice corecte
+ */
+function normalizeDiacritice($text) {
+    if (empty($text)) {
+        return $text;
+    }
+    
+    // Înlocuiește caractere vechi cu caractere corecte românești
+    $replacements = [
+        'Ş' => 'Ș', // S cu sedilă → S cu virgulă (majusculă)
+        'ş' => 'ș', // s cu sedilă → s cu virgulă (minusculă)
+        'Ţ' => 'Ț', // T cu sedilă → T cu virgulă (majusculă)
+        'ţ' => 'ț'  // t cu sedilă → t cu virgulă (minusculă)
+    ];
+    
+    return str_replace(array_keys($replacements), array_values($replacements), $text);
+}
+?>

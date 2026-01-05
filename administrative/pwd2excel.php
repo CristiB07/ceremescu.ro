@@ -1,22 +1,15 @@
 <?php
-//update 29.07.2025
-include '../settings.php';
-include '../classes/common.php';
-if(!isset($_SESSION)) 
-{ 
-	session_start(); 
-}
-if (!isSet($_SESSION['userlogedin']))
-{
-	header("location:$strSiteURL/login/login.php?message=MLF");
-}
-	if (!isSet($_SESSION['$lang'])) {
-	$_SESSION['$lang']="RO";
-	$lang=$_SESSION['$lang'];
+ if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+	}
+	if (!isSet($_SESSION['lang'])) {
+	$_SESSION['lang']="RO";
+	$lang=$_SESSION['lang'];
 }
 Else
 {
-	$lang=$_SESSION['$lang'];
+	$lang=$_SESSION['lang'];
 }
 if ($lang=="RO") {
 include '../lang/language_RO.php';
@@ -25,33 +18,100 @@ Else
 {
 	include '../lang/language_EN.php';
 }	
+if (!isSet($_SESSION['userlogedin']))
+{
+	header("location:$strSiteURL/login/login.php?message=MLF");
+	exit();
+}
 
+include '../settings.php';
+
+include '../classes/common.php';
 $uid=$_SESSION['uid'];
 $code=$_SESSION['code'];
 
-if ((isset( $_POST['month'])) && !empty( $_POST['month'])){
-$month=$_POST['month'];
-if ($month <10)
-{$month="0".$month;}
-Else
-{$month=$month;}
+// Validate month input
+if (!isset($_POST['month']) || !is_numeric($_POST['month'])) {
+    header("location:$strSiteURL/administrative/personalworkingdays.php?message=Error");
+    exit();
 }
-Else
-{echo "<div class=\"callout alert\">$strThereWasAnError</div>";
-die;
+$month = intval($_POST['month']);
+if ($month < 1 || $month > 12) {
+    header("location:$strSiteURL/administrative/personalworkingdays.php?message=Error");
+    exit();
 }
-if ((isset( $_POST['year'])) && !empty( $_POST['year'])){
-$year=$_POST['year'];}
-Else
-{echo "<div class=\"callout alert\">$strThereWasAnError</div>";
-die;}
+if ($month < 10) {
+    $month = "0" . $month;
+}
 
-$sqlu=" SELECT * from date_utilizatori Where utilizator_ID='$uid'";
-$resultu=ezpub_query($conn,$sqlu);
-$rowu = ezpub_fetch_array($resultu);
-$User=$rowu["utilizator_Email"];
-$Pass=$rowu["utilizator_Parola"];
-$Nume=$rowu["utilizator_Prenume"] ." ". $rowu["utilizator_Nume"];
+// Validate year input
+if (!isset($_POST['year']) || !is_numeric($_POST['year'])) {
+    header("location:$strSiteURL/administrative/personalworkingdays.php?message=Error");
+    exit();
+}
+$year = intval($_POST['year']);
+if ($year < 2000 || $year > 2100) {
+    header("location:$strSiteURL/administrative/personalworkingdays.php?message=Error");
+    exit();
+}
+
+// Get user data with prepared statement
+$stmt_user = $conn->prepare("SELECT * FROM date_utilizatori WHERE utilizator_ID=?");
+$stmt_user->bind_param("i", $uid);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
+$rowu = $result_user->fetch_assoc();
+$stmt_user->close();
+
+if (!$rowu) {
+    header("location:$strSiteURL/administrative/personalworkingdays.php?message=Error");
+    exit();
+}
+
+$User = $rowu["utilizator_Email"];
+$Pass = $rowu["utilizator_Parola"];
+
+// Decrypt password if encrypted
+if (intval($rowu['utilizator_Upgraded']) === 0) {
+    try {
+        $email_hash = hash('sha256', $User);
+        $stmt_key = $conn->prepare("SELECT cheie_secundara FROM date_utilizatori_chei WHERE cheie_primara = ?");
+        $stmt_key->bind_param("s", $email_hash);
+        $stmt_key->execute();
+        $result_key = $stmt_key->get_result();
+        $row_key = $result_key->fetch_assoc();
+        $stmt_key->close();
+        
+        if ($row_key && !empty($row_key['cheie_secundara'])) {
+            $encryption_key = hex2bin($row_key['cheie_secundara']);
+            $encrypted_data = base64_decode($Pass);
+            
+            if (strlen($encrypted_data) >= 16) {
+                $iv = substr($encrypted_data, 0, 16);
+                $ciphertext = substr($encrypted_data, 16);
+                $decrypted = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryption_key, OPENSSL_RAW_DATA, $iv);
+                
+                if ($decrypted !== false) {
+                    $Pass = $decrypted;
+                } else {
+                    error_log("Failed to decrypt password for user: " . $User);
+                    $Pass = '';
+                }
+            } else {
+                error_log("Encrypted data too short for user: " . $User);
+                $Pass = '';
+            }
+        } else {
+            error_log("Encryption key not found for user: " . $User);
+            $Pass = '';
+        }
+    } catch (Exception $e) {
+        error_log("Password decryption error: " . $e->getMessage());
+        $Pass = '';
+    }
+}
+
+$Nume = $rowu["utilizator_Prenume"] . " " . $rowu["utilizator_Nume"];
     		//Create an option With the numeric value of the month
 			
 			$dateObj   = DateTime::createFromFormat('!m', $month);
@@ -103,12 +163,12 @@ $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 		</ss:Style>
 	</ss:Styles>
 	<DocumentProperties xmlns=\"urn:schemas-microsoft-com:office:office\">
-        <Author>". $Nume . "</Author>
-        <LastAuthor>". $Nume. "</LastAuthor>
-        <Created>". date("d-m-Y H:i:s")."</Created>
+        <Author>" . htmlspecialchars($Nume, ENT_XML1, 'UTF-8') . "</Author>
+        <LastAuthor>" . htmlspecialchars($Nume, ENT_XML1, 'UTF-8') . "</LastAuthor>
+        <Created>" . htmlspecialchars(date("d-m-Y H:i:s"), ENT_XML1, 'UTF-8') . "</Created>
         <Version>15.00</Version>
     </DocumentProperties>
-<Worksheet ss:Name=\"Pontaj " . $monthname ." \">
+<Worksheet ss:Name=\"Pontaj " . htmlspecialchars($monthname, ENT_XML1, 'UTF-8') . " \">
 <Table>
 <Column ss:Index=\"1\" ss:AutoFitWidth=\"0\" ss:Width=\"110\"/>
 <Row>
@@ -122,9 +182,9 @@ $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <Cell><Data ss:Type=\"String\"></Data></Cell>
 </Row>
 <Row>
-<Cell><Data ss:Type=\"String\">".$monthname."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$d."</Data></Cell>
-<Cell><Data ss:Type=\"String\">".$dd."</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($monthname, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($d, ENT_XML1, 'UTF-8') . "</Data></Cell>
+<Cell><Data ss:Type=\"String\">" . htmlspecialchars($dd, ENT_XML1, 'UTF-8') . "</Data></Cell>
 <Cell><Data ss:Type=\"String\"></Data></Cell>
 <Cell><Data ss:Type=\"String\"></Data></Cell>
 <Cell><Data ss:Type=\"String\"></Data></Cell>
@@ -146,15 +206,21 @@ fwrite($fp, $header);
 //end of adding column names
 //start while loop to get data
 for ( $i = 1; $i <= $d; $i ++) {
- $monthday=$i;
- $dayofmonth=$year."-".$month."-".$i;
- $namedayofthemonth= date('D', strtotime($dayofmonth));
- $query="SELECT * from administrative_pontaje where pontaj_user='$code' and pontaj_an='$year' and pontaj_luna='$month' and pontaj_zi='$i'";
- $result=ezpub_query($conn,$query);
- $row = ezpub_fetch_array($result);
+ $monthday = $i;
+ $dayofmonth = $year . "-" . $month . "-" . $i;
+ $namedayofthemonth = date('D', strtotime($dayofmonth));
+ 
+ // Prepare statement for daily records
+ $stmt_day = $conn->prepare("SELECT * FROM administrative_pontaje WHERE pontaj_user=? AND pontaj_an=? AND pontaj_luna=? AND pontaj_zi=?");
+ $stmt_day->bind_param("sssi", $code, $year, $month, $i);
+ $stmt_day->execute();
+ $result_day = $stmt_day->get_result();
+ $row = $result_day->fetch_assoc();
+ $stmt_day->close();
+ 
  $schema_insert = "";
-$schema_insert .= "<Row>";
-$schema_insert.="<Cell><Data ss:Type=\"String\">". $i . "</Data></Cell>";
+ $schema_insert .= "<Row>";
+ $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($i, ENT_XML1, 'UTF-8') . "</Data></Cell>";
  
  IF (in_Array($dayofmonth, $holidays) OR in_array($namedayofthemonth, $skipdays))
  {
@@ -166,13 +232,13 @@ $schema_insert.="<Cell><Data ss:Type=\"String\">". $i . "</Data></Cell>";
                                     IntlDateFormatter::GREGORIAN,
                                     'EEEE, d MMMM Y');
 		$dayname = $formatter->format($dateObj);
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">Zi nelucrătoare</Data></Cell>";
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">Zi nelucrătoare</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
  }
  Else
  {
@@ -184,16 +250,16 @@ $schema_insert.="<Cell><Data ss:Type=\"String\">". $i . "</Data></Cell>";
                                     IntlDateFormatter::GREGORIAN,
                                     'EEEE, d MMMM Y');
 		$dayname = $formatter->format($dateObj);
-	 $schema_insert.="<Cell><Data ss:Type=\"String\">Zi lucrătoare</Data></Cell>";
-	  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["pontaj_CO"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["pontaj_ore_WFH"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["pontaj_ore_T"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["pontaj_ore_B"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["pontaj_ore_A"]."</Data></Cell>";
-  $schema_insert.="<Cell><Data ss:Type=\"String\">".$row["pontaj_observatii"]."</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">Zi lucrătoare</Data></Cell>";
+	 $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["pontaj_CO"] ?? '', ENT_XML1, 'UTF-8') . "</Data></Cell>";
+  $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["pontaj_ore_WFH"] ?? '', ENT_XML1, 'UTF-8') . "</Data></Cell>";
+  $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["pontaj_ore_T"] ?? '', ENT_XML1, 'UTF-8') . "</Data></Cell>";
+  $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["pontaj_ore_B"] ?? '', ENT_XML1, 'UTF-8') . "</Data></Cell>";
+  $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["pontaj_ore_A"] ?? '', ENT_XML1, 'UTF-8') . "</Data></Cell>";
+  $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars($row["pontaj_observatii"] ?? '', ENT_XML1, 'UTF-8') . "</Data></Cell>";
  }
-$schema_insert.="</Row>";
-fwrite($fp, $schema_insert);
+ $schema_insert .= "</Row>";
+ fwrite($fp, $schema_insert);
 }
 $schema_close = "";
 $schema_close.="</Table>
@@ -209,23 +275,23 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
 
-$emailbody="<html>";
-$emailbody=$emailbody . "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />";
-$emailbody=$emailbody . "<link href='".$siteCompanyWebsite."/fonts/open-sans-condensed-v21-latin-ext_latin-300.woff' rel='stylesheet' type='text/css'>";
-$emailbody=$emailbody . "<link href='".$siteCompanyWebsite."/fonts/open-sans-v27-latin-ext_latin-regular.woff' rel='stylesheet' type='text/css'>";
-$emailbody=$emailbody . "<style>body {margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; font-size: 1.1em; font-family: 'Open Sans',sans-serif; padding: 0px; COLOR: " . $color ."}";
-$emailbody=$emailbody . "h1,h2,h3,h4,h5 {font-family:'Open Sans',sans-serif; font-weight: bold; color: " . $color .";}";
-$emailbody=$emailbody . "td {font-size: 1em; font-family: 'Open Sans',sans-serif; COLOR: " . $color ."; padding: 3px;  font-weight: normal; border-collapse:collapse; border: 1px solid " . $color .";}";
-$emailbody=$emailbody . "th {font-size: 1.1em; font-family: 'Open Sans',sans-serif; COLOR: #ffffff; background-color: " . $color .";  font-weight: normal;}";
-$emailbody=$emailbody . "table {border-collapse:collapse; border: 1px solid " . $color .";}";
-$emailbody=$emailbody . "</style>";
-$emailbody=$emailbody . "</head><body>";
-$emailbody=$emailbody . "<a href=\"$siteCompanyWebsite\"><img src=\"".$siteCompanyWebsite."/img/logo.png\" title=\"$strSiteOwner\" width=\"150\" height=\"auto\"/></a>";
-$emailbody=$emailbody . "<p>Bună ziua,</p>";
-$emailbody=$emailbody . "<p>Atașat este pontajul pentru luna ". $monthname.",</p>";
-$emailbody=$emailbody . "<p>Mulțumesc,<br />". $Nume.",</p>";
-$emailbody=$emailbody . "</body>";
-$emailbody=$emailbody. "</html>";
+$emailbody = "<html>";
+$emailbody .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />";
+$emailbody .= "<link href='" . htmlspecialchars($siteCompanyWebsite, ENT_QUOTES, 'UTF-8') . "/fonts/open-sans-condensed-v21-latin-ext_latin-300.woff' rel='stylesheet' type='text/css'>";
+$emailbody .= "<link href='" . htmlspecialchars($siteCompanyWebsite, ENT_QUOTES, 'UTF-8') . "/fonts/open-sans-v27-latin-ext_latin-regular.woff' rel='stylesheet' type='text/css'>";
+$emailbody .= "<style>body {margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; font-size: 1.1em; font-family: 'Open Sans',sans-serif; padding: 0px; COLOR: " . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . "}";
+$emailbody .= "h1,h2,h3,h4,h5 {font-family:'Open Sans',sans-serif; font-weight: bold; color: " . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . ";}";
+$emailbody .= "td {font-size: 1em; font-family: 'Open Sans',sans-serif; COLOR: " . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . "; padding: 3px;  font-weight: normal; border-collapse:collapse; border: 1px solid " . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . ";}";
+$emailbody .= "th {font-size: 1.1em; font-family: 'Open Sans',sans-serif; COLOR: #ffffff; background-color: " . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . ";  font-weight: normal;}";
+$emailbody .= "table {border-collapse:collapse; border: 1px solid " . htmlspecialchars($color, ENT_QUOTES, 'UTF-8') . ";}";
+$emailbody .= "</style>";
+$emailbody .= "</head><body>";
+$emailbody .= "<a href=\"" . htmlspecialchars($siteCompanyWebsite, ENT_QUOTES, 'UTF-8') . "\"><img src=\"" . htmlspecialchars($siteCompanyWebsite, ENT_QUOTES, 'UTF-8') . "/img/logo.png\" title=\"" . htmlspecialchars($strSiteOwner, ENT_QUOTES, 'UTF-8') . "\" width=\"150\" height=\"auto\"/></a>";
+$emailbody .= "<p>Bună ziua,</p>";
+$emailbody .= "<p>Atașat este pontajul pentru luna " . htmlspecialchars($monthname, ENT_QUOTES, 'UTF-8') . ",</p>";
+$emailbody .= "<p>Mulțumesc,<br />" . htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8') . ",</p>";
+$emailbody .= "</body>";
+$emailbody .= "</html>";
 
 //Create a new PHPMailer instance
 $mail = new PHPMailer();
@@ -263,22 +329,24 @@ $mail->SMTPOptions = array(
     )
 );
 //Set the subject line
-$mail->Subject = 'Pontaj '.$Nume.' luna '.$monthname;
+$mail->Subject = 'Pontaj ' . htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8') . ' luna ' . htmlspecialchars($monthname, ENT_QUOTES, 'UTF-8');
 //Read an HTML message body from an external file, convert referenced images to embedded,
 //convert HTML into a basic plain-text alternative body
     $mail->isHTML(true);                                  // Set email format to HTML
     $mail->Body    = $emailbody;
-    $mail->AltBody = 'Acest mail conține pontajul. Mulțumesc, '. $Nume;
+    $mail->AltBody = 'Acest mail conține pontajul. Mulțumesc, ' . htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8');
 //Attach an image file
 $mail->addAttachment($hddpath .'/' . $worksheets_folder .'/pontaj_'.$code.'_'.$month.'_'.$year.'.xml');
 
 //send the message, check for errors
 if (!$mail->send()) {
-    echo '<div class=\"callout alert\">Mailer Error: ' . $mail->ErrorInfo . '</div>';
-	header("location:$strSiteURL". "/administrative/personalworkingdays.php?message=Error");
+    echo '<div class="callout alert">Mailer Error: ' . htmlspecialchars($mail->ErrorInfo, ENT_QUOTES, 'UTF-8') . '</div>';
+	header("location:$strSiteURL" . "/administrative/personalworkingdays.php?message=Error");
+	exit();
 } else {
-    echo "<div class=\"callout success\">" . $strMessageSent ." ". $Nume ." ". $User . "</div>";
-	header("location:$strSiteURL". "/administrative/personalworkingdays.php?message=Success");
+    echo "<div class=\"callout success\">" . htmlspecialchars($strMessageSent, ENT_QUOTES, 'UTF-8') . " " . htmlspecialchars($Nume, ENT_QUOTES, 'UTF-8') . " " . htmlspecialchars($User, ENT_QUOTES, 'UTF-8') . "</div>";
+	header("location:$strSiteURL" . "/administrative/personalworkingdays.php?message=Success");
+	exit();
 }
 
 ?>

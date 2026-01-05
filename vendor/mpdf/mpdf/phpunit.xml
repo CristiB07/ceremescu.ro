@@ -1,14 +1,14 @@
 <phpunit
-	bootstrap="elearning_tests/bootstrap.php"
+	bootstrap="tests/bootstrap.php"
 	colors="true"
 	backupGlobals="false"
-	beStrictAboutelearning_testsThatDoNotTestAnything="false">
+	beStrictAboutTestsThatDoNotTestAnything="false">
 
-	<elearning_testsuites>
-		<elearning_testsuite name="elearning_tests">
-			<directory suffix="Test.php">./elearning_tests</directory>
-		</elearning_testsuite>
-	</elearning_testsuites>
+	<testsuites>
+		<testsuite name="Tests">
+			<directory suffix="Test.php">./tests</directory>
+		</testsuite>
+	</testsuites>
 
 	<coverage processUncoveredFiles="true">
 		<include>

@@ -1,5 +1,4 @@
 <?php
-//update 29.07.2025
 include '../settings.php';
 include '../classes/paginator.class.php';
 include '../classes/common.php';
@@ -30,293 +29,394 @@ If ((isSet($_GET['message'])) AND $_GET['message']=="Success"){
 echo "<div class=\"callout success\">$strMessageSent</div>" ;
 }
 ?>
-	    <div class="grid-x grid-margin-x">
-			  <div class="large-12 medium-12 small-12 cell">
-<?php
+<div class="grid-x grid-margin-x">
+    <div class="large-12 medium-12 small-12 cell">
+        <?php
 echo "<h1>$strPageTitle</h1>";
 If (IsSet($_GET['mode']) AND $_GET['mode']=="delete"){
 
-$nsql="DELETE FROM administrative_alimentari WHERE alimentare_ID=" .$_GET['cID']. ";";
-ezpub_query($conn,$nsql);
+// Validate cID parameter
+if (!isset($_GET['cID']) || !is_numeric($_GET['cID'])) {
+    die('<div class="callout alert">Invalid record ID</div>');
+}
+
+$cID = intval($_GET['cID']);
+
+// Authorization check: verify record belongs to current user
+$stmt = $conn->prepare("SELECT alimentare_aloc FROM administrative_alimentari WHERE alimentare_ID=?");
+$stmt->bind_param("i", $cID);
+$stmt->execute();
+$result = $stmt->get_result();
+$record = $result->fetch_assoc();
+$stmt->close();
+
+if (!$record || $record['alimentare_aloc'] !== $code) {
+    die('<div class="callout alert">Unauthorized access</div>');
+}
+
+// Delete record using prepared statement
+$stmt = $conn->prepare("DELETE FROM administrative_alimentari WHERE alimentare_ID=?");
+$stmt->bind_param("i", $cID);
+$stmt->execute();
+$stmt->close();
+
 echo "<div class=\"callout success\">$strRecordDeleted</div></div></div>" ;
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
     window.history.go(-1);
 }
+setTimeout('delayer()', 1500);
 //-->
-</script>
-<body onLoad=\"setTimeout('delayer()', 500)\">";
+</script>";
 include '../bottom.php';
-die;} // ends delete
+exit();
+} // ends delete
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 
 If ($_GET['mode']=="new"){
-//insert new user
-$suma=str_replace(",",".",$_POST["alimentare_valoare"]);
-$litri=str_replace(",",".",$_POST["alimentare_litri"]);
+//insert new record
 
-	$mSQL = "INSERT INTO administrative_alimentari(";
-	$mSQL = $mSQL . "alimentare_litri,";
-	$mSQL = $mSQL . "alimentare_valoare,";
-	$mSQL = $mSQL . "alimentare_data,";
-	$mSQL = $mSQL . "alimentare_platit,";
-	$mSQL = $mSQL . "alimentare_auto,";
-	$mSQL = $mSQL . "alimentare_aloc,";
-	$mSQL = $mSQL . "alimentare_km,";
-	$mSQL = $mSQL . "alimentare_bf)";
+// Validate required fields
+if (!isset($_POST['alimentare_valoare'], $_POST['alimentare_litri'], $_POST['alimentare_data'], 
+    $_POST['alimentare_platit'], $_POST['alimentare_auto'], $_POST['alimentare_km'], $_POST['alimentare_bf'])) {
+    die('<div class="callout alert">All fields are required</div>');
+}
 
-	$mSQL = $mSQL . "Values(";
-	$mSQL = $mSQL . "'" .$litri . "', ";
-	$mSQL = $mSQL . "'" .$suma . "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_data"]	. "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_platit"] . "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_auto"] . "', ";
-	$mSQL = $mSQL . "'" .$code . "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_km"] . "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_bf"] . "') ";
+// Sanitize and validate inputs
+$suma = floatval(str_replace(",",".",$_POST["alimentare_valoare"]));
+$litri = floatval(str_replace(",",".",$_POST["alimentare_litri"]));
+$alimentare_data = trim($_POST["alimentare_data"]);
+$alimentare_platit = intval($_POST["alimentare_platit"]);
+$alimentare_auto = trim($_POST["alimentare_auto"]);
+$alimentare_km = floatval($_POST["alimentare_km"]);
+$alimentare_bf = trim($_POST["alimentare_bf"]);
+
+// Validate date format
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $alimentare_data)) {
+    die('<div class="callout alert">Invalid date format</div>');
+}
+
+// Use prepared statement
+$stmt = $conn->prepare("INSERT INTO administrative_alimentari(alimentare_litri, alimentare_valoare, alimentare_data, alimentare_platit, alimentare_auto, alimentare_aloc, alimentare_km, alimentare_bf) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ddsissds", $litri, $suma, $alimentare_data, $alimentare_platit, $alimentare_auto, $code, $alimentare_km, $alimentare_bf);
 			
 //It executes the SQL
-	if (!ezpub_query($conn,$mSQL))
+	if (!$stmt->execute())
 	{
-  die('Error: ' . ezpub_error($conn));
+  $stmt->close();
+  die('Error: ' . $conn->error);
 	}
-  Else{ //continue with post new
+  else{ //continue with post new
+  $stmt->close();
 
-$suma=str_replace(",",".",$_POST["alimentare_valoare"]);
 $alimentare="Alimentare auto";
 
-	$mSQL = "INSERT INTO administrative_deconturi(";
-	$mSQL = $mSQL . "decont_descriere,";
-	$mSQL = $mSQL . "decont_suma,";
-	$mSQL = $mSQL . "decont_luna,";
-	$mSQL = $mSQL . "decont_data,";
-	$mSQL = $mSQL . "decont_achitat_card,";
-	$mSQL = $mSQL . "decont_user,";
-	$mSQL = $mSQL . "decont_document)";
-
-	$mSQL = $mSQL . "Values(";
-	$mSQL = $mSQL . "'" .$alimentare . "', ";
-	$mSQL = $mSQL . "'" .$suma . "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_data"]	. "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_data"]	. "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_platit"] . "', ";
-	$mSQL = $mSQL . "'" .$code . "', ";
-	$mSQL = $mSQL . "'" .$_POST["alimentare_bf"] . "') ";
+// Use prepared statement
+$stmt = $conn->prepare("INSERT INTO administrative_deconturi(decont_descriere, decont_suma, decont_luna, decont_data, decont_achitat_card, decont_user, decont_document) VALUES(?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sdsssss", $alimentare, $suma, $alimentare_data, $alimentare_data, $alimentare_platit, $code, $alimentare_bf);
 			
 //It executes the SQL
-if (!ezpub_query($conn,$mSQL))
+if (!$stmt->execute())
   {
-  die('Error: ' . ezpub_error($conn));
+  $stmt->close();
+  die('Error: ' . $conn->error);
 	  }
-	  Else {
+	  else {
+$stmt->close();
 echo "<div class=\"callout success\">$strRecordAdded</div>";
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
     window.history.go(-2);
 }
+setTimeout('delayer()', 1500);
 //-->
-</script>
-<body onLoad=\"setTimeout('delayer()', 500)\">";
+</script>";
 include '../bottom.php';
-die;
+exit();
 }}}
-Else
+else
 {// edit
-$suma=str_replace(",",".",$_POST["alimentare_valoare"]);
+// Validate cID parameter
+if (!isset($_GET['cID']) || !is_numeric($_GET['cID'])) {
+    die('<div class="callout alert">Invalid record ID</div>');
+}
 
-$strWhereClause = " WHERE administrative_alimentari.alimentare_ID=" . $_GET["cID"] . ";";
-$query= "UPDATE administrative_alimentari SET administrative_alimentari.alimentare_bf='" .$_POST["alimentare_bf"] . "' ," ;
-$query= $query . " administrative_alimentari.alimentare_valoare='" .$suma . "' ," ;
-$query= $query . " administrative_alimentari.alimentare_litri='" .$_POST["alimentare_litri"] .   "' ," ;
-$query= $query . " administrative_alimentari.alimentare_km='" .$_POST["alimentare_km"] .   "' ," ;
-$query= $query . " administrative_alimentari.alimentare_data='" .$_POST["alimentare_data"] . "' "; 
-$query= $query . $strWhereClause;
-if (!ezpub_query($conn,$query))
+$cID = intval($_GET['cID']);
+
+// Authorization check: verify record belongs to current user
+$stmt = $conn->prepare("SELECT alimentare_aloc FROM administrative_alimentari WHERE alimentare_ID=?");
+$stmt->bind_param("i", $cID);
+$stmt->execute();
+$result = $stmt->get_result();
+$record = $result->fetch_assoc();
+$stmt->close();
+
+if (!$record || $record['alimentare_aloc'] !== $code) {
+    die('<div class="callout alert">Unauthorized access</div>');
+}
+
+// Validate required fields
+if (!isset($_POST['alimentare_bf'], $_POST['alimentare_valoare'], $_POST['alimentare_litri'], 
+    $_POST['alimentare_km'], $_POST['alimentare_data'])) {
+    die('<div class="callout alert">All fields are required</div>');
+}
+
+// Sanitize inputs
+$alimentare_bf = trim($_POST["alimentare_bf"]);
+$suma = floatval(str_replace(",",".",$_POST["alimentare_valoare"]));
+$alimentare_litri = floatval($_POST["alimentare_litri"]);
+$alimentare_km = floatval($_POST["alimentare_km"]);
+$alimentare_data = trim($_POST["alimentare_data"]);
+
+// Validate date format
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $alimentare_data)) {
+    die('<div class="callout alert">Invalid date format</div>');
+}
+
+// Use prepared statement
+$stmt = $conn->prepare("UPDATE administrative_alimentari SET alimentare_bf=?, alimentare_valoare=?, alimentare_litri=?, alimentare_km=?, alimentare_data=? WHERE alimentare_ID=?");
+$stmt->bind_param("sdddsi", $alimentare_bf, $suma, $alimentare_litri, $alimentare_km, $alimentare_data, $cID);
+
+if (!$stmt->execute())
   {
-  die('Error: ' . ezpub_error($conn));
+  $stmt->close();
+  die('Error: ' . $conn->error);
   }
-Else{
+else{
+$stmt->close();
 echo "<div class=\"callout success\">$strRecordModified</div>" ;
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
     window.location = \"gasfilling.php\"
 }
+setTimeout('delayer()', 1500);
 //-->
-</script>
-<body onLoad=\"setTimeout('delayer()', 500)\">";
+</script>";
 include '../bottom.php';
-die;
+exit();
 }
 }
 } // ends if post
-Else {
+else {
 ?>
-<?php
+        <?php
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 ?>
-			    <div class="grid-x grid-margin-x">
-			  <div class="large-12 medium-12 small-12 cell">
-			  <p><a href="gasfilling.php" class="button"><?php echo $strBack?></a></p>
-</div>
-</div>
-<form Method="post" Action="gasfilling.php?mode=new" >
-		    		  <div class="grid-x grid-margin-x">
-     <div class="large-2 medium-2 small-2 cell"> 
-	  <label><?php echo $strCarPlate?></label>
-	  <?php
-	  $query="SELECT utilizator_Carplate from date_utilizatori WHERE utilizator_ID=$uid";
-	  $result=ezpub_query($conn,$query);
-	$row=ezpub_fetch_array($result);
+        <div class="grid-x grid-margin-x">
+            <div class="large-12 medium-12 small-12 cell">
+                <p><a href="gasfilling.php" class="button"><?php echo $strBack?>&nbsp;<i
+                            class="fas fa-backward fa-xl"></i></a></p>
+            </div>
+        </div>
+        <form method="post" Action="gasfilling.php?mode=new">
+            <div class="grid-x grid-margin-x">
+                <div class="large-2 medium-2 small-2 cell">
+                    <label><?php echo $strCarPlate?>
+                        <?php
+	  // Use prepared statement
+	  $stmt = $conn->prepare("SELECT utilizator_Carplate FROM date_utilizatori WHERE utilizator_ID=?");
+	  $stmt->bind_param("i", $uid);
+	  $stmt->execute();
+	  $result = $stmt->get_result();
+	  $row = $result->fetch_assoc();
+	  $stmt->close();
 	  ?>
- <input name="alimentare_auto" id="alimentare_auto" Type="text" value=<?php echo $row["utilizator_Carplate"]?>  />
-	</div>
-				     <div class="large-3 medium-3 small-3 cell">    
-      <label><?php echo $strPaidWithCard?></label>
-      <input name="alimentare_platit" Type="radio" value="0" checked /> <?php echo $strCompanyCard?>&nbsp;&nbsp;
-	  <input name="alimentare_platit" Type="radio" value="3"><?php echo $strLeasingCard?>
-    </div> 
-     <div class="large-1 medium-1 small-1 cell"> 	  
-	  <label><?php echo $strSum?></label>
-	  <input name="alimentare_valoare" Type="text"  value="" />
-	</div>
-	  <div class="large-2 medium-2 small-2 cell"> 
-      <label><?php echo $strDate?></label>
-    <input name="alimentare_data" Type="date"  value="<?php echo date("Y-m-d")?>" min="<?php echo $mindate?>" max="<?php echo $maxdate?>" />
-    </div> 
+                        <input name="alimentare_auto" id="alimentare_auto" type="text"
+                            value="<?php echo htmlspecialchars($row["utilizator_Carplate"], ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+                <div class="large-3 medium-3 small-3 cell">
+                    <label><?php echo $strPaidWithCard?>
+                        <input name="alimentare_platit" type="radio" value="0" checked />
+                        <?php echo $strCompanyCard?>&nbsp;&nbsp;
+                        <input name="alimentare_platit" type="radio" value="3"><?php echo $strLeasingCard?>
+                    </label>
+                </div>
+                <div class="large-1 medium-1 small-1 cell">
+                    <label><?php echo $strSum?>
+                        <input name="alimentare_valoare" type="text" value="" />
+                    </label>
+                </div>
+                <div class="large-2 medium-2 small-2 cell">
+                    <label><?php echo $strDate?>
+                        <input name="alimentare_data" type="date" value="<?php echo date("Y-m-d")?>"
+                            min="<?php echo $mindate?>" max="<?php echo $maxdate?>" />
+                    </label>
+                </div>
+                <div class="large-1 medium-1 small-1 cell">
+                    <label><?php echo $strLiters?>
+                        <input name="alimentare_litri" id="alimentare_litri" type="text" />
+                    </label>
+                </div>
 
-     <div class="large-1 medium-1 small-1 cell"> 
-	  <label><?php echo $strLiters?></label>
- <input name="alimentare_litri" id="alimentare_litri" Type="text"  />
-	</div>
-	
-				     <div class="large-1 medium-1 small-1 cell">    
-      <label><?php echo $strKilometers?></label>
- <input name="alimentare_km" id="alimentare_km" Type="text"  />
-    </div> 
-		   <div class="large-2 medium-2 small-2 cell">  
-	  <label><?php echo $strDocument?></label>
-  <input name="alimentare_bf" Type="text"  value="" />
-    </div> 
-	</div>
-			    <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> <p align="center"><input Type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button"> </p></div>
-	</div>
-  </form>
-<?php
+                <div class="large-1 medium-1 small-1 cell">
+                    <label><?php echo $strKilometers?>
+                        <input name="alimentare_km" id="alimentare_km" type="text" />
+                    </label>
+                </div>
+                <div class="large-2 medium-2 small-2 cell">
+                    <label><?php echo $strDocument?>
+                        <input name="alimentare_bf" type="text" value="" />
+                    </label>
+                </div>
+            </div>
+            <div class="grid-x grid-margin-x">
+                <div class="large-12 medium-12 small-12 cell text-center"><input type="submit"
+                        Value="<?php echo $strAdd?>" name="Submit" class="button"></div>
+            </div>
+        </form>
+        <?php
 }
-ElseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
-$query="SELECT * FROM administrative_alimentari WHERE alimentare_ID=$_GET[cID]";
-$result=ezpub_query($conn,$query);
-$row=ezpub_fetch_array($result);
+elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
+// Validate cID parameter
+if (!isset($_GET['cID']) || !is_numeric($_GET['cID'])) {
+    die('<div class="callout alert">Invalid record ID</div>');
+}
+
+$cID = intval($_GET['cID']);
+
+// Use prepared statement
+$stmt = $conn->prepare("SELECT * FROM administrative_alimentari WHERE alimentare_ID=?");
+$stmt->bind_param("i", $cID);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$stmt->close();
+
+if (!$row) {
+    die('<div class="callout alert">Record not found</div>');
+}
+
+// Authorization check
+if ($row['alimentare_aloc'] !== $code) {
+    die('<div class="callout alert">Unauthorized access</div>');
+}
 ?>
-			    <div class="grid-x grid-margin-x">
-			  <div class="large-12 medium-12 small-12 cell">
-			  <p><a href="gasfilling.php" class="button"><?php echo $strBack?></a></p>
-</div>
-</div>
-<form Method="post" id="users" Action="gasfilling.php?mode=edit&cID=<?php echo $_GET['cID']?>" >
-			    		  <div class="grid-x grid-margin-x">
-        <div class="large-2 medium-2 small-2 cell"> 
-	  <label><?php echo $strCarPlate?></label>
- <input name="alimentare_auto" Type="text" value="<?php echo $row["alimentare_auto"]?>" />
-	</div>
-	<div class="large-3 medium-3 small-3 cell"> 
-	      <label><?php echo $strPaidWithCard?></label>
-      <input name="alimentare_platit" Type="radio" value="0" <?php If ($row["alimentare_platit"]==0) echo "checked"?> />&nbsp;<?php echo $strYes?> 
-	  <input name="alimentare_platit" Type="radio" value="1" <?php If ($row["alimentare_platit"]==1) echo "checked"?>>&nbsp;<?php echo $strNo?>
-	  </div>
-		       <div class="large-1 medium-1 small-1 cell">  
-	  <label><?php echo $strSum?><label>
-	  <input name="alimentare_valoare" Type="text"  value="<?php echo $row["alimentare_valoare"]?>" />
-	</div>
-	<div class="large-2 medium-2 small-2 cell"> 
-			  <label><?php echo $strDate?></label>
-         <input name="alimentare_data" Type="date"  value="<?php echo $row["alimentare_data"]?>" min="<?php echo $mindate?>" max="<?php echo $maxdate?>" />
-	</div>
-	        <div class="large-1 medium-1 small-1 cell"> 
-	  <label><?php echo $strKilometers?></label>
- <input name="alimentare_km" Type="text" value="<?php echo $row["alimentare_km"]?>" />
-	</div>						  
-	   <div class="large-1 medium-1 small-1 cell">  
-	  <label><?php echo $strLiters?></label>
-  <input name="alimentare_litri" Type="text"  value="<?php echo $row["alimentare_litri"]?>" />
-    </div> 	   
-	<div class="large-2 medium-2 small-2 cell">  
-	  <label><?php echo $strDocument?></label>
-  <input name="alimentare_bf" Type="text"  value="<?php echo $row["alimentare_bf"]?>" />
-    </div> 
-    </div> 
-		  		  <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"><p align="center"> <input Type="submit" Value="<?php echo $strModify?>" name="Submit" class="button"> </p></div>
-	</div>
-  </form>
-<?php
+        <div class="grid-x grid-margin-x">
+            <div class="large-12 medium-12 small-12 cell">
+                <p><a href="gasfilling.php" class="button"><?php echo $strBack?>&nbsp;<i
+                            class="fas fa-backward fa-xl"></i></a></p>
+            </div>
+        </div>
+        <form method="post" id="users" Action="gasfilling.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8'); ?>">
+            <div class="grid-x grid-margin-x">
+                <div class="large-2 medium-2 small-2 cell">
+                    <label><?php echo $strCarPlate?>
+                        <input name="alimentare_auto" type="text" value="<?php echo htmlspecialchars($row["alimentare_auto"], ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+                <div class="large-3 medium-3 small-3 cell">
+                    <label><?php echo $strPaidWithCard?>
+                        <input name="alimentare_platit" type="radio" value="0"
+                            <?php If ($row["alimentare_platit"]==0) echo "checked"?> />&nbsp;<?php echo $strYes?>
+                        <input name="alimentare_platit" type="radio" value="1"
+                            <?php If ($row["alimentare_platit"]==1) echo "checked"?>>&nbsp;<?php echo $strNo?>
+                    </label>
+                </div>
+                <div class="large-1 medium-1 small-1 cell">
+                    <label><?php echo $strSum?>
+                        <input name="alimentare_valoare" type="text" value="<?php echo htmlspecialchars($row["alimentare_valoare"], ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+                <div class="large-2 medium-2 small-2 cell">
+                    <label><?php echo $strDate?>
+                        <input name="alimentare_data" type="date" value="<?php echo htmlspecialchars($row["alimentare_data"], ENT_QUOTES, 'UTF-8'); ?>"
+                            min="<?php echo htmlspecialchars($mindate, ENT_QUOTES, 'UTF-8'); ?>" max="<?php echo htmlspecialchars($maxdate, ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+                <div class="large-1 medium-1 small-1 cell">
+                    <label><?php echo $strKilometers?>
+                        <input name="alimentare_km" type="text" value="<?php echo htmlspecialchars($row["alimentare_km"], ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+                <div class="large-1 medium-1 small-1 cell">
+                    <label><?php echo $strLiters?>
+                        <input name="alimentare_litri" type="text" value="<?php echo htmlspecialchars($row["alimentare_litri"], ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+                <div class="large-2 medium-2 small-2 cell">
+                    <label><?php echo $strDocument?>
+                        <input name="alimentare_bf" type="text" value="<?php echo htmlspecialchars($row["alimentare_bf"], ENT_QUOTES, 'UTF-8'); ?>" />
+                    </label>
+                </div>
+            </div>
+            <div class="grid-x grid-margin-x">
+                <div class="large-12 medium-12 small-12 cell text-center"><input type="submit"
+                        Value="<?php echo $strModify?>" name="Submit" class="button"></div>
+            </div>
+        </form>
+        <?php
 }
-Else 
+else 
 {
-echo "<a href=\"gasfilling.php?mode=new\" class=\"button\">$strAddNew <i class=\"large fa fa-plus\" title=\"$strAdd\"></i></a><br />";
-$query="SELECT * from administrative_alimentari where alimentare_aloc='$code' Order By alimentare_data DESC";
-$result=ezpub_query($conn,$query);
-$numar=ezpub_num_rows($result,$query);
+echo "<a href=\"gasfilling.php?mode=new\" class=\"button\">$strAddNew <i class=\"fa-xl fa fa-plus\" title=\"$strAdd\"></i></a><br />";
+
+// Use prepared statement
+$stmt = $conn->prepare("SELECT * FROM administrative_alimentari WHERE alimentare_aloc=? ORDER BY alimentare_data DESC");
+$stmt->bind_param("s", $code);
+$stmt->execute();
+$result = $stmt->get_result();
+$numar = $result->num_rows;
 $pages = new Pagination;  
 $pages->items_total = $numar;  
 $pages->mid_range = 5;  
-$pages->paginate(); 
-$result=ezpub_query($conn,$query);
-echo ezpub_error($conn);
+$pages->paginate();
+
 if ($numar==0)
 {
+$stmt->close();
 echo "<div class=\"callout alert\">".$strNoRecordsFound."</div>";
 }
-Else {
+else {
 ?>
-<h3><?php echo $strGasFillings?></h3>
-	 
-<div class="paginate">
-<?php
+        <h3><?php echo $strGasFillings?></h3>
+
+        <div class="paginate">
+            <?php
 echo $strTotal . " " .$numar." ".$strGasFillings ;
 echo " <br /><br />";
 echo $pages->display_pages() . " <a href=\"gasfilling.php\" title=\"strClearAllFilters\">$strShowAll</a>&nbsp;";
 echo " <br /><br />";
 ?>
-</div>
+        </div>
 
-<table width="100%">
-	      <thead>
-    	<tr>
-        	<th><?php echo $strExpense?></th>
-			<th><?php echo $strValue?></th>
-			<th><?php echo $strDate?></th>
-			<th><?php echo $strKilometers?></th>
-			<th><?php echo $strEdit?></th>
-			<th><?php echo $strDelete?></th>
-        </tr>
-		</thead>
-<tbody>
-<?php 
-While ($row=ezpub_fetch_array($result)){
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th><?php echo $strExpense?></th>
+                    <th><?php echo $strValue?></th>
+                    <th><?php echo $strDate?></th>
+                    <th><?php echo $strKilometers?></th>
+                    <th><?php echo $strEdit?></th>
+                    <th><?php echo $strDelete?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+While ($row=$result->fetch_assoc()){
     		echo"<tr>
-			<td>$strGasFilling</td>
-<td>".romanize($row['alimentare_valoare'])."</td>";
-echo "<td>".date('d.m.Y', strtotime($row['alimentare_data']))."</td>";
-echo "<td>$row[alimentare_km]</td>";
+			<td>" . htmlspecialchars($strGasFilling, ENT_QUOTES, 'UTF-8') . "</td>
+<td>" . htmlspecialchars(romanize($row['alimentare_valoare']), ENT_QUOTES, 'UTF-8') . "</td>";
+echo "<td>" . htmlspecialchars(date('d.m.Y', strtotime($row['alimentare_data'])), ENT_QUOTES, 'UTF-8') . "</td>";
+echo "<td>" . htmlspecialchars($row['alimentare_km'], ENT_QUOTES, 'UTF-8') . "</td>";
 
-		echo	  "<td><a href=\"gasfilling.php?mode=edit&cID=$row[alimentare_ID]\" ><i class=\"far fa-edit fa-xl\" title=\"$strEdit\"></i></a></td>
-			<td><a href=\"gasfilling.php?mode=delete&cID=$row[alimentare_ID]\"  OnClick=\"return confirm('$strConfirmDelete');\"><i class=\"fa fa-eraser fa-xl\" title=\"$strDelete\"></i></a></td>
+		echo	  "<td><a href=\"gasfilling.php?mode=edit&cID=" . htmlspecialchars($row['alimentare_ID'], ENT_QUOTES, 'UTF-8') . "\" ><i class=\"far fa-edit fa-xl\" title=\"" . htmlspecialchars($strEdit, ENT_QUOTES, 'UTF-8') . "\"></i></a></td>
+			<td><a href=\"gasfilling.php?mode=delete&cID=" . htmlspecialchars($row['alimentare_ID'], ENT_QUOTES, 'UTF-8') . "\"  OnClick=\"return confirm('" . htmlspecialchars($strConfirmDelete, ENT_QUOTES, 'UTF-8') . "');\"><i class=\"fa fa-eraser fa-xl\" title=\"" . htmlspecialchars($strDelete, ENT_QUOTES, 'UTF-8') . "\"></i></a></td>
         </tr>";
 }
+$stmt->close();
 echo "</tbody><tfoot><tr><td></td><td  colspan=\"4\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
 }
 }
 }
 ?>
+    </div>
 </div>
-</div>
-<hr/>
+<hr />
 <?php
 include '../bottom.php';
 ?>

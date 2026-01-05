@@ -26,6 +26,7 @@ PHP versions and extensions
 - `PHP 8.2` is supported as of `mPDF v8.1.3`
 - `PHP 8.3` is supported as of `mPDF v8.2.1`
 - `PHP 8.4` is supported as of `mPDF v8.2.5`
+- `PHP 8.5` is supported as of `mPDF v8.2.6`
 
 PHP `mbstring` and `gd` extensions have to be loaded.
 
@@ -124,9 +125,9 @@ Online manual is available at https://mpdf.github.io/.
 General troubleshooting
 =============
 
-For general elearning_questions or troubleshooting please use [Discussions](https://github.com/mpdf/mpdf/discussions).
+For general questions or troubleshooting please use [Discussions](https://github.com/mpdf/mpdf/discussions).
 
-You can also use the [mpdf tag](https://stackoverflow.com/elearning_questions/tagged/mpdf) at Stack Overflow as the StackOverflow user base is more likely to answer you in a timely manner.
+You can also use the [mpdf tag](https://stackoverflow.com/questions/tagged/mpdf) at Stack Overflow as the StackOverflow user base is more likely to answer you in a timely manner.
 
 Contributing
 ============
@@ -141,9 +142,9 @@ Unit testing for mPDF is done using [PHPUnit](https://phpunit.de/).
 To get started, run `composer install` from the command line while in the mPDF root directory
 (you'll need [composer installed first](https://getcomposer.org/download/)).
 
-To execute elearning_tests, run `composer test` from the command line while in the mPDF root directory.
+To execute tests, run `composer test` from the command line while in the mPDF root directory.
 
-Any assistance writing unit elearning_tests for mPDF is greatly appreciated. If you'd like to help, please
-note that any PHP file located in the `/elearning_tests/` directory will be autoloaded when unit testing.
+Any assistance writing unit tests for mPDF is greatly appreciated. If you'd like to help, please
+note that any PHP file located in the `/tests/` directory will be autoloaded when unit testing.
 
 [1]: https://mpdf.github.io

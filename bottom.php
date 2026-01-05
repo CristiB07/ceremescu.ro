@@ -13,7 +13,9 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 					CUI: <?php echo $siteVATNumber?>, R.C.: <?php echo $siteCompanyRegistrationNr?>, CS: <?php echo $siteCompanySocialCapital?><br />
 					<?php echo $siteCompanyLegalAddress?><br />
 					<?php echo $siteFirstAccount?><br />
-					<a href="<?php echo $strSiteURL ?>/termeni.php"><?php echo $strTermsAndConditions ?></a> | <a href="<?php echo $strSiteURL ?>/cookies.php"><?php echo $strCookiePolicy ?></a><br /></p>
+					<a href="<?php echo $strSiteURL ?>/termeni.php"><?php echo $strTermsAndConditions ?></a> |
+					<a href="<?php echo $strSiteURL ?>/politica.php"><?php echo $strPrivacyPolicy ?></a> |
+          <a href="<?php echo $strSiteURL ?>/cookies.php"><?php echo $strCookiePolicy ?></a><br /></p>
                 </div>
             </div>
 </footer>
@@ -29,6 +31,8 @@ if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"])) {
 	<!-- Ends scrips-->
 	<!--end footer-->
 	<?php
+	// Include activity and error tracker
+	include_once __DIR__ . '/classes/tracker.class.php';
 	}
 ?>
 

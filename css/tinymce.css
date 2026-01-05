@@ -41,7 +41,7 @@ body{margin:10px 0 0}
 .mce-content-body ol{list-style-type:decimal}
 .mce-content-body a[href]{text-decoration:underline}
 .mce-content-body table{width:100%;border-spacing:0;border-collapse:separate;border:1px solid #aaa}
-.mce-content-body table tr:nth-child(even){background:#fafafa}
+.mce-content-body table tr:nth-child(even){background:#fa fafa}
 .mce-content-body table caption,
 .mce-content-body table td,
 .mce-content-body table th{padding:15px 7px;font:inherit}

@@ -1,6 +1,6 @@
 # https://help.github.com/en/categories/automating-your-workflow-with-github-actions
 
-name: "elearning_tests"
+name: "Tests"
 
 on:
   pull_request:
@@ -12,9 +12,9 @@ on:
 
 jobs:
 
-  elearning_tests:
+  tests:
 
-    name: "elearning_tests"
+    name: "Tests"
 
     runs-on: ${{ matrix.operating-system }}
 
@@ -33,6 +33,7 @@ jobs:
           - "8.2"
           - "8.3"
           - "8.4"
+          - "8.5"
         operating-system: [ubuntu-latest, windows-latest]
 
     steps:
@@ -51,5 +52,5 @@ jobs:
       - name: "Install dependencies"
         run: "composer install --no-interaction --no-progress"
 
-      - name: "elearning_tests"
+      - name: "Tests"
         run: composer test

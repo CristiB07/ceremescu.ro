@@ -16,21 +16,30 @@ if(!isset($_SESSION))
 if (!isSet($_SESSION['userlogedin']))
 {
 	header("location:$strSiteURL/login/login.php?message=MLF");
+	exit();
 }
 
-	$code=$_GET['code'];
-if (isset($_GET['op']) && $_GET['op']=="gettoken" && empty($code)){
+// Check if user is admin
+if (!isset($_SESSION['clearence']) || $_SESSION['clearence'] != 'ADMIN') {
+	header("location:$strSiteURL/index.php?message=unauthorized");
+	exit();
+}
+
+$code = isset($_GET['code']) ? htmlspecialchars($_GET['code'], ENT_QUOTES, 'UTF-8') : '';
+$op = isset($_GET['op']) ? htmlspecialchars($_GET['op'], ENT_QUOTES, 'UTF-8') : '';
+
+if ($op == "gettoken" && empty($code)){
 
 		$url = $authorize_url;
-		$url .='?client_id='.$site_client_id;
-		$url .='&client_secret='.$site_client_secret;
+		$url .='?client_id=' . urlencode($site_client_id);
+		$url .='&client_secret=' . urlencode($site_client_secret);
 		$url .='&response_type=code';
 		$url .='&token_content_type=jwt';
-		$url .='&redirect_uri='.$redirect_uri;
-		echo "<div class=\"callout success\"><p><a href=\"".$url."\" class=\"button\">$strGetToken</a></p></strong></div>";
+		$url .='&redirect_uri=' . urlencode($redirect_uri);
+		echo "<div class=\"callout success\"><p><a href=\"" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "\" class=\"button\">$strGetToken</a></p></div>";
 }
 //get initial code
-ElseIf (!empty($code)) {
+elseIf (!empty($code)) {
 
 		$retval=array();
 		$url = $token_url;
@@ -48,18 +57,33 @@ ElseIf (!empty($code)) {
 		curl_setopt($ch,CURLOPT_URL, $url);
 		curl_setopt($ch,CURLOPT_POST, true);
 		curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true); 
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch,CURLOPT_SSL_VERIFYHOST, 2);
 		$jsonobj = curl_exec($ch);
+		
+		if (curl_errno($ch)) {
+			$error_msg = curl_error($ch);
+			curl_close($ch);
+			die('<div class="callout alert">cURL Error: ' . htmlspecialchars($error_msg, ENT_QUOTES, 'UTF-8') . '</div>');
+		}
+		curl_close($ch);
+		
 		$arr = json_decode($jsonobj, true);
+		
+		if (!isset($arr["access_token"]) || !isset($arr["refresh_token"])) {
+			die('<div class="callout alert">Invalid response from authorization server</div>');
+		}
+		
 		$retval['access_token']=$arr["access_token"];
 		$retval['refresh_token']=$arr["refresh_token"];
-		$acces_token=$retval['access_token'];
-		$refresh_token=$retval['refresh_token'];
+		$acces_token=htmlspecialchars($retval['access_token'], ENT_QUOTES, 'UTF-8');
+		$refresh_token=htmlspecialchars($retval['refresh_token'], ENT_QUOTES, 'UTF-8');
 		$d=strtotime("+90 days");
-		$enddate= date("d.m.Y",$d);
-		echo "<div class=\"callout success\">" . $strAccessToken." = <strong>". $acces_token  ."</strong>.<br />". $strRefreshToken."= <strong>". $refresh_token ."</strong><br />". $strDate. "=". $enddate.".</div>";
+		$enddate= htmlspecialchars(date("d.m.Y",$d), ENT_QUOTES, 'UTF-8');
+		echo "<div class=\"callout success\">" . htmlspecialchars($strAccessToken, ENT_QUOTES, 'UTF-8') . " = <strong>". $acces_token  ."</strong>.<br />". htmlspecialchars($strRefreshToken, ENT_QUOTES, 'UTF-8') ."= <strong>". $refresh_token ."</strong><br />". htmlspecialchars($strDate, ENT_QUOTES, 'UTF-8') . "=". $enddate.".</div>";
 }
-Else {
+else {
 //refresh code
 
 	$retval=array();
@@ -77,17 +101,32 @@ Else {
 		curl_setopt($ch,CURLOPT_URL, $url);
 		curl_setopt($ch,CURLOPT_POST, true);
 		curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true); 
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch,CURLOPT_SSL_VERIFYHOST, 2);
 		$jsonobj = curl_exec($ch);
+		
+		if (curl_errno($ch)) {
+			$error_msg = curl_error($ch);
+			curl_close($ch);
+			die('<div class="callout alert">cURL Error: ' . htmlspecialchars($error_msg, ENT_QUOTES, 'UTF-8') . '</div>');
+		}
+		curl_close($ch);
+		
 		$arr = json_decode($jsonobj, true);
+		
+		if (!isset($arr["access_token"]) || !isset($arr["refresh_token"])) {
+			die('<div class="callout alert">Invalid response from authorization server</div>');
+		}
+		
 		$retval['access_token']=$arr["access_token"];
 		$retval['refresh_token']=$arr["refresh_token"];
 		
-		$acces_token=$retval['access_token'];
-		$refresh_token=$retval['refresh_token'];
+		$acces_token=htmlspecialchars($retval['access_token'], ENT_QUOTES, 'UTF-8');
+		$refresh_token=htmlspecialchars($retval['refresh_token'], ENT_QUOTES, 'UTF-8');
 		$d=strtotime("+90 days");
-		$enddate= date("d.m.Y",$d);
-		echo "<div class=\"callout success\">" . $strAccessToken." = <strong>". $acces_token  ."</strong>.<br />". $strRefreshToken."= <strong>". $refresh_token ."</strong><br />". $strDate. "=". $enddate.".</div>";
+		$enddate= htmlspecialchars(date("d.m.Y",$d), ENT_QUOTES, 'UTF-8');
+		echo "<div class=\"callout success\">" . htmlspecialchars($strAccessToken, ENT_QUOTES, 'UTF-8') . " = <strong>". $acces_token  ."</strong>.<br />". htmlspecialchars($strRefreshToken, ENT_QUOTES, 'UTF-8') ."= <strong>". $refresh_token ."</strong><br />". htmlspecialchars($strDate, ENT_QUOTES, 'UTF-8') . "=". $enddate.".</div>";
 }
 include '../bottom.php';
 die;

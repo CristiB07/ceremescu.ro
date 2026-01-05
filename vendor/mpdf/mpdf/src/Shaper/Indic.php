@@ -136,7 +136,7 @@ class Indic
 
 		/* The spec says U+0952 is OT_A.	However, testing shows that Uniscribe
 		 * treats U+0951..U+0952 all as OT_VD.
-		 * elearning_tests:
+		 * TESTS:
 		 * U+092E,U+0947,U+0952
 		 * U+092E,U+0952,U+0947
 		 * U+092E,U+0947,U+0951

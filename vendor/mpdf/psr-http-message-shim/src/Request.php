@@ -97,12 +97,12 @@ class Request implements \Psr\Http\Message\RequestInterface
 		return $new;
 	}
 
-	public function getMethod(): string
+	public function getmethod(): string
 	{
 		return $this->method;
 	}
 
-	public function withMethod(string $method): RequestInterface
+	public function withmethod(string $method): RequestInterface
 	{
 		$new = clone $this;
 		$new->method = $method;

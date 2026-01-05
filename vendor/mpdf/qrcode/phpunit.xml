@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <phpunit 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	bootstrap="elearning_tests/bootstrap.php" 
+	bootstrap="tests/bootstrap.php" 
 	colors="true" 
 	backupGlobals="false" 
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
@@ -10,9 +10,9 @@
       <directory suffix=".php">src</directory>
     </include>
   </coverage>
-  <elearning_testsuites>
-    <elearning_testsuite name="elearning_tests">
-      <directory suffix=".php">./elearning_tests</directory>
-    </elearning_testsuite>
-  </elearning_testsuites>
+  <testsuites>
+    <testsuite name="tests">
+      <directory suffix=".php">./tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

@@ -27,13 +27,13 @@
 
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^1.0",
-		"mockery/mockery": "^0.9.5",
+		"mockery/mockery": "^0.9.5 || ^1.0",
 		"squizlabs/php_codesniffer": "^3.4",
 		"tracy/tracy": "^2.5"
 	},
 
 	"scripts": {
-		"cs": "@php vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src elearning_tests",
+		"cs": "@php vendor/bin/phpcs -v --report-width=160 --standard=ruleset.xml --severity=1 --warning-severity=0 --extensions=php src tests",
 		"test": "@php vendor/bin/phpunit",
 		"coverage": "@php vendor/bin/phpunit --coverage-text"
 	},
@@ -52,6 +52,6 @@
 	},
 
 	"autoload-dev": {
-		"files": [ "elearning_tests/functions.php" ]
+		"files": [ "tests/functions.php" ]
 	}
 }

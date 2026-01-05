@@ -2865,7 +2865,7 @@ var rootjQuery,
 			return this;
 		}
 
-		// Method init() accepts an alternate rootjQuery
+		// method init() accepts an alternate rootjQuery
 		// so migrate can support jQuery.sub (gh-2101)
 		root = root || rootjQuery;
 
@@ -2965,7 +2965,7 @@ rootjQuery = jQuery( document );
 
 var rparentsprev = /^(?:parents|prev(?:Until|All))/,
 
-	// Methods guaranteed to produce a unique set when starting from a unique set
+	// methods guaranteed to produce a unique set when starting from a unique set
 	guaranteedUnique = {
 		children: true,
 		contents: true,

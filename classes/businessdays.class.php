@@ -1,12 +1,27 @@
 <?php 
 //update 8.01.2025
 //The function returns the no. of business days between two dates and it skips the holidays 
-function getWorkingDays($startDate,$endDate){ 
+function getWorkingDays($startDate, $endDate){ 
+    global $holidays; // Defined in settings.php
+    
+    // Validate input dates
+    if (empty($startDate) || empty($endDate)) {
+        return 0;
+    }
+    
     // do strtotime calculations just once 
     $endDate = strtotime($endDate); 
-    $startDate = strtotime($startDate); 
-
-	$year = date('Y');
+    $startDate = strtotime($startDate);
+    
+    // Invalid dates
+    if ($endDate === false || $startDate === false) {
+        return 0;
+    }
+    
+    // Start date must be before or equal to end date
+    if ($startDate > $endDate) {
+        return 0;
+    }
  
     //The total number of days between the two dates. We compute the no. of seconds and divide it to 60*60*24 
     //We add one to inlude both dates in the interval. 
@@ -55,22 +70,40 @@ function getWorkingDays($startDate,$endDate){
     } 
  
     //We subtract the holidays 
-    foreach($holidays as $holiday){ 
-        $time_stamp=strtotime($holiday); 
-        //If the holiday doesn't fall in weekend 
-        if ($startDate <= $time_stamp && $time_stamp <= $endDate && date("N",$time_stamp) != 6 && date("N",$time_stamp) != 7) 
-            $workingDays--; 
-    } 
+    if (!empty($holidays) && is_array($holidays)) {
+        foreach($holidays as $holiday){ 
+            $time_stamp = strtotime($holiday);
+            // Skip invalid holiday dates
+            if ($time_stamp === false) {
+                continue;
+            }
+            //If the holiday doesn't fall in weekend 
+            if ($startDate <= $time_stamp && $time_stamp <= $endDate && date("N",$time_stamp) != 6 && date("N",$time_stamp) != 7) 
+                $workingDays--; 
+        }
+    }
  
     return $workingDays; 
 } 
 
 	function getFirstDayOfWeek($year, $weeknr)
-		{
-			$offset = date('w', mktime(0,0,0,1,1,$year));
-			$offset = ($offset < 5) ? 1-$offset : 8-$offset;
-			$monday = mktime(0,0,0,1,1+$offset,$year);
-			$date = strtotime('+' . ($weeknr - 1) . ' weeks', $monday);
-			return date('Y-m-d',$date);
+	{
+		// Validate inputs
+		$year = (int)$year;
+		$weeknr = (int)$weeknr;
+		
+		if ($year < 1970 || $year > 2100) {
+			return false;
 		}
-?> 
+		
+		if ($weeknr < 1 || $weeknr > 53) {
+			return false;
+		}
+		
+		$offset = date('w', mktime(0,0,0,1,1,$year));
+		$offset = ($offset < 5) ? 1-$offset : 8-$offset;
+		$monday = mktime(0,0,0,1,1+$offset,$year);
+		$date = strtotime('+' . ($weeknr - 1) . ' weeks', $monday);
+		return date('Y-m-d',$date);
+	}
+?>

@@ -1,5 +1,0 @@
-Order allow,deny
-Deny From All
-<FilesMatch "^student_sitelessons\.php$">
-Allow From All
-</FilesMatch>

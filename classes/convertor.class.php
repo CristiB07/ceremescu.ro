@@ -10,6 +10,19 @@
 
 function StrLei($No, $sp='.', $pct=',' ) {
 
+// Input validation
+if (!is_numeric($No) && !is_string($No)) {
+    return "zero lei";
+}
+
+// Prevent negative numbers
+$No = abs($No);
+
+// Limit to reasonable values (999 trillion)
+if ($No > 999999999999999) {
+    return "număr prea mare";
+}
+
 // numerele literal
 $na = array ( "", "unu", "doi", "trei", "patru", "cinci", "șase", "șapte", "opt", "nouă");
 $nb = array ( "", "un",  "două", "trei", "patru", "cinci", "șase", "șapte", "opt", "nouă");
@@ -35,6 +48,9 @@ $ban = array ("", " ban ", " bani ");
 
 //se elimina $sp din numar
 $sNo = (string) $No;
+// Sanitize delimiters to prevent injection
+$sp = substr($sp, 0, 1);
+$pct = substr($pct, 0, 1);
 $sNo = str_replace($sp,"",$sNo);
 
 //extrag partea intreaga și o completez cu zerouri la stg.
