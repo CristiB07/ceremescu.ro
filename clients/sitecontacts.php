@@ -7,7 +7,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes")
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	die;
 }
 
@@ -45,7 +45,7 @@ echo "<div class=\"callout success\">$strRecordDeleted</div>" ;
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
-    window.location = \"sitecontacts.php\"
+    window.history.go(-1);
 }
 //-->
 </script>
@@ -82,7 +82,7 @@ echo "<div class=\"callout success\">$strRecordAdded</div>";
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
-    window.location = \"sitecontacts.php\"
+    window.history.go(-1);
 }
 //-->
 </script>
@@ -117,7 +117,7 @@ echo "<div class=\"callout success\">$strRecordModified</div>" ;
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
-    window.location = \"sitecontacts.php\"
+    window.history.go(-1);
 }
 //-->
 </script>

@@ -10,7 +10,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']))
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 }
 If (isset($_GET['cID']) && isset($_GET['type']) && isset($_GET['option'])) {
 	// Validare și sanitizare input
@@ -396,16 +396,17 @@ $HTMLBody="";
 $HTMLBody=$HTMLBody . "<table border=\"0\" align=\"center\" width=\"100%\"><tr><td width=\"50%\">";
 $HTMLBody=$HTMLBody . "</td>";
 $HTMLBody=$HTMLBody . "<td width=\"50%\"> ";
-$HTMLBody=$HTMLBody . "<h1>Factura $row[fp_numar_factura]</h1>";
-$HTMLBody=$HTMLBody . "<h3>Data emiterii: ". date("d.m.Y", strtotime($row["fp_data_emiterii"]))."</h3>";
-$HTMLBody=$HTMLBody . "<h3>Data scadenței: ".date("d.m.Y", strtotime($row["fp_data_scadenta"]))."</h3>";
+$HTMLBody=$HTMLBody . "<h1>Factura ".(isset($row['fp_numar_factura']) ? htmlspecialchars($row['fp_numar_factura']) : '')."</h1>";
+$HTMLBody=$HTMLBody . "<h3>Data emiterii: ".(isset($row["fp_data_emiterii"]) && $row["fp_data_emiterii"] ? date("d.m.Y", strtotime($row["fp_data_emiterii"])) : '')."</h3>";
+$HTMLBody=$HTMLBody . "<h3>Data scadenței: ".(isset($row["fp_data_scadenta"]) && $row["fp_data_scadenta"] ? date("d.m.Y", strtotime($row["fp_data_scadenta"])) : '')."</h3>";
 $HTMLBody=$HTMLBody . "</td>";
 $HTMLBody=$HTMLBody . "</tr></table>";
 $HTMLBody=$HTMLBody . "<table border=\"0\" align=\"center\" width=\"100%\">";
 $HTMLBody=$HTMLBody . "<tr valign=\"top\"><td width=\"50%\" valign=\"top\"><strong>Furnizor</strong>";
-$HTMLBody=$HTMLBody . "<h4>".$row["fp_nume_furnizor"]."</h4>CUI: ".$row["fp_CUI_furnizor"]." <br />Nr. Înreg. Reg. Com: ".$row["fp_RC_furnizor"]."<br />
-Adresă: ".$row["fp_adresa_furnizor"].".<br />
-Localitate: ".$row["fp_oras_furnizor"]."<br />";
+$HTMLBody=$HTMLBody . "<h4>".$row["fp_nume_furnizor"]."</h4>CUI: ".$row["fp_CUI_furnizor"]." <br />Nr. Înreg. Reg. Com: ".$row["fp_RC_furnizor"]."<br />";
+$HTMLBody=$HTMLBody . "<h4>".(isset($row["fp_nume_furnizor"]) ? htmlspecialchars($row["fp_nume_furnizor"]) : '')."</h4>CUI: ".(isset($row["fp_CUI_furnizor"]) ? htmlspecialchars($row["fp_CUI_furnizor"]) : '')." <br />Nr. Înreg. Reg. Com: ".(isset($row["fp_RC_furnizor"]) ? htmlspecialchars($row["fp_RC_furnizor"]) : '')."<br />
+Adresă: ".(isset($row["fp_adresa_furnizor"]) ? htmlspecialchars($row["fp_adresa_furnizor"]) : '').".<br />
+Localitate: ".(isset($row["fp_oras_furnizor"]) ? htmlspecialchars($row["fp_oras_furnizor"]) : '')."<br />";
 $HTMLBody=$HTMLBody . "<td width=\"50%\" valign=\"top\"><strong>Cumpărător</strong>";
 $HTMLBody=$HTMLBody . "<h4>$siteCompanyLegalName</h4>CUI: $siteVATNumber; $siteCompanyRegistrationNr; Capital social $siteCompanySocialCapital.<br />
 $siteCompanyLegalAddress<br />
@@ -438,22 +439,22 @@ While ($row2=ezpub_fetch_array($result2)){
 	$count=$count+1;
 $HTMLBody=$HTMLBody . "<tr>
 <td align=\"left\">". $count ."</td>
-<td align=\"left\">". $row2["articolFP_nume"] ."</td>
-<td align=\"center\">". $row2["articolFP_unitate"] ."</td>
-<td align=\"right\">". $row2["articolFP_cantitate"] ."</td>
-<td align=\"right\">". romanize($row2["articolFP_pret"]) ."</td>
-<td align=\"right\">". romanize($row2["articolFP_valoare"]) ."</td>
-<td align=\"right\">". $row2["articolFP_procent_TVA"] ."</td>";
-If ($row2["articolFP_TVA"]==0.0000)
-{$articoltva="scutit";}
+<td align=\"left\">". (isset($row2["articolFP_nume"]) ? htmlspecialchars($row2["articolFP_nume"]) : '') ."</td>
+<td align=\"center\">". (isset($row2["articolFP_unitate"]) ? htmlspecialchars($row2["articolFP_unitate"]) : '') ."</td>
+<td align=\"right\">". (isset($row2["articolFP_cantitate"]) ? htmlspecialchars($row2["articolFP_cantitate"]) : '') ."</td>
+<td align=\"right\">". (isset($row2["articolFP_pret"]) ? romanize($row2["articolFP_pret"]) : '') ."</td>
+<td align=\"right\">". (isset($row2["articolFP_valoare"]) ? romanize($row2["articolFP_valoare"]) : '') ."</td>
+<td align=\"right\">". (isset($row2["articolFP_procent_TVA"]) ? htmlspecialchars($row2["articolFP_procent_TVA"]) : '') ."</td>";
+if (isset($row2["articolFP_TVA"]) && $row2["articolFP_TVA"]==0.0000)
+	{$articoltva="scutit";}
 else
-{$articoltva=romanize($row2["articolFP_TVA"]);}
+	{$articoltva=(isset($row2["articolFP_TVA"]) ? romanize($row2["articolFP_TVA"]) : '');}
 
 $HTMLBody=$HTMLBody .  "<td align=\"right\">". $articoltva ."</td></tr>";
 }
 mysqli_stmt_close($stmt_art3);
-$HTMLBody=$HTMLBody . "<tr><td colspan=\"6\"><strong>Total fără TVA</strong></td><td colspan=\"2\" align=\"right\"><strong>". romanize($row["fp_valoare_neta"]) ."</strong></td></tr>";
-$HTMLBody=$HTMLBody . "<tr><td colspan=\"6\"><strong>Total TVA</strong></td><td colspan=\"2\" align=\"right\"><strong>". romanize($row["fp_valoare_TVA"]) ."</strong></td></tr>";
+$HTMLBody=$HTMLBody . "<tr><td colspan=\"6\"><strong>Total fără TVA</strong></td><td colspan=\"2\" align=\"right\"><strong>". (isset($row["fp_valoare_neta"]) ? romanize($row["fp_valoare_neta"]) : '') ."</strong></td></tr>";
+$HTMLBody=$HTMLBody . "<tr><td colspan=\"6\"><strong>Total TVA</strong></td><td colspan=\"2\" align=\"right\"><strong>". (isset($row["fp_valoare_TVA"]) ? romanize($row["fp_valoare_TVA"]) : '') ."</strong></td></tr>";
 
 // SECȚIUNEA 3: SELECT cote TVA distincte pentru factura primită
 $stmt_tva3 = mysqli_prepare($conn, "SELECT DISTINCT articolFP_procent_TVA FROM facturare_articole_facturi_primite WHERE index_download=?");
@@ -472,7 +473,7 @@ $tpquery = mysqli_stmt_get_result($stmt_tva3);
 $HTMLBody=$HTMLBody . "<tr><td colspan=\"6\"><strong>Total TVA cota ".$tprow["articolFP_procent_TVA"]."%</strong></td><td colspan=\"2\" align=\"right\"><strong>". romanize($rowsb["subtotal"]) ."</strong></td></tr>";
 	  }
 mysqli_stmt_close($stmt_tva3);
-$HTMLBody=$HTMLBody . "<tr bgcolor=\"" . $color ."\"><td colspan=\"6\"><font color=\"#ffffff\" size=\"4\"><strong>Total de plată</strong></font></td><td colspan=\"2\" align=\"right\"><font color=\"#ffffff\" size=\"5\"><strong>". romanize($row["fp_valoare_totala"]) ." lei</strong></font></td></tr>";
+$HTMLBody=$HTMLBody . "<tr bgcolor=\"" . $color ."\"><td colspan=\"6\"><font color=\"#ffffff\" size=\"4\"><strong>Total de plată</strong></font></td><td colspan=\"2\" align=\"right\"><font color=\"#ffffff\" size=\"5\"><strong>". (isset($row["fp_valoare_totala"]) ? romanize($row["fp_valoare_totala"]) : '') ." lei</strong></font></td></tr>";
 $HTMLBody=$HTMLBody . "</table>";
 $invoice=$HTMLBody;
 }

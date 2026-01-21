@@ -3,7 +3,7 @@
 session_start(); 
 
 // Verificare IP whitelist
-include __DIR__ . '/ip_check.php';
+//include __DIR__ . '/ip_check.php';
 
 include '../settings.php';
 require_once '../classes/common.php';
@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($csrf_error)) {
                     $iv_length = openssl_cipher_iv_length('aes-256-cbc');
                     $iv = substr($encrypted_data, 0, $iv_length);
                     $encrypted_password = substr($encrypted_data, $iv_length);
-                    $decrypted_password = openssl_decrypt($encrypted_password, 'aes-256-cbc', hex2bin($encryption_key), 0, $iv);
+                    $decrypted_password = openssl_decrypt($encrypted_password, 'aes-256-cbc', hex2bin($encryption_key), OPENSSL_RAW_DATA, $iv);
                     
                     // Compare decrypted password with input
                     $password_valid = ($mypassword === $decrypted_password);

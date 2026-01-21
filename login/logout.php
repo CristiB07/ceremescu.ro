@@ -3,7 +3,7 @@
 session_start();
 
 // Verificare IP whitelist
-include __DIR__ . '/ip_check.php';
+//include __DIR__ . '/ip_check.php';
 
 include '../settings.php';
 

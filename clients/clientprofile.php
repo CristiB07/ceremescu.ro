@@ -8,7 +8,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes")
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	die;
 }
 
@@ -49,7 +49,8 @@ echo "<h1>$strPageTitle</h1>";
             <li class="tabs-title"><a href="#panel6"><?php echo $strVisits?></a></li>
             <?php if ($_SESSION['clearence']=='ADMIN')
 {           echo "<li class=\"tabs-title\"><a href=\"#panel7\">$strInvoices</a></li>
-            <li class=\"tabs-title\"><a href=\"#panel8\">$strBalances</a></li>";
+            <li class=\"tabs-title\"><a href=\"#panel8\">$strBalances</a></li>
+            <li class=\"tabs-title\"><a href=\"#panel9\">$strFiscalData</a></li>";
         }
         ?>
         </ul>
@@ -486,66 +487,39 @@ $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 mysqli_stmt_close($stmt);
  
 $cui = htmlspecialchars($row['Client_CIF'] ?? '', ENT_QUOTES, 'UTF-8');
+$cui_numeric = preg_replace('/\D/', '', $cui);
 
-$ch = curl_init();
+// Importă și afișează bilanțuri ANAF dacă CUI numeric valid
+if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
+    $_GET['cui'] = $cui_numeric;
+    include_once '../anaf/balancesview.php';
+    unset($_GET['cui']);
+}
 
-curl_setopt($ch, CURLOPT_URL, "https://api.openapi.ro/api/companies/$cui/balances");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-curl_setopt($ch, CURLOPT_HEADER, FALSE);
-
-curl_setopt($ch, CURLOPT_HTTPHEADER, array($openapikey));
-if( ! $response = curl_exec($ch)) 
-    { 
-        trigger_error(curl_error($ch)); 
-    } 
-    curl_close($ch); 
-	$obj = json_decode($response, true);
-	array_multisort(array_column($obj, 'year'), SORT_DESC, $obj);
-	$query="SELECT * FROM clienti_date where Client_CIF = '$cui'";
-	$result=ezpub_query($conn,$query);
-	$row=ezpub_fetch_array($result);
-	echo"	
-<table class=\"hover\">
-<thead>
-<tr>
-<td>An</td>
-<td>Capital social</td>
-<td>Cifra de afaceri</td>
-<td>Venituri totale</td>
-<td>Profit/Pierdere (net)</td>
-<td>Profit/Pierdere (brută)</td>
-<td>Salariați</td>
-<td>Datorii</td>
-<td>Creanțe</td>
-<td>Cheltuieli totale</td>
-<td>Disponibil cash</td>
-<td>Capitaluri total</td>
-<td>Active imobilizate</td>
-<td>Active circulante</td>
-</tr>
-</thead>
-<tbody>";
- foreach($obj as $index => $value) {
-	 echo "<tr>";
-     If (!empty($value['year'])) {print "<td align=\"right\">"  . $value['year']."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['capitaluri_capital'])){print "<td align=\"right\">"  . number_format($value['data']['capitaluri_capital'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['cifra_de_afaceri_neta'])){print "<td align=\"right\">"  . number_format($value['data']['cifra_de_afaceri_neta'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['venituri_totale'])){print "<td align=\"right\">"  . number_format($value['data']['venituri_totale'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['profit_net'])){print "<td align=\"right\">" . number_format($value['data']['profit_net'],0,",",".")."</td>";} elseIf (!empty($value['data']['pierdere_neta'])) {print "<td class=\"loss\" align=\"right\">- ". number_format($value['data']['pierdere_neta'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['profit_brut'])){print "<td align=\"right\">"  . number_format($value['data']['profit_brut'],0,",",".")."</td>";} elseIf (!empty($value['data']['pierdere_bruta'])) {print "<td class=\"loss\" align=\"right\">- ". number_format($value['data']['pierdere_bruta'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['numar_mediu_de_salariati'])){print "<td align=\"right\">"  . number_format($value['data']['numar_mediu_de_salariati'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['datorii_total'])){print "<td align=\"right\">"  . number_format($value['data']['datorii_total'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['creante'])){print "<td align=\"right\">"  . number_format($value['data']['creante'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['cheltuieli_totale'])){print "<td align=\"right\">"  . number_format($value['data']['cheltuieli_totale'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['casa_si_conturi'])){print "<td align=\"right\">"  . number_format($value['data']['casa_si_conturi'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['capitaluri_total'])){print "<td align=\"right\">"  . number_format($value['data']['capitaluri_total'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['active_imobilizate_total'])){print "<td align=\"right\">"  . number_format($value['data']['active_imobilizate_total'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
-     If (!empty($value['data']['active_circulante_total'])){print "<td align=\"right\">"  . number_format($value['data']['active_circulante_total'],0,",",".")."</td>";} else {print "<td align=\"right\">-</td>";};
- echo "</tr>";}
- echo "</tbody><tfoot><tr><td></td><td  colspan=\"12\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
  ?>
             </div>
-            <?php }?>
+            <div class="tabs-panel" id="panel9">
+                <!--   show fiscal data -->
+                <?php
+                $stmt = mysqli_prepare($conn, "SELECT Client_CIF from clienti_date WHERE ID_Client=?");
+mysqli_stmt_bind_param($stmt, 'i', $clientID);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+mysqli_stmt_close($stmt);
+ 
+$cui = htmlspecialchars($row['Client_CIF'] ?? '', ENT_QUOTES, 'UTF-8');
+$cui_numeric = preg_replace('/\D/', '', $cui);
+// Importă și afișează date fiscale ANAF dacă CUI numeric valid
+if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
+    $_GET['cui'] = $cui_numeric;
+    include_once '../anaf/fiscalview.php';
+    unset($_GET['cui']);
+}
+?>
+            </div>
+            <?php } // <-- CLOSE the if block for ADMIN
+            ?>
         </div>
 
 

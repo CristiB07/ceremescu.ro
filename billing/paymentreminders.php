@@ -19,6 +19,9 @@ $role = $_SESSION['clearence'];
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
+    // Initialize variables for email processing
+    $sent_count = 0;
+    $failed_count = 0;
     if (!isset($_POST['clients']) || !is_array($_POST['clients'])) {
         $message = "ER";
     } else {
@@ -26,10 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
         $failed_count = 0;
         
         foreach ($_POST['clients'] as $client_data) {
-            list($client_id, $client_email) = explode('|', $client_data);
+            list($client_id, $client_email_raw) = explode('|', $client_data);
             $client_id = (int)$client_id;
-            
-            if (!filter_var($client_email, FILTER_VALIDATE_EMAIL)) {
+            // Split multiple emails
+            $email_list = array_filter(array_map('trim', preg_split('/;[ ]*/', $client_email_raw)));
+            $valid_email_found = false;
+            foreach ($email_list as $email) {
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $valid_email_found = true;
+                    break;
+                }
+            }
+            if (!$valid_email_found) {
                 $failed_count++;
                 continue;
             }
@@ -48,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
             }
             
             // Get overdue invoices for this client
-            $stmt_invoices = mysqli_prepare($conn, "SELECT factura_numar, factura_client_valoare_totala, factura_data_emiterii, factura_client_termen, DATEDIFF(CURDATE(), factura_client_termen) as zile_intarziere FROM facturare_facturi WHERE factura_client_ID=? AND factura_client_achitat='0' AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) >  20 ORDER BY factura_client_termen ASC");
+            $stmt_invoices = mysqli_prepare($conn, "SELECT factura_numar, factura_client_valoare_totala, factura_data_emiterii, factura_client_termen, DATEDIFF(CURDATE(), factura_client_termen) as zile_intarziere FROM facturare_facturi WHERE factura_client_ID=? AND factura_client_achitat='0' AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) >  3 ORDER BY factura_client_termen ASC");
             mysqli_stmt_bind_param($stmt_invoices, "i", $client_id);
             mysqli_stmt_execute($stmt_invoices);
             $result_invoices = mysqli_stmt_get_result($stmt_invoices);
@@ -85,10 +96,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = $SmtpPort;
                 $mail->CharSet = 'UTF-8';
-                $mail->SMTPDebug = 2;
+                $mail->SMTPDebug = 0;
+                $mail->ConfirmReadingTo = $siteCompanyEmail;
                 
                 $mail->setFrom($siteCompanyEmail, $strSiteOwner);
-                $mail->addAddress($client_email, $client['factura_client_denumire']);
+                // Adaugă toate adresele valide
+                foreach ($email_list as $email) {
+                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $mail->addAddress($email, $client['factura_client_denumire']);
+                    }
+                }
                 
                 $mail->isHTML(true);
                 $mail->Subject = 'Notificare Întârziere Plată - ' . $siteCompanyLegalName;
@@ -215,11 +232,11 @@ include '../dashboard/header.php';
         ?>
         
         <div class="callout primary">
-            <p><strong>Notă:</strong> Vor fi afișați doar clienții cu facturi restante mai vechi de  20 de zile.</p>
+            <p><strong>Notă:</strong> Vor fi afișați doar clienții cu facturi restante mai vechi de  3 de zile.</p>
         </div>
         
         <?php
-        // Query to get clients with overdue invoices >  20 days
+        // Query to get clients with overdue invoices >  3 days
         // First try from clienti_abonamente
         $query = "SELECT DISTINCT 
                     f.factura_client_ID,
@@ -227,7 +244,14 @@ include '../dashboard/header.php';
                     MAX(f.factura_client_CIF) as factura_client_CIF,
                     MAX(COALESCE(a.abonament_client_email, c.Client_email)) as client_email,
                     COUNT(DISTINCT f.factura_ID) as numar_facturi,
-                    SUM(f.factura_client_valoare_totala) as total_restant,
+                    (
+                        SELECT SUM(ff.factura_client_valoare_totala)
+                        FROM facturare_facturi ff
+                        WHERE ff.factura_client_ID = f.factura_client_ID
+                          AND ff.factura_client_achitat = '0'
+                          AND ff.factura_client_termen < CURDATE()
+                          AND DATEDIFF(CURDATE(), ff.factura_client_termen) > 3
+                    ) as total_restant,
                     MIN(f.factura_client_termen) as prima_scadenta,
                     MAX(DATEDIFF(CURDATE(), f.factura_client_termen)) as zile_intarziere_max
                 FROM facturare_facturi f
@@ -236,7 +260,7 @@ include '../dashboard/header.php';
                 LEFT JOIN clienti_date c ON cc.ID_Client = c.ID_Client
                 WHERE f.factura_client_achitat = '0'
                 AND f.factura_client_termen < CURDATE()
-                AND DATEDIFF(CURDATE(), f.factura_client_termen) >  20
+                AND DATEDIFF(CURDATE(), f.factura_client_termen) >  3
                 GROUP BY f.factura_client_ID
                 HAVING client_email IS NOT NULL AND client_email != ''
                 ORDER BY zile_intarziere_max DESC";
@@ -258,6 +282,8 @@ include '../dashboard/header.php';
                             <th>CIF</th>
                             <th>Email</th>
                             <th>Facturi Restante</th>
+                            <th>Număr(e) Factură Restantă</th>
+                            <th>Reminder trimis?</th>
                             <th>Total Restant (RON)</th>
                             <th>Prima Scadență</th>
                             <th>Întârziere Max (zile)</th>
@@ -271,13 +297,38 @@ include '../dashboard/header.php';
                             $client_name = htmlspecialchars($row['factura_client_denumire'], ENT_QUOTES, 'UTF-8');
                             $client_cif = htmlspecialchars($row['factura_client_CIF'], ENT_QUOTES, 'UTF-8');
                             $client_value = $client_id . '|' . $row['client_email'];
-                            
+
+                            // 1. Numerele facturilor restante (concatenate)
+                            $facturi_numer = [];
+                            $sql_facturi = "SELECT factura_numar FROM facturare_facturi WHERE factura_client_ID='$client_id' AND factura_client_achitat='0' AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) > 3";
+                            $res_facturi = ezpub_query($conn, $sql_facturi);
+                            while ($rf = ezpub_fetch_array($res_facturi)) {
+                                $facturi_numer[] = $rf['factura_numar'];
+                            }
+                            $facturi_numer_str = $facturi_numer ? implode(", ", $facturi_numer) : '-';
+
+                            // 2. Reminder trimis (data și număr factură)
+                            $reminder_info = '-';
+                            $sql_rem = "SELECT notificare_data_trimiterii, notificare_facturi_intarziate FROM facturare_notificari_trimise WHERE notificare_client_id='$client_id' ORDER BY notificare_data_trimiterii DESC LIMIT 1";
+                            $res_rem = ezpub_query($conn, $sql_rem);
+                            if ($rem = ezpub_fetch_array($res_rem)) {
+                                $data = date('d.m.Y H:i', strtotime($rem['notificare_data_trimiterii']));
+                                $facturi_notif = @json_decode($rem['notificare_facturi_intarziate'], true);
+                                if (is_array($facturi_notif)) {
+                                    $reminder_info = $data . '<br>Factura(e): ' . implode(", ", $facturi_notif);
+                                } else {
+                                    $reminder_info = $data;
+                                }
+                            }
+
                             echo "<tr>";
                             echo "<td><input type=\"checkbox\" name=\"clients[]\" value=\"" . htmlspecialchars($client_value, ENT_QUOTES, 'UTF-8') . "\" class=\"client-checkbox\"></td>";
                             echo "<td>$client_name</td>";
                             echo "<td>$client_cif</td>";
                             echo "<td>$client_email</td>";
                             echo "<td>" . $row['numar_facturi'] . "</td>";
+                            echo "<td>" . htmlspecialchars($facturi_numer_str) . "</td>";
+                            echo "<td>" . $reminder_info . "</td>";
                             echo "<td><strong>" . number_format($row['total_restant'], 2, '.', ',') . "</strong></td>";
                             echo "<td>" . date('d.m.Y', strtotime($row['prima_scadenta'])) . "</td>";
                             echo "<td><span class=\"label alert\">" . $row['zile_intarziere_max'] . " zile</span></td>";
@@ -318,7 +369,7 @@ include '../dashboard/header.php';
             </script>
             <?php
         } else {
-            echo "<div class=\"callout warning\">Nu există clienți cu facturi restante mai vechi de  20 de zile.</div>";
+            echo "<div class=\"callout warning\">Nu există clienți cu facturi restante mai vechi de  3 de zile.</div>";
         }
         ?>
     </div>

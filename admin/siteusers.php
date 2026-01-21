@@ -10,7 +10,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']))
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	exit();
 }
 
@@ -29,6 +29,51 @@ if (!isset($_SESSION['csrf_token'])) {
     <div class="large-12 medium-12 small-12 cell">
         <?php
 echo "<h1>$strPageTitle</h1>";
+
+// Generate encryption keys for existing users
+If (IsSet($_GET['mode']) AND $_GET['mode']=="generatekeys"){
+
+// CSRF validation
+if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+	die('<div class="callout alert">Invalid CSRF token</div>');
+}
+
+// Find users with utilizator_Upgraded=3 who don't have encryption keys
+$query_users = "SELECT u.utilizator_ID, u.utilizator_Email 
+    FROM date_utilizatori u
+    WHERE u.utilizator_Upgraded = 3 
+    AND NOT EXISTS (
+        SELECT 1 FROM date_utilizatori_chei k 
+        WHERE k.cheie_primara = LOWER(SHA2(u.utilizator_Email, 256))
+    )";
+$result = ezpub_query($conn, $query_users);
+$users_processed = 0;
+
+while ($user = ezpub_fetch_array($result)) {
+    $cheieprimara = hash('sha256', $user['utilizator_Email']);
+    $cheiesecundara = bin2hex(random_bytes(32));
+    
+    $stmt_key = $conn->prepare("INSERT INTO date_utilizatori_chei (cheie_primara, cheie_secundara) VALUES (?, ?)");
+    $stmt_key->bind_param("ss", $cheieprimara, $cheiesecundara);
+    $stmt_key->execute();
+    $stmt_key->close();
+    
+    $users_processed++;
+}
+
+echo "<div class=\"callout success\">S-au generat chei de criptare pentru $users_processed utilizatori.</div></div></div>";
+echo "<script type=\"text/javascript\">
+<!--
+function delayer(){
+    window.location = \"siteusers.php\"
+}
+//-->
+</script>
+<body onLoad=\"setTimeout('delayer()', 2000)\">";
+include '../bottom.php';
+die;
+}
+
 If (IsSet($_GET['mode']) AND $_GET['mode']=="delete"){
 
 // CSRF validation
@@ -537,8 +582,6 @@ if (!$row) {
                         <?php If ($row["utilizator_Helpdesk"]==0) echo "checked"?>><?php echo $strNo?>
                 </div>
             </div>
-
-
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
                         Value="<?php echo $strModify?>" name="Submit" class="button success" />
@@ -549,9 +592,61 @@ if (!$row) {
 }
 else
 {
+// Check if there are users without encryption keys
+$users_without_keys = 0;
+
+// Count users with Upgraded=3
+$query_total = "SELECT COUNT(*) as total FROM date_utilizatori WHERE utilizator_Upgraded = 3";
+$result_total = mysqli_query($conn, $query_total);
+
+if ($result_total) {
+    $row_total = mysqli_fetch_assoc($result_total);
+    $total_upgraded = intval($row_total['total']);
+    
+    if ($total_upgraded > 0) {
+        // Check if table exists
+        $query_table_check = "SHOW TABLES LIKE 'date_utilizatori_chei'";
+        $result_table = mysqli_query($conn, $query_table_check);
+        
+        if ($result_table && mysqli_num_rows($result_table) > 0) {
+            // Check each user to see if they have encryption keys
+            $query_users = "SELECT utilizator_ID, utilizator_Email FROM date_utilizatori WHERE utilizator_Upgraded = 3";
+            $result_users = mysqli_query($conn, $query_users);
+            $count_without = 0;
+            
+            if ($result_users) {
+                while ($user = mysqli_fetch_assoc($result_users)) {
+                    $email_hash = hash('sha256', $user['utilizator_Email']);
+                    
+                    $query_key_check = "SELECT COUNT(*) as cnt FROM date_utilizatori_chei WHERE cheie_primara = '$email_hash'";
+                    $result_key_check = mysqli_query($conn, $query_key_check);
+                    
+                    if ($result_key_check) {
+                        $row_key = mysqli_fetch_assoc($result_key_check);
+                        if (intval($row_key['cnt']) == 0) {
+                            $count_without++;
+                        }
+                    }
+                }
+                
+                $users_without_keys = $count_without;
+            }
+        }
+    }
+}
+
 echo " <div class=\"grid-x grid-margin-x\">
      <div class=\"large-12 medium-12 small-12 cell\">
-<a href=\"siteusers.php?mode=new\" class=\"button\">$strAdd&nbsp;<i class=\"fa-xl fa fa-plus\" title=\"$strAdd\"></i></a></div></div>";
+<a href=\"siteusers.php?mode=new\" class=\"button\">$strAdd&nbsp;<i class=\"fa-xl fa fa-plus\" title=\"$strAdd\"></i></a>";
+
+if ($users_without_keys > 0) {
+    $csrf = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');
+    echo " <a href=\"siteusers.php?mode=generatekeys&csrf_token=$csrf\" class=\"button warning\" OnClick=\"return confirm('Se vor genera chei de criptare pentru $users_without_keys utilizatori. Continuați?');\">
+        <i class=\"fas fa-key fa-xl\"></i>&nbsp;Generează chei pentru $users_without_keys utilizatori
+    </a>";
+}
+
+echo "</div></div>";
 $query="SELECT * FROM date_utilizatori";
 $result=ezpub_query($conn,$query);
 $numar=ezpub_num_rows($result,$query);

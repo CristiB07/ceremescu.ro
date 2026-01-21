@@ -14,7 +14,7 @@ if (!isset($_SESSION['userlogedin']) OR $_SESSION['userlogedin'] != "Yes") {
 }
 
 // Construire cale către fișierul JSON
-$json_file = $hddpath . "/" . $charts . "/finance_comparison_" . date('Y-m-d') . ".json";
+$json_file = $hddpath . "/" . $charts_folder . "/finance_comparison_" . date('Y-m-d') . ".json";
 
 // Verificare existență fișier
 if (!file_exists($json_file)) {

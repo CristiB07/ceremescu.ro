@@ -11,7 +11,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes")
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	die;
 }
 
@@ -614,23 +614,51 @@ function getMonthlyData($conn, $year, $max_month, $VATRegime) {
     
     if ($VATRegime == 1) {
         // TVA la încasare - calculăm după data achitării
-        $query = "SELECT 
+        // 1. Total facturat: după data emiterii
+        $query_facturat = "SELECT 
             MONTH(factura_data_emiterii) as luna,
             COUNT(DISTINCT factura_ID) as total_facturi,
-            COALESCE(SUM(factura_client_valoare_totala), 0) as total_facturat,
-            COALESCE(SUM(CASE WHEN factura_client_achitat='1' AND YEAR(factura_client_data_achitat)='$year' THEN factura_client_valoare_totala ELSE 0 END), 0) as total_incasat,
-            0 as total_tva_incasat_tmp
+            COALESCE(SUM(factura_client_valoare_totala), 0) as total_facturat
         FROM facturare_facturi 
         WHERE YEAR(factura_data_emiterii)='$year' AND factura_tip=0
         GROUP BY MONTH(factura_data_emiterii)";
-        
-        $result = ezpub_query($conn, $query);
+
+        $result_facturat = ezpub_query($conn, $query_facturat);
         $data = [];
-        while ($row = ezpub_fetch_array($result)) {
-            $data[(int)$row['luna']] = $row;
+        while ($row = ezpub_fetch_array($result_facturat)) {
+            $data[(int)$row['luna']] = [
+                'luna' => (int)$row['luna'],
+                'total_facturi' => $row['total_facturi'],
+                'total_facturat' => $row['total_facturat'],
+                'total_incasat' => 0 // va fi completat mai jos
+            ];
         }
-        
-        // Pentru VATRegime=1, calculăm TVA separat după data încasării
+
+        // 2. Total încasat: după data încasării (corect)
+        $query_incasat = "SELECT 
+            MONTH(factura_client_data_achitat) as luna,
+            COALESCE(SUM(factura_client_valoare_totala), 0) as total_incasat
+        FROM facturare_facturi 
+        WHERE factura_client_achitat='1' 
+            AND YEAR(factura_client_data_achitat)='$year' 
+            AND factura_tip=0
+        GROUP BY MONTH(factura_client_data_achitat)";
+
+        $result_incasat = ezpub_query($conn, $query_incasat);
+        while ($row = ezpub_fetch_array($result_incasat)) {
+            $luna = (int)$row['luna'];
+            if (!isset($data[$luna])) {
+                $data[$luna] = [
+                    'luna' => $luna,
+                    'total_facturi' => 0,
+                    'total_facturat' => 0,
+                    'total_incasat' => 0
+                ];
+            }
+            $data[$luna]['total_incasat'] = $row['total_incasat'];
+        }
+
+        // 3. TVA încasat: după data încasării
         $query_tva = "SELECT 
             MONTH(factura_client_data_achitat) as luna,
             COALESCE(SUM(factura_client_valoare_tva), 0) as total_tva_incasat
@@ -639,7 +667,7 @@ function getMonthlyData($conn, $year, $max_month, $VATRegime) {
             AND YEAR(factura_client_data_achitat)='$year' 
             AND factura_tip=0
         GROUP BY MONTH(factura_client_data_achitat)";
-        
+
         $result_tva = ezpub_query($conn, $query_tva);
         while ($row_tva = ezpub_fetch_array($result_tva)) {
             $luna = (int)$row_tva['luna'];
@@ -653,7 +681,7 @@ function getMonthlyData($conn, $year, $max_month, $VATRegime) {
             }
             $data[$luna]['total_tva_incasat'] = $row_tva['total_tva_incasat'];
         }
-        
+
     } else {
         // TVA la facturare - calculăm după data emiterii
         $query = "SELECT 
@@ -741,7 +769,7 @@ foreach ($available_years as $year_val) {
 
 // Salvare date în JSON pentru grafic
 $json_data = json_encode($comparison_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-file_put_contents($hddpath . "/" . $charts . "/finance_comparison_" . date('Y-m-d') . ".json", $json_data);
+file_put_contents($hddpath . "/" . $charts_folder . "/finance_comparison_" . date('Y-m-d') . ".json", $json_data);
 ?>
             
             <h3><?php echo $strComparison?></h3>
@@ -999,7 +1027,7 @@ file_put_contents($hddpath . "/" . $charts . "/finance_comparison_" . date('Y-m-
             
             <div class="grid-x grid-padding-x">
                 <div class="large-12 cell">
-                    <a href="<?php echo $hddpath . "/" . $charts . "/finance_comparison_" . date('Y-m-d') . ".json"?>" class="button secondary" download>
+                    <a href="<?php echo $hddpath . "/" . $charts_folder . "/finance_comparison_" . date('Y-m-d') . ".json"?>" class="button secondary" download>
                         <i class="fas fa-download"></i> Descarcă Date JSON
                     </a>
                 </div>

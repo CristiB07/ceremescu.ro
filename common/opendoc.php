@@ -9,7 +9,7 @@ if ((isset($_GET['docID'])) && (isset($_GET['type'])) && !empty($_GET['docID']) 
     $filename = basename($_GET['docID']);
     
     // Validate type parameter
-    if (!is_numeric($_GET['type']) || $_GET['type'] < 1 || $_GET['type'] > 4) {
+    if (!is_numeric($_GET['type']) || $_GET['type'] < 1 || $_GET['type'] > 5) {
         $referer = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'index.php';
         header("Location: " . htmlspecialchars($referer, ENT_QUOTES, 'UTF-8'));
         exit();
@@ -26,6 +26,8 @@ if ((isset($_GET['docID'])) && (isset($_GET['type'])) && !empty($_GET['docID']) 
         $filefolder = $receivedeinvoices;
     } elseif ($type == 4) {
         $filefolder = $contracts_folder;
+    } elseif ($type == 5) {
+            $filefolder = $elearningfiles."/".$_GET['folder'];
     }
     
     // Construct full file path securely

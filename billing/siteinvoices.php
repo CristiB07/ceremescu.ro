@@ -8,7 +8,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']))
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 }
 $strPageTitle="Administrare facturi";
 include '../dashboard/header.php';
@@ -121,6 +121,7 @@ If ($_GET['mode']=="new"){
 	else
 	{ // clientul nu există - îl inserăm în baza de date
 		$clientcui=$_POST["factura_client_RO"]." ".$_POST["factura_client_CIF"];
+		$clientcif=$_POST["factura_client_CIF"];
 		
 		// INSERT client with prepared statement
 		$stmt_client = mysqli_prepare($conn, "INSERT INTO clienti_date(
@@ -149,6 +150,27 @@ If ($_GET['mode']=="new"){
 		$Client_ID = mysqli_insert_id($conn);
 		mysqli_stmt_close($stmt_client);
 	}
+  // Importă bilanțuri ANAF dacă CUI numeric valid
+$import_bilanturi_msg = '';
+$cui_numeric = preg_replace('/\D/', '', $client_cif);
+if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
+    $imported = import_bilanturi_anaf((int)$cui_numeric, $conn);
+    if ($imported > 0) {
+        $import_bilanturi_msg = "<div class='callout success'>Importate $imported bilanțuri ANAF!</div>";
+    } else {
+        $import_bilanturi_msg = "<div class='callout info'>Bilanțurile ANAF erau deja importate sau nu există!</div>";
+    }
+}
+
+// Importă date fiscale ANAF dacă CUI numeric valid
+if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
+    // Import fiscal data by including the script directly (no output)
+    $_GET['cui'] = $cui_numeric;
+    ob_start();
+    include_once '../anaf/getfiscaldata.php';
+    ob_end_clean();
+    unset($_GET['cui']);
+}
 //insert new invoice
 $dataemiterii = $_POST["data_emiterii"];
 $termenfactura = date('Y-m-d', strtotime($dataemiterii . ' +'.$_POST["factura_client_termen"].' day'));

@@ -10,7 +10,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes")
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	die;
 }
 
@@ -255,6 +255,8 @@ else {
 $emailaddress=$row4['Contract_Email_Facturare'];
 }
 ?>
+<link rel="stylesheet" href="../js/simple-editor/simple-editor.css">
+<script src="../js/simple-editor/simple-editor.js"></script>
         <h1><?php echo $strSendInvoice ?></h1>
         <form method="POST"
             action="emailinvoice.php?cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>&type=<?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8')?>&option=<?php echo htmlspecialchars($option, ENT_QUOTES, 'UTF-8')?>"
@@ -274,7 +276,7 @@ $emailaddress=$row4['Contract_Email_Facturare'];
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strMessage?>
-                        <textarea name="email_body" id="simple-editor-html" class="simple-editor-html" rows="5">
+                        <textarea name="email_body" class="simple-html-editor" rows="5">
 	  <p>Stimate client,</p>
 	<p>Acest mail conține factura <?php echo $strSiteOwner?>. Ea a fost emisă pe <?php echo date("d.m.Y", strtotime($row22["factura_data_emiterii"]))?> și este în valoare de <?php echo
 	 romanize($row22["factura_client_valoare_totala"]) ?> și are ca termen <?php echo date('d.m.Y',strtotime($row22["factura_client_termen"]))?>. La data emiteri facturii, soldul dumneavoastră este <?php echo romanize($soldanterior)?>.</p> 

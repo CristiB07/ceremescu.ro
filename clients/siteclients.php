@@ -8,7 +8,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes")
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	die;
 }
 
@@ -57,6 +57,10 @@ include '../bottom.php';
 die;}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
+include_once '../anaf/balancesgetlib.php';
+
+
+
 check_inject();
 If ($_GET['mode']=="new"){
 
@@ -102,7 +106,28 @@ if (!mysqli_stmt_execute($stmt)) {
 }
 mysqli_stmt_close($stmt);
 
-echo "<div class=\"callout success\">$strRecordAdded</div></div></div>";
+// Importă bilanțuri ANAF dacă CUI numeric valid
+$import_bilanturi_msg = '';
+$cui_numeric = preg_replace('/\D/', '', $client_cif);
+if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
+    $imported = import_bilanturi_anaf((int)$cui_numeric, $conn);
+    if ($imported > 0) {
+        $import_bilanturi_msg = "<div class='callout success'>Importate $imported bilanțuri ANAF!</div>";
+    } else {
+        $import_bilanturi_msg = "<div class='callout info'>Bilanțurile ANAF erau deja importate sau nu există!</div>";
+    }
+}
+// Importă date fiscale ANAF dacă CUI numeric valid
+if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
+    // Import fiscal data by including the script directly (no output)
+    $_GET['cui'] = $cui_numeric;
+    ob_start();
+    include_once '../anaf/getfiscaldata.php';
+    ob_end_clean();
+    unset($_GET['cui']);
+}
+
+echo "<div class=\"callout success\">$strRecordAdded</div>".$import_bilanturi_msg."</div></div>";
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
@@ -670,7 +695,7 @@ FROM clienti_date
 Group By letter ORDER BY letter ASC;";
 $result2=mysqli_query($conn, $sql);
 While ($row1=mysqli_fetch_array($result2, MYSQLI_ASSOC)){
-	$char=htmlspecialchars($row1["letter"], ENT_QUOTES, 'UTF-8');
+    $char=htmlspecialchars($row1["letter"] ?? '', ENT_QUOTES, 'UTF-8');
     echo "<a href=\"siteclients.php?start=$char\">$char</a>&nbsp;";
 }
 echo " <br /><br />";
@@ -679,7 +704,7 @@ FROM clienti_date
 ORDER BY seenby ASC;";
 $result2=mysqli_query($conn, $sql);
 While ($row1=mysqli_fetch_array($result2, MYSQLI_ASSOC)){
-	$seen=htmlspecialchars($row1["seenby"], ENT_QUOTES, 'UTF-8');
+    $seen=htmlspecialchars($row1["seenby"] ?? '', ENT_QUOTES, 'UTF-8');
     echo "<a href=\"siteclients.php?seen=$seen\">$seen</a>&nbsp;";
 }
 ?>
@@ -700,11 +725,11 @@ While ($row1=mysqli_fetch_array($result2, MYSQLI_ASSOC)){
             <tbody>
                 <?php 
 While ($row=mysqli_fetch_array($result, MYSQLI_ASSOC)){
-    		echo"<tr>
-			<td>" . htmlspecialchars($row['Client_Denumire'], ENT_QUOTES, 'UTF-8') . "</td>
-			<td>" . htmlspecialchars($row['Client_CUI'], ENT_QUOTES, 'UTF-8') . "</td>
-			<td>" . htmlspecialchars($row['Client_Localitate'], ENT_QUOTES, 'UTF-8') . "</td>
-			<td>" . htmlspecialchars($row['Client_Judet'], ENT_QUOTES, 'UTF-8') . "</td>
+            echo"<tr>
+            <td>" . htmlspecialchars($row['Client_Denumire'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
+            <td>" . htmlspecialchars($row['Client_CUI'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
+            <td>" . htmlspecialchars($row['Client_Localitate'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
+            <td>" . htmlspecialchars($row['Client_Judet'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
 			 <td><a href=\"siteclients.php?mode=edit&cID=" . (int)$row['ID_Client'] . "\" ><i class=\"far fa-edit fa-xl\" title=\"$strEdit\"></i></a></td>
 			 <td><a href=\"siteclients.php?mode=delete&cID=" . (int)$row['ID_Client'] . "\"  OnClick=\"return confirm('$strConfirmDelete');\"><i class=\"fa fa-eraser fa-xl\" title=\"$strDelete\"></i></a></td>
 			 <td><a href=\"clientprofile.php?cID=" . (int)$row['ID_Client'] . "\"><i class=\"fa fa-search-plus fa-xl\" title=\"$strEdit\"></i></a></td>

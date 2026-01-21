@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/all.css" />
     <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/foundation.css" />
     <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/<?php echo $cssname?>.css" />
-    <link rel="shortcut icon" type="image/favicon" href="favicon.ico" />
+    <link rel="shortcut icon" type="image/favicon" href="<?php echo $strSiteURL ?>/favicon.ico" />
     <script language="javascript" type="text/javascript">
     function resizeIframe(obj) {
         obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
@@ -18,6 +18,8 @@
     </script>
 </head>
 <?php
+include_once(dirname(__DIR__) .'/settings.php');
+include_once(dirname(__DIR__) .'/classes/common.php');
     if(!isset($_SESSION)) 
     { 
         session_start(); 
@@ -31,13 +33,12 @@ else
 	$lang=$_SESSION['$lang'];
 }
 if ($lang=="RO") {
-include '../lang/language_RO.php';
+include_once(dirname(__DIR__) . '/lang/language_RO.php');
 }
 else
 {
-include '../lang/language_EN.php';
+include_once(dirname(__DIR__) . '/lang/language_EN.php');
 }
-// Tracker moved to bottom.php for better error catching coverage
 ?>
 </head>
 

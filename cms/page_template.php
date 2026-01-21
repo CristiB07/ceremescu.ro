@@ -7,13 +7,16 @@ $stmt->bind_param("s", $url);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($row=$result->fetch_assoc()) {
-$strKeywords=htmlspecialchars($row['pagina_keywords'], ENT_QUOTES, 'UTF-8');
-$strDescription=htmlspecialchars($row['pagina_descriere'], ENT_QUOTES, 'UTF-8');
-$strPageTitle=htmlspecialchars($row['pagina_titlu'], ENT_QUOTES, 'UTF-8');
-// Keep HTML content but sanitize URL replacements
-$strPageContent=str_replace(array("../img/pages/","<li>", "<ul class=\"tiny\">"),array(htmlspecialchars($strSiteURL, ENT_QUOTES, 'UTF-8')."/img/pages/","<li class=\"tiny\">", "<ul>"),$row['pagina_continut']);
-$pageurl=htmlspecialchars($row['pagina_url'], ENT_QUOTES, 'UTF-8');
-include 'header.php';
+  $strKeywords=htmlspecialchars($row['pagina_keywords'], ENT_QUOTES, 'UTF-8');
+  $strDescription=htmlspecialchars($row['pagina_descriere'], ENT_QUOTES, 'UTF-8');
+  $strPageTitle=htmlspecialchars($row['pagina_titlu'], ENT_QUOTES, 'UTF-8');
+  // Keep HTML content but sanitize URL replacements
+  $strPageContent=str_replace(array("../img/pages/","<li>", "<ul class=\"tiny\">"),array(htmlspecialchars($strSiteURL, ENT_QUOTES, 'UTF-8')."/img/pages/","<li class=\"tiny\">", "<ul>"),$row['pagina_continut']);
+  $pageurl=htmlspecialchars($row['pagina_url'], ENT_QUOTES, 'UTF-8');
+  if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+    @$stmt->close();
+  }
+  include 'header.php';
 echo "
 <nav aria-label=\"" . htmlspecialchars($strYouAreHere, ENT_QUOTES, 'UTF-8') . ":\" role=\"navigation\">
   <ul class=\"breadcrumbs\">
@@ -34,9 +37,6 @@ Echo "<h1>$strPageTitle</h1>
 	$strPageContent
   </div>
 </div>";
- ?>
-<?php 
-$stmt->close();
 }
 else
 {

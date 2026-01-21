@@ -1,10 +1,9 @@
-<?php // Last Modified Time: Saturday, August 23, 2025 at 5:24:36 PM Eastern European Summer Time ?>
 <?php
 // Verificare IP whitelist
-include __DIR__ . '/ip_check.php';
+//include __DIR__ . '/ip_check.php';
 
-include  __DIR__ .'/../settings.php';
-include  __DIR__ . '/../classes/common.php';
+include_once  __DIR__ .'/../settings.php';
+include_once  __DIR__ . '/../classes/common.php';
 $strPageTitle="Intrare cont";
 
 if(!isset($_SESSION)) 

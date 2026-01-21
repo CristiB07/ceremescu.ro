@@ -20,6 +20,7 @@ class SimpleEditor {
         this.textareas = document.querySelectorAll(selector);
         this.editors = [];
         this.init();
+        this.setupMessageListener();
     }
 
     init() {
@@ -33,6 +34,20 @@ class SimpleEditor {
                 editor: editorWrapper.querySelector('.simple-editor-content'),
                 toolbar: editorWrapper.querySelector('.simple-editor-toolbar')
             });
+        });
+    }
+
+    setupMessageListener() {
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'updateHTML') {
+                const editorId = event.data.editorId;
+                const newHtml = event.data.html;
+
+                if (this.editors[editorId]) {
+                    this.editors[editorId].editor.innerHTML = newHtml;
+                    this.editors[editorId].textarea.value = newHtml;
+                }
+            }
         });
     }
 
@@ -667,6 +682,12 @@ class SimpleEditor {
                     button:hover {
                         background: #0052a3;
                     }
+                    button.success {
+                        background: #28a745;
+                    }
+                    button.success:hover {
+                        background: #218838;
+                    }
                     .info {
                         background: #f0f8ff;
                         padding: 10px;
@@ -677,14 +698,15 @@ class SimpleEditor {
             </head>
             <body>
                 <div class="info">
-                    <strong>Note:</strong> You can view and copy the HTML code below. To make changes, edit in the visual editor.
+                    <strong>Note:</strong> You can edit the HTML code below. Click "Apply Changes" to update the editor.
                 </div>
                 <div class="buttons">
+                    <button class="success" onclick="applyChanges()">Apply Changes</button>
                     <button onclick="selectAll()">Select All</button>
                     <button onclick="copyToClipboard()">Copy to Clipboard</button>
                     <button onclick="window.close()">Close</button>
                 </div>
-                <textarea id="htmlCode" readonly>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                <textarea id="htmlCode">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
                 <script>
                     function selectAll() {
                         document.getElementById('htmlCode').select();
@@ -694,6 +716,23 @@ class SimpleEditor {
                         textarea.select();
                         document.execCommand('copy');
                         alert('HTML code copied to clipboard!');
+                    }
+                    function applyChanges() {
+                        const textarea = document.getElementById('htmlCode');
+                        const newHtml = textarea.value;
+                        
+                        // Send message to opener window
+                        if (window.opener && !window.opener.closed) {
+                            window.opener.postMessage({
+                                type: 'updateHTML',
+                                editorId: ${editorId},
+                                html: newHtml
+                            }, '*');
+                            alert('Changes applied successfully!');
+                            window.close();
+                        } else {
+                            alert('Parent window is closed. Cannot apply changes.');
+                        }
                     }
                 </script>
             </body>

@@ -98,6 +98,37 @@ function generateRandomString($length) {
     return $randomString;
 }
 
+// Get file icon based on file extension
+function getFileIcon($filename) {
+    $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    
+    switch ($extension) {
+        case 'pdf':
+            return 'far fa-file-pdf';
+        case 'doc':
+        case 'docx':
+            return 'far fa-file-word';
+        case 'xls':
+        case 'xlsx':
+            return 'far fa-file-excel';
+        case 'ppt':
+        case 'pptx':
+            return 'far fa-file-powerpoint';
+        case 'zip':
+        case 'rar':
+            return 'far fa-file-archive';
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif':
+            return 'far fa-file-image';
+        case 'txt':
+            return 'far fa-file-alt';
+        default:
+            return 'far fa-file';
+    }
+}
+
 //get real IP
 function getRealIpAddr()
 {
@@ -322,6 +353,18 @@ class CursBNR
 }
 //truncate 200 characters
 function truncateinvoiceitem($string,$length=195,$append="...") {
+  $string = trim($string);
+
+  if(strlen($string) > $length) {
+    $string = wordwrap($string, $length);
+    $string = explode("\n", $string, 2);
+    $string = $string[0] . $append;
+  }
+
+  return $string;
+}
+//truncate 300 characters
+function truncateblogarticle($string,$length=295,$append="...") {
   $string = trim($string);
 
   if(strlen($string) > $length) {

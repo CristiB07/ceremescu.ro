@@ -95,8 +95,9 @@ if ($numar==0) {
                 }
             ?>
             <img src="<?php echo htmlspecialchars($strSiteURL, ENT_QUOTES, 'UTF-8') ?>/img/products/<?php echo htmlspecialchars($promo_image, ENT_QUOTES, 'UTF-8')?>" class="shopim">
-            <h4><?php echo htmlspecialchars($row["produs_nume"], ENT_QUOTES, 'UTF-8')?></h4>
-            <p class="smaller"><?php echo htmlspecialchars($row["produs_descriere"], ENT_QUOTES, 'UTF-8')?></p>
+          <h4><a href="<?php echo htmlspecialchars($strSiteURL . '/shop/' . $row['produs_url'], ENT_QUOTES, 'UTF-8') ?>"><?php echo htmlspecialchars($row["produs_nume"], ENT_QUOTES, 'UTF-8')?></a></h4>
+                <p class="smaller"><?php echo $row["produs_descriere"] ?></p>
+               
             <?php } ?>
         </div>
     </div>

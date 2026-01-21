@@ -1,0 +1,474 @@
+/*updated 05.02.2025*/
+/*fonts */
+/* open-sans-condensed-300 - latin-ext_latin */
+@font-face {
+    font-family: 'Open Sans Condensed';
+    font-style: normal;
+    font-weight: 300;
+    src: url('../fonts/open-sans-condensed-v21-latin-ext_latin-300.eot');
+    /* IE9 Compat Modes */
+    src: local(''),
+        url('../fonts/open-sans-condensed-v21-latin-ext_latin-300.eot?#iefix') format('embedded-opentype'),
+        /* IE6-IE8 */
+        url('../fonts/open-sans-condensed-v21-latin-ext_latin-300.woff2') format('woff2'),
+        /* Super Modern Browsers */
+        url('../fonts/open-sans-condensed-v21-latin-ext_latin-300.woff') format('woff'),
+        /* Modern Browsers */
+        url('../fonts/open-sans-condensed-v21-latin-ext_latin-300.ttf') format('truetype'),
+        /* Safari, Android, iOS */
+        url('../fonts/open-sans-condensed-v21-latin-ext_latin-300.svg#OpenSansCondensed') format('svg');
+    /* Legacy iOS */
+}
+
+/* open-sans-regular - latin-ext_latin */
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/open-sans-v27-latin-ext_latin-regular.eot');
+    /* IE9 Compat Modes */
+    src: local(''),
+        url('../fonts/open-sans-v27-latin-ext_latin-regular.eot?#iefix') format('embedded-opentype'),
+        /* IE6-IE8 */
+        url('../fonts/open-sans-v27-latin-ext_latin-regular.woff2') format('woff2'),
+        /* Super Modern Browsers */
+        url('../fonts/open-sans-v27-latin-ext_latin-regular.woff') format('woff'),
+        /* Modern Browsers */
+        url('../fonts/open-sans-v27-latin-ext_latin-regular.ttf') format('truetype'),
+        /* Safari, Android, iOS */
+        url('../fonts/open-sans-v27-latin-ext_latin-regular.svg#OpenSans') format('svg');
+    /* Legacy iOS */
+}
+
+/* end fonts */
+/* site customization*/
+body {
+    font-family: 'Open Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+p {
+    color: #808080;
+    font-size: 1.3em
+}
+
+p .red {
+    color: #FF0000;
+    font-size: 0.8em
+}
+
+p .green {
+    color: #00cc00;
+    font-size: 0.8em
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-weight: bold;
+    color: #537993;
+}
+
+ul,
+li {
+    color: #808080;
+}
+
+ul.tiny,
+li.tiny {
+    color: #808080;
+    margin-left: 1.5em;
+    font-size: 1.3em;
+}
+
+table.large {
+    font-size: 0.7em;
+    padding: 0.25rem 0.325rem 0.325rem;
+}
+
+select.large {
+    font-size: 0.7em;
+    padding: 0.25rem 0.325rem 0.325rem;
+}
+
+.small-font-table {
+    font-size: 0.8rem;
+}
+
+.vertical a {
+    text-decoration: none;
+    color: #3E5B6F;
+}
+
+a {
+    text-decoration: none;
+    color: #3E5B6F;
+}
+
+a:hover {
+    color: #34495e
+}
+
+a:active {
+    color: #3E5B6F
+}
+
+a:focus {
+    color: #5d6d7e
+}
+
+.fontsmall {
+    font-size: 0.8em;
+}
+
+.data {
+    width: 100px;
+}
+
+.button {
+    background-color: #3E5B6F;
+    color: #fefefe;
+}
+
+.button:hover,
+.button:focus {
+    background-color: #265786;
+    color: #fefefe;
+}
+
+.top-bar ul li {
+    background: none repeat scroll 0 0 #3E5B6F
+}
+
+.top-bar {
+    background: none repeat scroll 0 0 #3E5B6F
+}
+
+.top-bar a {
+    color: #fff
+}
+
+a .has-submenu {
+    color: #fff
+}
+
+has-submenu .a {
+    color: #fff
+}
+
+.top-bar ul.a li.a {
+    color: #fff
+}
+
+.top-bar a:hover {
+    color: #ffff00
+}
+
+.top-bar a:active {
+    color: #fff000
+}
+
+.top-bar a:focus {
+    color: #fff000
+}
+
+.top-bar .menu-text {
+    color: #fff
+}
+
+.orbit {
+    z-index: -1000
+}
+
+.smaller {
+    font-size: 0.8em;
+    color: #808080;
+}
+
+div.paginate {
+    width: 75rem;
+    clear: both;
+    padding: 2em 0 2em 0;
+    margin: 0px;
+    text-align: left;
+    float: left;
+    clear: both;
+    font-size: 1.1em;
+}
+
+div.paginate a {
+    padding: 2px 5px 2px 5px;
+    margin-right: 2px;
+    border: 1px solid #3E5B6F;
+    text-decoration: none;
+    color: #3E5B6F;
+}
+
+div.paginate a:hover,
+div.paginate a:active {
+    border: 1px solid #3E5B6F;
+    color: #fff;
+    background-color: #3E5B6F;
+}
+
+div.paginate a.current {
+    padding: 2px 5px 2px 5px;
+    margin-right: 2px;
+    border: 1px solid #3E5B6F;
+    font-weight: bold;
+    background-color: #3E5B6F;
+    color: #FFF;
+}
+
+div.paginate span.disabled {
+    padding: 2px 5px 2px 5px;
+    margin-right: 2px;
+    border: 1px solid #f3f3f3;
+    color: #091346;
+}
+
+#country-list {
+    float: left;
+    list-style: none;
+    margin-top: -3px;
+    padding: 0;
+    width: auto;
+    height: 20em;
+    overflow-y: scroll;
+    font-size: 0.8em;
+    position: absolute;
+}
+
+#country-list li {
+    padding: 10px;
+    background: #f0f0f0;
+    border-bottom: #bbb9b9 1px solid;
+}
+
+#country-list li:hover {
+    background: #ece3d2;
+    cursor: pointer;
+}
+
+#search-box {
+    padding: 10px;
+    border: #a8d4b1 1px solid;
+    border-radius: 4px;
+}
+
+.suggestion-box {
+    margin-left: auto;
+    margin-right: auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+    z-index: -1;
+    position: absolute;
+}
+
+.parent {
+    position: relative;
+}
+
+#loader {
+    border: 12px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 12px solid #444444;
+    width: 70px;
+    height: 70px;
+    animation: spin 1s linear infinite;
+}
+
+/*site customization*/
+
+/*shop*/
+div.promoted {
+    border: 1px dotted #3E5B6F;
+    margin: 0px;
+    padding: 1.5em;
+    text-align: left;
+    float: left;
+    font-size: 0.8em;
+}
+
+.basket {
+    color: #fff;
+    font-size: 1em;
+    padding: 0.4em
+}
+
+.discount {
+    text-decoration: line-through;
+}
+
+.price {
+    line-height: auto;
+    vertical-align: bottom;
+    color: #E91756;
+}
+
+.shopim {
+    width: auto;
+    height: 250px;
+}
+
+.basket {
+    color: #fff;
+    font-size: 1em;
+    padding: 0.4em
+}
+
+/*shop*/
+
+/*billing*/
+.downloaded {
+    /*background: linear-gradient(90deg, #e6f9e6 0%, #b2f2b2 100%);*/
+    color: #217a2b;
+    font-weight: 600;
+}
+
+.downloaded td {
+    color: #217a2b;
+}
+
+.notdownloaded {
+    /*background: linear-gradient(90deg, #fff4e6 0%, #ffd9b2 100%);*/
+    color: #b85c00;
+    font-weight: 600;
+}
+
+.notdownloaded td {
+    color: #b85c00;
+}
+
+.paid {
+    color: #1b5b1b;
+    font-size: 0.8em;
+}
+
+.notpaid {
+    color: #ef6f6f;
+    font-size: 0.8em;
+}
+
+.loss {
+    color: #FF0000;
+}
+
+.profit {
+    color: #00cc00;
+}
+
+.canceled {
+    color: #FF0000;
+    font-size: 0.8em;
+    text-decoration: line-through;
+}
+
+/*billings*/
+
+/*elearning*/
+p.question {
+    color: #1c1919;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+p.wrong {
+    color: #eca1a6;
+    font-size: 1.2em;
+}
+
+p.correct {
+    color: #b5e7a0;
+    font-size: 1.2em;
+}
+
+/* elearning */
+
+/*booking*/
+.muted {
+    color: #666
+}
+
+#calendar {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: .5rem
+}
+
+.calwarning {
+    color: #b45309;
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+}
+
+/* booking */
+
+/*password strength meter*/
+
+.pwd-strength {
+    margin-top: 8px;
+    max-width: 480px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.pwd-meter {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.pwd-bar {
+    height: 100%;
+    width: 0%;
+    background: #ef4444;
+    /* roșu pentru slab */
+    transition: width 160ms ease, background 160ms ease;
+}
+
+.pwd-label {
+    margin: 6px 0 0;
+    font-size: 0.95rem;
+}
+
+.pwd-hints {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+/* Culori pentru praguri */
+.pwd-very-weak .pwd-bar {
+    background: #ef4444;
+}
+
+/* roșu */
+.pwd-weak .pwd-bar {
+    background: #f59e0b;
+}
+
+/* portocaliu */
+.pwd-fair .pwd-bar {
+    background: #fbbf24;
+}
+
+/* chihlimbar */
+.pwd-strong .pwd-bar {
+    background: #22c55e;
+}
+
+/* verde */
+.pwd-excellent .pwd-bar {
+    background: #16a34a;
+}
+
+/* verde închis */
+/*password strength meter*/

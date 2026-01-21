@@ -65,7 +65,6 @@ $produs_fcategorie_safe = htmlspecialchars($row['produs_fcategorie'] ?? '', ENT_
           </div></div>
         <div class="grid-x grid-margin-x">
           <div class="medium-6 cell">
-        <label><?php echo htmlspecialchars($strImagePreview, ENT_QUOTES, 'UTF-8')?>
 					
         <div class="large reveal" id="Modal1" data-reveal>
             <!-- Modal content -->
@@ -76,7 +75,6 @@ $produs_fcategorie_safe = htmlspecialchars($row['produs_fcategorie'] ?? '', ENT_
             <button class="close-button" data-close aria-label="Close modal" type="button">
                 <span aria-hidden="true">&times;</span>
             </button>
-            </label>
         </div>
 
         <?php 

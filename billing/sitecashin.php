@@ -8,7 +8,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']))
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 }
 include '../dashboard/header.php';
 $day = date('d');
@@ -20,7 +20,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']))
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 }
 ?>
 <div class="grid-x grid-padding-x ">

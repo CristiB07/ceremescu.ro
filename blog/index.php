@@ -1,8 +1,8 @@
 <?php
 //update 16.12.2025
-include '../settings.php';
-include '../classes/common.php';
-include '../classes/paginator.class.php';
+include_once '../settings.php';
+include_once '../classes/common.php';
+include_once '../classes/paginator.class.php';
 $pageurl='/blog/index.php';
 $cursuritrail="blog/";
 $strKeywords="Blog, articole, noutăți, știri, informații, actualizări";
@@ -80,7 +80,7 @@ echo $pages->display_pages() . " <a href=\"index.php\" title=\"strClearAllFilter
               <i class=\"far fa-user xl\"></i>".htmlspecialchars($row['articol_autor'], ENT_QUOTES, 'UTF-8')."&nbsp;&nbsp;
               <i class=\"fas fa-calendar-alt xl\"></i> " . htmlspecialchars(date("d.m.Y H:i:s",strtotime($row["articol_data_publicarii"])), ENT_QUOTES, 'UTF-8') . "
             </p>
-            <p>" . htmlspecialchars(truncateblogarticle($row["articol_continut"]), ENT_QUOTES, 'UTF-8') . " <a href=\"".htmlspecialchars($strSiteURL, ENT_QUOTES, 'UTF-8')."/blog/".htmlspecialchars($row['articol_url'], ENT_QUOTES, 'UTF-8')."\">" .htmlspecialchars($strReadMore, ENT_QUOTES, 'UTF-8')."</a></p>
+            <p>" . truncateblogarticle($row["articol_continut"]) . " <a href=\"".htmlspecialchars($strSiteURL, ENT_QUOTES, 'UTF-8')."/blog/".htmlspecialchars($row['articol_url'], ENT_QUOTES, 'UTF-8')."\">" .htmlspecialchars($strReadMore, ENT_QUOTES, 'UTF-8')."</a></p>
           </div>
         </div>
         <hr>";

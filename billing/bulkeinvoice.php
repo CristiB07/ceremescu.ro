@@ -8,7 +8,7 @@ if(!isset($_SESSION)) {
     session_start(); 
 }
 if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes") {
-    header("location:$strSiteURL/login/login.php?message=MLF");
+    header("location:$strSiteURL/login/index.php?message=MLF");
     die;
 }
 

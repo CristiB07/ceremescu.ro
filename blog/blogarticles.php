@@ -93,7 +93,7 @@ exit();} // end delete record
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
 check_inject();
 If ($_GET['mode']=="new"){
-//insert new user
+//insert new article
 
 if (!isset($_POST['articol_tip']) || !in_array($_POST['articol_tip'], ['0', '1'], true)) {
     $_POST['articol_tip'] = '0';

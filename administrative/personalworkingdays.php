@@ -11,7 +11,7 @@ if(!isset($_SESSION))
 }
 if (!isSet($_SESSION['userlogedin']))
 {
-	header("location:$strSiteURL/login/login.php?message=MLF");
+	header("location:$strSiteURL/login/index.php?message=MLF");
 	exit();
 }
 $uid=$_SESSION['uid'];

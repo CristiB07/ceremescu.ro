@@ -293,7 +293,7 @@ $header='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         }
 
         $stmt_insert = mysqli_prepare($conn, "INSERT INTO efactura(factura_xml, factura_data_incarcarii, factura_ID, factura_CIF, factura_index_incarcare) VALUES(?, ?, ?, ?, ?)");
-        mysqli_stmt_bind_param($stmt_insert, "ssiss", $filename, $dataincarcarii, $row["factura_ID"], $row["factura_client_CUI"], $index);
+        mysqli_stmt_bind_param($stmt_insert, "ssiss", $filename, $dataincarcarii, $row["factura_ID"], $row["factura_client_CIF"], $index);
 
         if (!mysqli_stmt_execute($stmt_insert)) {
             $error_msg = 'Error: ' . mysqli_stmt_error($stmt_insert);
@@ -326,7 +326,7 @@ if (basename($_SERVER['PHP_SELF']) == 'einvoice.php') {
         session_start(); 
     }
     if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes") {
-        header("location:$strSiteURL/login/login.php?message=MLF");
+        header("location:$strSiteURL/login/index.php?message=MLF");
         die;
     }
 

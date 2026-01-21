@@ -1,7 +1,7 @@
 <?php
-include 'settings.php';
-include 'classes/common.php';
-include 'classes/paginator.class.php';
+include_once 'settings.php';
+include_once 'classes/common.php';
+include_once 'classes/paginator.class.php';
 
 $url = strtok($url, '?');
 $stmt = $conn->prepare("SELECT * FROM blog_articole WHERE articol_url=?");

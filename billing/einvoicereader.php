@@ -67,11 +67,11 @@ $firstFile = $ziplocation . $files[2];// because [0] = "." [1] = ".."
 $xml=file_get_contents($firstFile) or die("Error: Cannot create object");
 $result=xml2array($xml);
 
+
 echo "<hr>";
 
 $information=json_encode($result, true);
 $obj = json_decode($information, true);
-
 if (array_key_exists("Invoice",$obj))
 {$invoice=$obj['Invoice'];
 }
@@ -86,7 +86,7 @@ $invoiceID=$invoice['ID'];
 $typecode=$invoice['InvoiceTypeCode'];
 $issuedate=$invoice['IssueDate'];
 $duedate=$invoice['DueDate'];
-If (empty($invoice['ContractDocumentReference']))
+if (empty($invoice['ContractDocumentReference']))
 {$referenceID="fără contract";}
 	else
 {$reference=$invoice['ContractDocumentReference'];
@@ -202,7 +202,7 @@ if ($count<>'5'){
 foreach($totalsubtotal as $index => $value) {
 $totaltaxammount=$value['TaxAmount'];
 $totaltaxscheme=$value['TaxCategory'];
-If (empty($totaltaxscheme['Percent']))
+if (empty($totaltaxscheme['Percent']))
 {$totaltaxPercent="";}
 else
 {$totaltaxPercent=$totaltaxscheme['Percent'];}
@@ -215,7 +215,7 @@ else
 {
 	$totaltaxammount=$totalsubtotal['TaxAmount'];
 $totaltaxscheme=$totalsubtotal['TaxCategory'];
-If (empty($totaltaxscheme['Percent']))
+if (empty($totaltaxscheme['Percent']))
 {$totaltaxPercent="";}
 else
 {$totaltaxPercent=$totaltaxscheme['Percent'];}
@@ -292,7 +292,7 @@ foreach($invoicelines as $index => $value) {
 	else	{
 	 $tableline = $tableline . "<tr>";
 	 $tableline = $tableline .  "<td>" .$value['ID']. "</td>";
-	 $tableline = $tableline .  "<td>".htmlentities($value['Item']['Name']) ." - ".htmlentities($value['Item']['Description'])."</td>";
+	 $tableline = $tableline .  "<td>".$value['Item']['Name'] ." - ".$value['Item']['Description']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['InvoicedQuantity']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['Price']['PriceAmount']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['LineExtensionAmount']."</td>";
@@ -313,7 +313,7 @@ else
 	else	{	
 	 $tableline = $tableline . "<tr>";
 	 $tableline = $tableline .  "<td>" .$value['ID']. "</td>";
-	 $tableline = $tableline .  "<td>".htmlentities($value['Item']['Name']) ." - ".htmlentities($value['Item']['Description'])."</td>";
+	 $tableline = $tableline .  "<td>".$value['Item']['Name'] ." - ".$value['Item']['Description']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['InvoicedQuantity']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['Price']['PriceAmount']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['LineExtensionAmount']."</td>";
@@ -324,7 +324,7 @@ else
 		 { $procentTVA=$value['Item']['ClassifiedTaxCategory']['Percent'];}
 		 $tableline = $tableline .  "<td align=\"right\">$procentTVA</td>";
 	 	$tableline = $tableline .  "</tr>";
-			$numearticol=htmlentities($value['Item']['Name']) ." - ".htmlentities($value['Item']['Description']);
+			$numearticol=$value['Item']['Name'] ." - ".$value['Item']['Description'];
 		$unitatearticol="buc";
 		$cantitatearticol=$value['InvoicedQuantity'];
 		$pretarticol=$value['Price']['PriceAmount'];
