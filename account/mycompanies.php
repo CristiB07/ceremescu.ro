@@ -235,17 +235,15 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
         <p><a href="myprofile.php" class="button"><?php echo $strBack?></a></p>
-        <form method="Post" Action="mycompanies.php?mode=new">
+        <form method="Post" action="mycompanies.php?mode=new">
             <div class="grid-x grid-padding-x">
                 <div class="large-6 medium-6 small-6 cell">
                     <div id="response"></div>
                     <div class="input-group">
                         <span class="input-group-label"><?php echo $strCompanyVAT?></span>
-                        <input class="input-group-field" type="text" name="Cui" id="Cui"
-                            placeholder="<?php echo $strEnterVATNumber?>">
+                        <input class="input-group-field" type="text" name="Cui" id="Cui" placeholder="<?php echo $strEnterVATNumber?>">
                         <div class="input-group-button">
-                            <button id="btn1" class="button success"><i
-                                    class="fas fa-search"></i>&nbsp;<?php echo $strCheck ?></button>
+                            <button id="btn1" class="button success"><i class="fas fa-search"></i>&nbsp;<?php echo $strCheck ?></button>
                         </div>
                     </div>
                 </div>
@@ -312,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function () {
 else {
 	?>
         <p><a href="myprofile.php" class="button"><?php echo $strBack?></a></p>
-        <form method="post" id="users" Action="mycompanies.php?mode=edit&cID=<?php echo htmlspecialchars($_GET['cID'], ENT_QUOTES, 'UTF-8'); ?>">
+        <form method="post"  action="mycompanies.php?mode=edit&cID=<?php echo htmlspecialchars($_GET['cID'], ENT_QUOTES, 'UTF-8'); ?>">
             <?php
 // Validate cID parameter
 if (!isset($_GET['cID']) || !is_numeric($_GET['cID'])) {
@@ -338,60 +336,51 @@ $stmt->close();
             <div class="grid-x grid-padding-x ">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCompany?>
-                        <input type="text" name="company_name" id="company_name"
-                            value="<?php echo htmlspecialchars($row['company_name'], ENT_QUOTES, 'UTF-8'); ?>" required />
+                        <input type="text" name="company_name" id="company_name" value="<?php echo htmlspecialchars($row['company_name'], ENT_QUOTES, 'UTF-8'); ?>" required />
                     </label>
                 </div>
                 <div class="large-1 medium-1 small-1 cell">
                     <label><?php echo $strCompanyFA?>
-                        <input type="text" name="company_ro" id="company_ro" value="<?php echo htmlspecialchars($row['company_ro'], ENT_QUOTES, 'UTF-8'); ?>"
-                            required />
+                        <input type="text" name="company_ro" id="company_ro" value="<?php echo htmlspecialchars($row['company_ro'], ENT_QUOTES, 'UTF-8'); ?>" required />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-1 cell">
                     <label><?php echo $strCompanyVAT?>
-                        <input type="text" name="company_VAT" id="company_VAT" value="<?php echo htmlspecialchars($row['company_VAT'], ENT_QUOTES, 'UTF-8'); ?>"
-                            required />
+                        <input type="text" name="company_VAT" id="company_VAT" value="<?php echo htmlspecialchars($row['company_VAT'], ENT_QUOTES, 'UTF-8'); ?>" required />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCompanyRC?>
-                        <input type="text" name="company_reg" id="company_reg" value="<?php echo htmlspecialchars($row['company_reg'], ENT_QUOTES, 'UTF-8'); ?>"
-                            required />
+                        <input type="text" name="company_reg" id="company_reg" value="<?php echo htmlspecialchars($row['company_reg'], ENT_QUOTES, 'UTF-8'); ?>" required />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-padding-x ">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strAddress?>
-                        <input type="text" name="company_address" id="company_address"
-                            value="<?php echo htmlspecialchars($row['company_address'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="company_address" id="company_address" value="<?php echo htmlspecialchars($row['company_address'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCity?>
-                        <input type="text" name="company_city" id="company_city"
-                            value="<?php echo htmlspecialchars($row['company_city'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="company_city" id="company_city" value="<?php echo htmlspecialchars($row['company_city'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCounty?>
-                        <input type="text" name="company_county" id="company_county"
-                            value="<?php echo htmlspecialchars($row['company_county'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="company_county" id="company_county" value="<?php echo htmlspecialchars($row['company_county'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-padding-x ">
                 <div class="large-6 medium-6 small-4 cell">
                     <label><?php echo $strBank?>
-                        <input type="text" name="company_bank" id="company_bank"
-                            value="<?php echo htmlspecialchars($row['company_bank'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="company_bank" id="company_bank" value="<?php echo htmlspecialchars($row['company_bank'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
                 <div class="large-6 medium-6 small-6 cell">
                     <label><?php echo $strCompanyIBAN?>
-                        <input type="text" name="company_IBAN" id="company_IBAN"
-                            value="<?php echo htmlspecialchars($row['company_IBAN'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="company_IBAN" id="company_IBAN" value="<?php echo htmlspecialchars($row['company_IBAN'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
             </div>

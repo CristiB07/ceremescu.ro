@@ -15,14 +15,14 @@ if (!isSet($_SESSION['$lang'])) {
 	$_SESSION['$lang']="RO";
 	$lang=$_SESSION['$lang'];
 }
-Else
+else
 {
 	$lang=$_SESSION['$lang'];
 }
 if ($lang=="RO") {
 include __DIR__ .'../../lang/language_RO.php';
 }
-Else
+else
 {
 	include __DIR__ . '../../lang/language_EN.php';
 }
@@ -98,7 +98,7 @@ echo "<div class=\"callout alert\">$strThereWasAnError</div>" ;
                                         <input type="password" id="password" name="password"
                                             placeholder="<?php echo $strPassword ?>" />
                                     </label>
-                                    <input type="submit" Value="<?php echo $strLogin ?>" name="Submit"
+                                    <input type="submit" value="<?php echo $strLogin ?>" name="Submit"
                                         class="button success" />
                                 </div>
                             </div>

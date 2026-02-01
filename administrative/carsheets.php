@@ -293,21 +293,18 @@ function calculate(rowIndex) {
 
             <tr>
                 <form method="post"
-                    Action="carsheets.php?mode=new&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
+                    action="carsheets.php?mode=new&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
                     <td><input name="fp_zi" type="text" value="<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="month" type="text" value="<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="year" type="text" value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="fp_numar" type="text" size="4" value="<?php echo htmlspecialchars($carplate, ENT_QUOTES, 'UTF-8')?>" /></td>
                     <td><input name="fp_plecare" type="text" size="4" value="" /></td>
                     <td><input name="fp_sosire" type="text" size="4" value="" /></td>
-                    <td><input name="fp_km_init" id="fp_km_init_<?php echo $i?>" type="text" size="4" value=""
-                            oninput="calculate(<?php echo $i?>)" /></td>
-                    <td><input name="fp_km" type="text" id="fp_km_<?php echo $i?>" size="4" value=""
-                            oninput="calculate(<?php echo $i?>)" /></td>
-                    <td><input name="fp_km_final" id="fp_km_final_<?php echo $i?>"" type=" text" size="4" value="" />
-                    </td>
+                    <td><input name="fp_km_init" id="fp_km_init_<?php echo $i?>" type="text" size="4" value="" oninput="calculate(<?php echo $i?>)" /></td>
+                    <td><input name="fp_km" type="text" id="fp_km_<?php echo $i?>" size="4" value="" oninput="calculate(<?php echo $i?>)" /></td>
+                    <td><input name="fp_km_final" id="fp_km_final_<?php echo $i?>" type="text" size="4" value="" /> </td>
                     <td><input name="fp_detalii" type="text" size="4" value="" /></td>
-                    <td><input type="submit" Value="<?php echo $strAdd?>" class="button" name="Submit"></td>
+                    <td><input type="submit" value="<?php echo $strAdd?>" class="button" name="Submit"></td>
                     <td>
                         <p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></p>
                     </td>
@@ -320,29 +317,21 @@ function calculate(rowIndex) {
 
             <tr>
                 <form method="post"
-                    Action="carsheets.php?mode=edit&cID=<?php echo htmlspecialchars($row["fp_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
+                    action="carsheets.php?mode=edit&cID=<?php echo htmlspecialchars($row["fp_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
                     <td><input name="fp_zi" type="text" value="<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="month" type="text" value="<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="year" type="text" value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="fp_numar" type="text" size="4" value="<?php echo htmlspecialchars($row["fp_numar"], ENT_QUOTES, 'UTF-8')?>" /></td>
                     <td><input name="fp_plecare" type="text" size="4" value="<?php echo htmlspecialchars($row["fp_plecare"], ENT_QUOTES, 'UTF-8')?>" /></td>
                     <td><input name="fp_sosire" type="text" size="4" value="<?php echo htmlspecialchars($row["fp_sosire"], ENT_QUOTES, 'UTF-8')?>" /></td>
-                    <td><input name="fp_km_init" type="text" id="fp_km_init_<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" size="4"
-                            value="<?php echo htmlspecialchars($row["fp_km_init"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>)" /></td>
-                    <td><input name="fp_km" type="text" id="fp_km_<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" size="4"
-                            value="<?php echo htmlspecialchars($row["fp_km"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>)" /></td>
-                    <td><input name="fp_km_final" id="fp_km_final" type="text" size="4"
-                            value="<?php echo htmlspecialchars($row["fp_km_final"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input name="fp_km_init" type="text" id="fp_km_init_<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" size="4" value="<?php echo htmlspecialchars($row["fp_km_init"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>)" /></td>
+                    <td><input name="fp_km" type="text" id="fp_km_<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" size="4" value="<?php echo htmlspecialchars($row["fp_km"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>)" /></td>
+                    <td><input name="fp_km_final" id="fp_km_final_<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" type="text" size="4" value="<?php echo htmlspecialchars($row["fp_km_final"], ENT_QUOTES, 'UTF-8')?>" /></td>
                     <td><input name="fp_detalii" type="text" size="4" value="<?php echo htmlspecialchars($row["fp_detalii"], ENT_QUOTES, 'UTF-8')?>" /></td>
-                    <td><input type="submit" Value="<?php echo $strModify?>" class="button" name="Submit"></td>
-                    <td>
-                        <a href="carsheets.php?mode=delete&cID=<?php echo htmlspecialchars($row["fp_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>"
-                            class="ask button" OnClick="return confirm('<?php echo htmlspecialchars($strConfirmDelete, ENT_QUOTES, 'UTF-8')?>');">
-                            <i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></a>
-                    </td>
+                    <td><input type="submit" value="<?php echo $strModify?>" class="button" name="Submit"></td>
+                    <td><a href="carsheets.php?mode=delete&cID=<?php echo htmlspecialchars($row["fp_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" class="ask button" OnClick="return confirm('<?php echo htmlspecialchars($strConfirmDelete, ENT_QUOTES, 'UTF-8')?>');"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></a></td>
                 </form>
             </tr>
-
             <?php }
  }
  }

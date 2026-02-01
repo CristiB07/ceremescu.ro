@@ -148,7 +148,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="siteauthorizations.php?mode=new">
+        <form method="post"  action="siteauthorizations.php?mode=new">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
@@ -165,8 +165,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             </div>
                             <div class="grid-x grid-margin-x">
                                 <div class="large-12 medium-12 small-12 cell text-center">
-                                    <input type="submit" Value="<?php echo $strAdd?>" name="Submit"
-                                        class="button success" />
+                                    <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" />
                                 </div>
                             </div>
         </form>
@@ -200,22 +199,19 @@ if (!$row) {
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strTitle?>
-                        <input name="Autorizatie" type="text" size="50" value="<?php echo htmlspecialchars($row['Autorizatie'], ENT_QUOTES, 'UTF-8'); ?>"
-                            class="required" />
+                        <input name="Autorizatie" type="text" size="50" value="<?php echo htmlspecialchars($row['Autorizatie'], ENT_QUOTES, 'UTF-8'); ?>" class="required" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strDetails?></label>
-                        <textarea name="Descriere" class="simple-html-editor" rows="5">
-                            <?php echo htmlspecialchars($row['Descriere'], ENT_QUOTES, 'UTF-8'); ?></textarea>
-                    
+                        <textarea name="Descriere" class="simple-html-editor" rows="5"><?php echo htmlspecialchars($row['Descriere'], ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input type="submit" Value="<?php echo $strModify?>" name="Submit" class="button success" />
+                    <input type="submit" value="<?php echo $strModify?>" name="Submit" class="button success" />
                 </div>
             </div>
         </form>

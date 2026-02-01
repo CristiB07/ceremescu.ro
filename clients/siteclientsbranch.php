@@ -41,6 +41,8 @@ $client_adresa = $row["Client_Adresa"] ?? '';
 $client_telefon = $row["Client_Telefon"] ?? '';
 $client_cui = $row["Client_CUI"] ?? '';
 $client_rc = $row["Client_RC"] ?? '';
+$client_ro = $row["Client_RO"] ?? '';
+$client_cif = $row["Client_CIF"] ?? '';
 $client_banca = $row["Client_Banca"] ?? '';
 $client_iban = $row["Client_IBAN"] ?? '';
 $client_localitate = $row["Client_Localitate"] ?? '';
@@ -52,15 +54,15 @@ $client_caracterizare = $row["Client_Caracterizare"] ?? '';
 
 // Prepared statement pentru INSERT
 $stmt2 = mysqli_prepare($conn, 
-	"INSERT INTO clienti_date(Client_Denumire, Client_Adresa, Client_Telefon, Client_CUI, Client_RC, 
-	Client_Banca, Client_IBAN, Client_Localitate, Client_Judet, Client_Cod_CAEN, Client_Numar_Angajati, 
+	"INSERT INTO clienti_date(Client_Denumire, Client_Adresa, Client_Telefon, Client_CUI, Client_RC, Client_RO,
+	Client_CIF, Client_Banca, Client_IBAN, Client_Localitate, Client_Judet, Client_Cod_CAEN, Client_Numar_Angajati, 
 	Client_Descriere_Activitate, Client_Web, Client_Tip, Client_HQ, Client_Caracterizare) 
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 );
 
-mysqli_stmt_bind_param($stmt2, 'ssssssssssisssis', 
+mysqli_stmt_bind_param($stmt2, 'ssssssssssssisssis', 
 	$client_denumire, $client_adresa, $client_telefon, $client_cui, $client_rc,
-	$client_banca, $client_iban, $client_localitate, $client_judet, $client_cod_caen,
+	$client_ro, $client_cif, $client_banca, $client_iban, $client_localitate, $client_judet, $client_cod_caen,
 	$numar_angajati, $client_descriere, $client_web, $type, $cID, $client_caracterizare
 );
 				

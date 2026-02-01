@@ -269,7 +269,7 @@ $header='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
     $server_output = curl_exec($ch);
-    curl_close($ch);
+    if (PHP_VERSION_ID < 80500) { curl_close($ch); }
     
     $xml = json_encode(simplexml_load_string($server_output));
     $json = json_decode($xml);

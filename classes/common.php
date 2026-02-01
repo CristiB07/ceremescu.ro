@@ -10,10 +10,12 @@ if (mysqli_connect_errno())
   {
   echo "Failed to connect to MySQL: " . mysqli_connect_error();
   }
+// Guard all helper function and class definitions to avoid redeclare on multiple includes
+if (!function_exists('ezpub_query')) {
 function ezpub_query($conn, $query ){
-	$result = mysqli_query($conn, $query);
+        $result = mysqli_query($conn, $query);
 
-  return $result;
+    return $result;
 }
   function ezpub_inserted_id($conn) {
   $nume=mysqli_insert_id($conn);
@@ -63,17 +65,15 @@ function check_inject()
       {
         die("SQL Injection Detected\n<br />\nIP: ".$_SERVER['REMOTE_ADDR']);
       }
-      else
-      {
-        $check = preg_split("//", $value, -1, PREG_SPLIT_OFFSET_CAPTURE);
-        foreach($check as $char)
-		{
-          if(in_array($char, $badchars))
-			{
-            die("SQL Injection Detected\n<br />\nIP: ".$_SERVER['REMOTE_ADDR']);
-			}
-		}
-	  }
+            else
+            {
+                // Check for any bad token as substring (case-insensitive) instead of using preg_split
+                foreach ($badchars as $bad) {
+                        if (stripos($value, $bad) !== false) {
+                                die("SQL Injection Detected\n<br />\nIP: " . $_SERVER['REMOTE_ADDR']);
+                        }
+                }
+            }
 	}
 }
 
@@ -576,4 +576,5 @@ function normalizeDiacritice($text) {
     
     return str_replace(array_keys($replacements), array_values($replacements), $text);
 }
+} // end if !function_exists('ezpub_query')
 ?>

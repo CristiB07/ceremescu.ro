@@ -1,6 +1,7 @@
 <?php
 //site function
-$sitefunction='Site';
+$sitefunction='CRM';
+
 //folders
 $invoice_folder='facturi';
 $receipts_folder='chitante';
@@ -19,20 +20,11 @@ $efacturadownload_folder='efacturadownload';
 $newsletter_folder='newsletter';
 $admin_folder='admin';
 $contracts_folder='contracte';
-$charts='grafice';
-
-///openapi
-$openapikey="x-api-key: f2yehr9M22MyZnK7Z2cC7zvgrydyJkm1xE8xtpiJ_LEySf_FcA";
-//$openapikey="x-api-key: XXCDbsBFAwjVXCjaVEqEDBhFT1ghs61xxQ1vynQbdUsMqVs8SQ";
-
-//e-factura
-$authorize_url='https://logincert.anaf.ro/anaf-oauth2/v1/authorize';
-$token_url='https://logincert.anaf.ro/anaf-oauth2/v1/token';
-$redirect_uri='https://crm.consaltis.ro/admin/managetoken.php';
-$status_url='https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=';
-$download_url='https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=';
-$upload_url='https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=';
-$messages_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=60&cif=';
+$charts_folder='grafice';
+$transactions_folder='extrase';
+$projects_folder='proiecte';
+$documents_folder='documente';
+$elearning_folder='elearning';
 
 //freedays
 $holidays=array(
@@ -99,7 +91,9 @@ $skipdays = array("Sat", "Sun");
 
 
 //other
-define('ABSPATH', dirname(__FILE__));
+if (!defined('ABSPATH')) {
+	define('ABSPATH', dirname(__FILE__));
+}
 date_default_timezone_set('Europe/Bucharest');
 date_default_timezone_set(date_default_timezone_get());
 $array = array('ro_RO.ISO8859-1', 'ro_RO.ISO-8859-1', 'ro', 'ro_RO', 'rom', 'romanian');

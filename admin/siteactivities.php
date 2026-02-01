@@ -147,7 +147,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="siteactivities.php?mode=new">
+        <form method="post"  action="siteactivities.php?mode=new">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
@@ -159,11 +159,11 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strDetails?></label>
-                        <textarea name="Activitate_Descriere" class="simple-html-editor" rows="5"></textarea>
+                        <textarea name="Activitate_Descriere" class="simple-html-editor" data-upload-dir="pages" rows="5"></textarea>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
-                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" />
+                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" />
                 </div>
             </div>
         </form>
@@ -192,25 +192,23 @@ if (!$row) {
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="siteactivities.php?mode=edit&cID=<?php echo intval($row['ID_Activitate']); ?>">
+        <form method="post"  action="siteactivities.php?mode=edit&cID=<?php echo intval($row['ID_Activitate']); ?>">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strTitle?>
-                        <input name="Activitate_Denumire" type="text" value="<?php echo htmlspecialchars($row['Activitate_Denumire'], ENT_QUOTES, 'UTF-8'); ?>"
-                            class="required" />
+                        <input name="Activitate_Denumire" type="text" value="<?php echo htmlspecialchars($row['Activitate_Denumire'], ENT_QUOTES, 'UTF-8'); ?>" class="required" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strDetails?></label>
-                        <textarea name="Activitate_Descriere" class="simple-html-editor" rows="5"><?php echo htmlspecialchars($row['Activitate_Descriere'], ENT_QUOTES, 'UTF-8'); ?></textarea>
+                        <textarea name="Activitate_Descriere" class="simple-html-editor" data-upload-dir="pages" rows="5"><?php echo htmlspecialchars($row['Activitate_Descriere'], ENT_QUOTES, 'UTF-8'); ?></textarea>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
-                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
-                        Value="<?php echo $strModify?>" name="Submit" class="button success" />
+                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo $strModify?>" name="Submit" class="button success" />
                 </div>
             </div>
         </form>

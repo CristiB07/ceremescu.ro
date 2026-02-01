@@ -162,18 +162,16 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $stmt->close();
 ?>
-        <form method="post" Action="myprofile.php?mode=edit&sID=<?php echo htmlspecialchars($uid, ENT_QUOTES, 'UTF-8'); ?>">
+        <form method="post" action="myprofile.php?mode=edit&sID=<?php echo htmlspecialchars($uid, ENT_QUOTES, 'UTF-8'); ?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strFirstName?>
-                        <input name="account_first_name" type="text" required
-                            value="<?php echo htmlspecialchars($row['account_first_name'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input name="account_first_name" type="text" required value="<?php echo htmlspecialchars($row['account_first_name'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strLastName?>
-                        <input name="account_last_name" type="text" required
-                            value="<?php echo htmlspecialchars($row['account_last_name'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input name="account_last_name" type="text" required value="<?php echo htmlspecialchars($row['account_last_name'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
@@ -196,27 +194,24 @@ $stmt->close();
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strAddress?>
-                        <input name="account_address" type="text" required
-                            value="<?php echo htmlspecialchars($row['account_address'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input name="account_address" type="text" required value="<?php echo htmlspecialchars($row['account_address'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
                 <div class="large-2 cell">
                     <label><?php echo $strCity?>
-                        <input type="text" name="account_city" id="search-box"
-                            value="<?php echo htmlspecialchars($row['account_city'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="account_city" id="search-box" value="<?php echo htmlspecialchars($row['account_city'], ENT_QUOTES, 'UTF-8'); ?>" />
                         <div id="suggesstion-box" class="suggesstion-box"></div>
                     </label>
                 </div>
                 <div class="large-2 cell">
                     <label><?php echo $strCounty?>
-                        <input type="text" name="account_county" id="judet"
-                            value="<?php echo htmlspecialchars($row['account_county'], ENT_QUOTES, 'UTF-8'); ?>" />
+                        <input type="text" name="account_county" id="judet" value="<?php echo htmlspecialchars($row['account_county'], ENT_QUOTES, 'UTF-8'); ?>" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input type="submit" class="button" Value="<?php echo $strModify?>" name="Submit">
+                    <input type="submit" class="button" value="<?php echo $strModify?>" name="Submit">
                 </div>
             </div>
         </form>

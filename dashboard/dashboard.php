@@ -106,16 +106,56 @@ if ($sitefunction=='CRM'){
         else
         {
         ?>
+<!-- verificare semnături documente -->
+<?php
+// Check for unsigned documents
+$unsigned_query = "SELECT d.* FROM documente d WHERE NOT EXISTS (SELECT 1 FROM documente_semnaturi ds WHERE ds.document_id = d.document_id AND ds.utilizator_ID = ? AND ds.document_lastupdated = d.document_lastupdated)";
+$stmt = $conn->prepare($unsigned_query);
+$stmt->bind_param("i", $uid);
+$stmt->execute();
+$unsigned_result = $stmt->get_result();
+$unsigned_count = $unsigned_result->num_rows;
 
-        <div class="callout primary">
-            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam eget augue elit. Pellentesque justo
-                tortor, ultricies vel lobortis at, vehicula gravida enim. Morbi sollicitudin pellentesque sodales.
-                Praesent accumsan molestie quam in porta. Phasellus lobortis purus leo, vitae convallis ipsum luctus in.
-                Nulla viverra imperdiet ante vitae fringilla. Mauris ac turpis orci. Etiam semper, ligula at ornare
-                malesuada, erat turpis commodo risus, eget sagittis quam augue vel nibh. Maecenas volutpat maximus massa
-                sit amet porttitor. Mauris vitae imperdiet diam. Nunc arcu neque, lacinia eu sapien eu, commodo gravida
-                orci. Donec maximus justo neque, ac vestibulum nisi lacinia ac.</p>
-        </div>
+if ($unsigned_count > 0) {
+    // Documents to sign
+    echo "<div class=\"callout warning\" data-closable=\"false\">
+            <h5><i class=\"fas fa-exclamation-triangle\"></i> Documente care necesită semnătură</h5>
+            <p>Aveți <strong>$unsigned_count</strong> document(e) care trebuie semnate la versiunea curentă.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titlu</th>
+                        <th>Tip</th>
+                        <th>Categorie</th>
+                        <th>Cod</th>
+                        <th>Acțiune</th>
+                    </tr>
+                </thead>
+                <tbody>";
+    while ($doc = $unsigned_result->fetch_assoc()) {
+        echo "<tr>
+                <td>" . htmlspecialchars($doc['document_titlu']) . "</td>
+                <td>" . htmlspecialchars($doc['document_tip']) . "</td>
+                <td>" . htmlspecialchars($doc['document_categorie']) . "</td>
+                <td>" . htmlspecialchars($doc['document_cod']) . "</td>
+                <td><a href=\"$strSiteURL/documents/viewdocument.php?cID=" . $doc['document_id'] . "\" class=\"button small\">Vizualizare și semnare</a></td>
+            </tr>";
+    }
+    echo "</tbody>
+            </table>
+        </div>";
+} else {
+    // No documents to sign
+    echo "<div class=\"callout success\" data-closable>
+            <h5><i class=\"fas fa-check-circle\"></i> Toate documentele sunt semnate</h5>
+            <p>Nu aveți documente noi de semnat. Toate documentele sunt la zi cu semnăturile.</p>
+            <button class=\"close-button\" aria-label=\"Dismiss alert\" type=\"button\" data-close>
+                <span aria-hidden=\"true\">&times;</span>
+            </button>
+        </div>";
+}
+$stmt->close();
+?>
         <?php }
 }
         else

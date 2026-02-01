@@ -1,8 +1,7 @@
-<?php // Last Modified Time: Sunday, December 29, 2025 at 12:00:00 PM Eastern European Standard Time ?>
 <?php
 //Universal image uploader for simple-editor
 //updated 29.12.2025
-include '../../settings.php';
+include dirname(__DIR__) . '/settings.php';
 
 // Disable error display and only log errors
 error_reporting(E_ALL);
@@ -24,12 +23,12 @@ function sendError($message, $code = 500) {
 /*******************************************************
  * Only these origins will be allowed to upload images *
  ******************************************************/
-$accepted_origins = array("http://localhost", "https://localhost", "http://127.0.0.1", $strSiteURL);
+$accepted_origins = array("http://localhost", "https://localhost", "http://127.0.0.1", "http://localhost:8000", "$strSiteURL");
 
 /*********************************************
  * Determine upload folder based on directory parameter *
  *********************************************/
-$allowedDirectories = array('blog', 'pages', 'elearning');
+$allowedDirectories = array('blog', 'pages', 'elearning', 'documents', 'shop', 'admin', 'legal', 'billing', 'projects');
 $directory = isset($_POST['directory']) ? $_POST['directory'] : 'blog';
 
 // Validate directory parameter
@@ -37,7 +36,7 @@ if (!in_array($directory, $allowedDirectories)) {
     sendError('Invalid directory parameter', 400);
 }
 
-$imageFolder = "../../img/" . $directory . "/";
+$imageFolder = dirname(__DIR__) . "/img/" . $directory . "/";
 
 // Check if directory exists, create if not
 if (!is_dir($imageFolder)) {
@@ -112,6 +111,7 @@ if (is_uploaded_file($temp['tmp_name'])) {
 
     // Respond to the successful upload with JSON.
     // Use a location key to specify the path to the saved image resource.
-    echo json_encode(array('location' => $filetowrite), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    $relativeLocation = str_replace(dirname(__DIR__) . "/img/", "../img/", $filetowrite);
+    echo json_encode(array('location' => $relativeLocation), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }
 ?>

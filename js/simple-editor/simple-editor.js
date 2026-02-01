@@ -17,8 +17,14 @@ const SCRIPT_PATH = (function () {
 
 class SimpleEditor {
     constructor(selector) {
-        this.textareas = document.querySelectorAll(selector);
+        // If selector is an element, wrap it in an array
+        if (selector instanceof Element) {
+            this.textareas = [selector];
+        } else {
+            this.textareas = document.querySelectorAll(selector);
+        }
         this.editors = [];
+        this.savedSelection = null;
         this.init();
         this.setupMessageListener();
     }
@@ -51,6 +57,199 @@ class SimpleEditor {
         });
     }
 
+    applyHeading(editorElement, headingTag) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+        let selectedText = range.toString();
+
+        // Find the block element containing the selection
+        let blockElement = range.commonAncestorContainer;
+        if (blockElement.nodeType === Node.TEXT_NODE) {
+            blockElement = blockElement.parentElement;
+        }
+
+        // Find the nearest block element
+        while (blockElement && blockElement !== editorElement && !this.isBlockElement(blockElement)) {
+            blockElement = blockElement.parentElement;
+        }
+
+        if (blockElement && blockElement !== editorElement) {
+            // If the block element is already a heading, change its tag
+            if (/^H[1-6]$/.test(blockElement.tagName)) {
+                const newHeading = document.createElement(headingTag);
+                newHeading.innerHTML = blockElement.innerHTML;
+                blockElement.parentNode.replaceChild(newHeading, blockElement);
+                // Position cursor in the new heading
+                const newRange = document.createRange();
+                newRange.selectNodeContents(newHeading);
+                newRange.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            } else {
+                // Replace the block element with heading
+                const heading = document.createElement(headingTag);
+                heading.innerHTML = blockElement.innerHTML;
+                blockElement.parentNode.replaceChild(heading, blockElement);
+                // Position cursor in the new heading
+                const newRange = document.createRange();
+                newRange.selectNodeContents(heading);
+                newRange.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            }
+        } else {
+            // No block element found, insert new heading
+            if (selectedText.trim()) {
+                const heading = document.createElement(headingTag);
+                heading.innerHTML = selectedText;
+                range.deleteContents();
+                range.insertNode(heading);
+                range.setStartAfter(heading);
+                range.setEndAfter(heading);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                const heading = document.createElement(headingTag);
+                heading.innerHTML = '<br>';
+                range.insertNode(heading);
+                range.setStartAfter(heading);
+                range.setEndAfter(heading);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+
+        // Update textarea
+        const textarea = editorElement.closest('.simple-editor-wrapper').querySelector('textarea');
+        if (textarea) {
+            textarea.value = editorElement.innerHTML;
+        }
+
+        // Trigger auto-resize
+        this.autoResizeEditor(editorElement);
+    }
+
+    isBlockElement(node) {
+        const blockTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'DIV', 'BLOCKQUOTE', 'PRE'];
+        return node && node.nodeType === Node.ELEMENT_NODE && blockTags.includes(node.tagName);
+    }
+
+    autoResizeEditor(editorElement) {
+        // Use setTimeout to ensure DOM is updated
+        setTimeout(() => {
+            // Reset height to auto to get the correct scrollHeight
+            editorElement.style.height = 'auto';
+            // Set height to scrollHeight to fit content
+            const newHeight = editorElement.scrollHeight;
+            editorElement.style.height = newHeight + 'px';
+        }, 0);
+    }
+
+    decodeHtmlEntities(text) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        return textarea.value;
+    }
+
+    saveSelection() {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            return {
+                startContainer: range.startContainer,
+                startOffset: range.startOffset,
+                endContainer: range.endContainer,
+                endOffset: range.endOffset
+            };
+        }
+        return null;
+    }
+
+    restoreSelection(savedSelection) {
+        if (savedSelection) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            try {
+                range.setStart(savedSelection.startContainer, savedSelection.startOffset);
+                range.setEnd(savedSelection.endContainer, savedSelection.endOffset);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } catch (e) {
+                // In case the saved selection is no longer valid
+                console.warn('Could not restore selection:', e);
+            }
+        }
+    }
+
+    handleTabIndent(editorElement) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+        if (range.collapsed) return; // No selection
+
+        // Get all selected list items
+        const selectedLis = this.getSelectedListItems(range, editorElement);
+        if (selectedLis.length < 1) return;
+
+        // Check if they are consecutive siblings
+        const parent = selectedLis[0].parentElement;
+        if (!parent || parent.tagName !== 'UL' && parent.tagName !== 'OL') return;
+
+        const allLis = Array.from(parent.children).filter(child => child.tagName === 'LI');
+        const indices = selectedLis.map(li => allLis.indexOf(li)).sort((a, b) => a - b);
+
+        // Check if consecutive
+        for (let i = 1; i < indices.length; i++) {
+            if (indices[i] !== indices[i - 1] + 1) return;
+        }
+
+        // Get the position of the first selected LI in parent.children
+        const childIndex = Array.from(parent.children).indexOf(selectedLis[0]);
+
+        // Create new sublist
+        const sublist = document.createElement(parent.tagName); // UL or OL
+        selectedLis.forEach(li => {
+            sublist.appendChild(li);
+        });
+
+        // Insert the sublist at the position of the first selected LI
+        parent.insertBefore(sublist, parent.children[childIndex]);
+
+        // Update textarea
+        const textarea = editorElement.closest('.simple-editor-wrapper').querySelector('textarea');
+        if (textarea) {
+            textarea.value = editorElement.innerHTML;
+        }
+
+        // Trigger auto-resize
+        this.autoResizeEditor(editorElement);
+    }
+
+    getSelectedListItems(range, editorElement) {
+        const lis = [];
+        const treeWalker = document.createTreeWalker(
+            editorElement,
+            NodeFilter.SHOW_ELEMENT,
+            {
+                acceptNode: function (node) {
+                    return node.tagName === 'LI' ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                }
+            }
+        );
+
+        let node;
+        while (node = treeWalker.nextNode()) {
+            if (range.intersectsNode(node)) {
+                lis.push(node);
+            }
+        }
+
+        return lis;
+    }
+
     createEditor(textarea, index) {
         const wrapper = document.createElement('div');
         wrapper.className = 'simple-editor-wrapper';
@@ -61,11 +260,133 @@ class SimpleEditor {
         editorContent.className = 'simple-editor-content';
         editorContent.contentEditable = 'true';
         editorContent.dataset.editorId = index;
-        editorContent.innerHTML = textarea.value || '';
+        editorContent.innerHTML = this.decodeHtmlEntities(textarea.value) || '';
+
+        // Initial auto-resize
+        this.autoResizeEditor(editorContent);
+
+        // Prevent headings from becoming paragraphs when pressing Enter
+        editorContent.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    let node = range.commonAncestorContainer;
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        node = node.parentElement;
+                    }
+
+                    // Check if we're in a block element (not just headings)
+                    while (node && node !== editorContent) {
+                        if (node.tagName && (this.isBlockElement(node) || /^H[1-6]$/.test(node.tagName))) {
+                            e.preventDefault();
+                            // Insert line break instead of new paragraph
+                            document.execCommand('insertHTML', false, '<br>');
+                            return;
+                        }
+                        node = node.parentElement;
+                    }
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                this.handleTabIndent(editorContent);
+            }
+        });
 
         // Sync content back to textarea
         editorContent.addEventListener('input', () => {
+            // Prevent headings from being converted to paragraphs
+            const headings = editorContent.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            headings.forEach(heading => {
+                if (heading.parentElement && heading.parentElement.tagName === 'P') {
+                    // Move heading out of paragraph
+                    heading.parentElement.parentElement.insertBefore(heading, heading.parentElement);
+                    // Remove empty paragraph
+                    if (!heading.parentElement.textContent.trim() && heading.parentElement.children.length === 0) {
+                        heading.parentElement.remove();
+                    }
+                }
+            });
+
+            // Prevent list items from being wrapped in paragraphs
+            const listItems = editorContent.querySelectorAll('li');
+            listItems.forEach(li => {
+                if (li.parentElement && li.parentElement.tagName === 'P') {
+                    // Move li out of paragraph
+                    li.parentElement.parentElement.insertBefore(li, li.parentElement);
+                    // Remove empty paragraph
+                    if (!li.parentElement.textContent.trim() && li.parentElement.children.length === 0) {
+                        li.parentElement.remove();
+                    }
+                }
+            });
+
+            // Prevent lists from being wrapped in paragraphs
+            const lists = editorContent.querySelectorAll('ol, ul');
+            lists.forEach(list => {
+                if (list.parentElement && list.parentElement.tagName === 'P') {
+                    // Move list out of paragraph
+                    list.parentElement.parentElement.insertBefore(list, list.parentElement);
+                    // Remove empty paragraph
+                    if (!list.parentElement.textContent.trim() && list.parentElement.children.length === 0) {
+                        list.parentElement.remove();
+                    }
+                }
+            });
+
+            // Remove empty paragraphs
+            const emptyParagraphs = editorContent.querySelectorAll('p:empty');
+            emptyParagraphs.forEach(p => p.remove());
+
             textarea.value = editorContent.innerHTML;
+            // Auto-resize editor height
+            this.autoResizeEditor(editorContent);
+        });
+
+        // Use MutationObserver to merge lists in real-time
+        const observer = new MutationObserver(() => {
+            // Merge consecutive lists of the same type
+            const allLists = editorContent.querySelectorAll('ol, ul');
+            for (let i = 0; i < allLists.length - 1; i++) {
+                const current = allLists[i];
+                const next = allLists[i + 1];
+                if (current.tagName === next.tagName && current.nextSibling === next) {
+                    // Move all li from next to current
+                    while (next.firstChild) {
+                        current.appendChild(next.firstChild);
+                    }
+                    next.remove();
+                    // Adjust loop since we removed an element
+                    i--;
+                }
+            }
+        });
+        observer.observe(editorContent, { childList: true, subtree: true });
+
+        // Allow cursor placement anywhere on click
+        editorContent.addEventListener('click', (e) => {
+            // Use caretRangeFromPoint to place cursor at click position
+            if (document.caretRangeFromPoint) {
+                const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                if (range) {
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    e.preventDefault(); // Prevent default browser behavior
+                }
+            }
+        });
+
+        // Also handle keyup for better responsiveness
+        editorContent.addEventListener('keyup', () => {
+            this.autoResizeEditor(editorContent);
+        });
+
+        // Also resize on paste
+        editorContent.addEventListener('paste', () => {
+            setTimeout(() => {
+                this.autoResizeEditor(editorContent);
+            }, 10);
         });
 
         // Handle image clicks for editing properties
@@ -107,16 +428,7 @@ class SimpleEditor {
                 if (editor && editor.editor) {
                     editor.editor.focus();
                 }
-
-                // Toggle format - if already applied, revert to paragraph
-                const currentFormat = document.queryCommandValue('formatBlock').toUpperCase();
-                if (currentFormat === btn.value) {
-                    // Already applied, revert to paragraph
-                    document.execCommand(btn.command, false, 'P');
-                } else {
-                    // Apply the format
-                    document.execCommand(btn.command, false, btn.value);
-                }
+                document.execCommand(btn.command, false, btn.value || null);
             });
 
             toolbar.appendChild(button);
@@ -145,6 +457,8 @@ class SimpleEditor {
         headingsBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            // Save current selection before opening dropdown
+            this.savedSelection = this.saveSelection();
             // Close other dropdowns
             document.querySelectorAll('.toolbar-dropdown-menu.show').forEach(menu => {
                 if (menu !== headingsMenu) menu.classList.remove('show');
@@ -155,13 +469,16 @@ class SimpleEditor {
         headingsMenu.addEventListener('click', (e) => {
             if (e.target.classList.contains('dropdown-item')) {
                 e.preventDefault();
+                // Restore selection before applying heading
+                this.restoreSelection(this.savedSelection);
                 const value = e.target.dataset.value;
                 const editor = this.editors[editorId];
                 if (editor && editor.editor) {
-                    editor.editor.focus();
+                    this.applyHeading(editor.editor, value);
                 }
-                document.execCommand('formatBlock', false, value);
                 headingsMenu.classList.remove('show');
+                // Clear saved selection
+                this.savedSelection = null;
             }
         });
 
@@ -188,6 +505,9 @@ class SimpleEditor {
             { title: 'Align Right', icon: '<i class="fas fa-align-right"></i>', command: 'justifyRight' },
             { title: 'Justify', icon: '<i class="fas fa-align-justify"></i>', command: 'justifyFull' },
             { type: 'separator' },
+            { title: 'Ordered List', icon: '<i class="fas fa-list-ol"></i>', command: 'insertOrderedList' },
+            { title: 'Unordered List', icon: '<i class="fas fa-list-ul"></i>', command: 'insertUnorderedList' },
+            { type: 'separator' },
             { title: 'Insert Table', icon: '<i class="fas fa-table"></i>', action: 'insertTable', editorId: editorId, isTableBtn: true },
             { title: 'Insert Link', icon: '<i class="fas fa-link"></i>', action: 'insertLink', editorId: editorId },
             { title: 'Insert Image', icon: '<i class="fas fa-image"></i>', action: 'insertImage', editorId: editorId },
@@ -196,6 +516,7 @@ class SimpleEditor {
             { title: 'Paste as Plain Text', icon: '<i class="fas fa-clipboard"></i>', action: 'pasteAsPlainText', editorId: editorId },
             { title: 'View HTML', icon: '<i class="fas fa-file-code"></i>', action: 'viewHTML', editorId: editorId },
             { title: 'Preview', icon: '<i class="fas fa-eye"></i>', action: 'preview', editorId: editorId },
+            { title: 'Fullscreen', icon: '<i class="fas fa-expand"></i>', action: 'toggleFullscreen', editorId: editorId },
             { title: 'Clear Formatting', icon: '<i class="fas fa-eraser"></i>', command: 'removeFormat' }
         ];
 
@@ -406,13 +727,12 @@ class SimpleEditor {
         const formData = new FormData();
         formData.append('file', file);
 
-        // Get directory from editor's data attribute or default to 'blog'
-        const editorElement = document.getElementById(editorId);
-        const directory = editorElement ? editorElement.dataset.uploadDir || 'blog' : 'blog';
+        // Get directory from textarea's data attribute or default to 'blog'
+        const directory = this.editors[editorId].textarea.dataset.uploadDir || 'blog';
         formData.append('directory', directory);
 
-        // Use relative path to common directory
-        const uploadUrl = '/common/postAcceptor.php';
+        // Use absolute URL to PHP server
+        const uploadUrl = 'http://localhost:8000/common/postAcceptor.php';
 
         fetch(uploadUrl, {
             method: 'POST',
@@ -434,8 +754,8 @@ class SimpleEditor {
                 }
                 if (data.location) {
                     // Use the full path returned by server
-                    const imgPath = data.location.replace('../img/blog/', '');
-                    const img = `<img src="../img/blog/${imgPath}" alt="${file.name}" style="max-width: 100%; cursor: pointer;" class="editor-image">`;
+                    const imgPath = data.location.replace(`../img/${directory}/`, '');
+                    const img = `<img src="../img/${directory}/${imgPath}" alt="${file.name}" style="max-width: 100%; cursor: pointer;" class="editor-image">`;
                     this.editors[editorId].editor.focus();
                     document.execCommand('insertHTML', false, img);
                 }
@@ -459,6 +779,10 @@ class SimpleEditor {
                     <div class="form-group">
                         <label>Alt Text:</label>
                         <input type="text" id="img-alt" value="${img.alt || ''}" placeholder="Image description">
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL:</label>
+                        <input type="text" id="img-src" value="${img.src || ''}" placeholder="Image URL">
                     </div>
                     <div class="form-group">
                         <label>Width:</label>
@@ -515,6 +839,7 @@ class SimpleEditor {
         // Apply button
         overlay.querySelector('.btn-apply').addEventListener('click', () => {
             img.alt = overlay.querySelector('#img-alt').value;
+            img.src = overlay.querySelector('#img-src').value;
             img.style.width = overlay.querySelector('#img-width').value;
             img.style.padding = overlay.querySelector('#img-padding').value;
             img.style.margin = overlay.querySelector('#img-margin').value;
@@ -780,11 +1105,93 @@ class SimpleEditor {
         `);
         previewWindow.document.close();
     }
+
+    toggleFullscreen(editorId) {
+        const editor = this.editors[editorId];
+        if (editor && editor.wrapper) {
+            const wrapper = editor.wrapper;
+            const isFullscreen = wrapper.classList.contains('fullscreen');
+
+            if (isFullscreen) {
+                // Exit fullscreen
+                wrapper.classList.remove('fullscreen');
+                document.body.style.overflow = '';
+                // Update button icon
+                const fullscreenBtn = wrapper.querySelector('[title="Fullscreen"] i');
+                if (fullscreenBtn) {
+                    fullscreenBtn.className = 'fas fa-expand';
+                }
+            } else {
+                // Enter fullscreen
+                wrapper.classList.add('fullscreen');
+                document.body.style.overflow = 'hidden';
+                // Update button icon
+                const fullscreenBtn = wrapper.querySelector('[title="Fullscreen"] i');
+                if (fullscreenBtn) {
+                    fullscreenBtn.className = 'fas fa-compress';
+                }
+            }
+
+            // Focus back to editor
+            setTimeout(() => {
+                editor.editor.focus();
+            }, 100);
+        }
+    }
 }
 
 // Initialize editors when DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
-    if (document.querySelector('.simple-html-editor')) {
-        new SimpleEditor('.simple-html-editor');
+    // Function to initialize editors
+    function initEditors() {
+        const selectors = [
+            '.simple-html-editor',
+            '#simple-html-editor',
+            'textarea.simple-editor',
+            'textarea.simple-html-editor'
+        ];
+
+        selectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(textarea => {
+                if (!textarea.hasAttribute('data-editor-initialized') && !textarea.closest('.simple-editor-wrapper')) {
+                    textarea.setAttribute('data-editor-initialized', 'true');
+                    new SimpleEditor(textarea);
+                }
+            });
+        });
     }
+    initEditors();
+
+    // Also initialize after a short delay in case elements are added dynamically
+    setTimeout(initEditors, 100);
+
+    // Watch for dynamically added elements
+    const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+                if (node.nodeType === 1) { // Element node
+                    const textareas = node.querySelectorAll ? node.querySelectorAll('textarea.simple-html-editor, textarea.simple-editor') : [];
+                    Array.from(textareas).forEach(textarea => {
+                        if (!textarea.hasAttribute('data-editor-initialized') && !textarea.closest('.simple-editor-wrapper')) {
+                            textarea.setAttribute('data-editor-initialized', 'true');
+                            new SimpleEditor(textarea);
+                        }
+                    });
+                    // Also check if the node itself is a textarea
+                    if (node.tagName === 'TEXTAREA' &&
+                        (node.classList.contains('simple-html-editor') || node.classList.contains('simple-editor') || node.id === 'simple-html-editor')) {
+                        if (!node.hasAttribute('data-editor-initialized') && !node.closest('.simple-editor-wrapper')) {
+                            node.setAttribute('data-editor-initialized', 'true');
+                            new SimpleEditor(node);
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 });

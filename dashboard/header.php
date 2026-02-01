@@ -1,25 +1,31 @@
 <!doctype html>
 <html class="no-js" lang="" dir="ltr">
 <!-- update 08.01.2025-->
+<?php
+if (!defined('ABSPATH')) {
+    include_once(dirname(__DIR__) .'/settings.php');
+    include_once(dirname(__DIR__) .'/classes/common.php');
+}
+?>
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $strSiteName ?>: <?php echo $strPageTitle ?></title>
-    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/all.css" />
-    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/foundation.css" />
-    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/<?php echo $cssname?>.css" />
-    <link rel="shortcut icon" type="image/favicon" href="<?php echo $strSiteURL ?>/favicon.ico" />
+    <link rel="stylesheet" href="../css/all.css" />
+    <link rel="stylesheet" href="../css/foundation.css" />
+    <link rel="stylesheet" href="../css/<?php echo $cssname?>.css" />
+    <link rel="stylesheet" href="../js/simple-editor/simple-editor.css" />
+    <link rel="shortcut icon" type="image/favicon" href="../favicon.ico" />
     <script language="javascript" type="text/javascript">
     function resizeIframe(obj) {
         obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
     }
     </script>
+    <script src="../js/simple-editor/simple-editor.js"></script>
 </head>
 <?php
-include_once(dirname(__DIR__) .'/settings.php');
-include_once(dirname(__DIR__) .'/classes/common.php');
     if(!isset($_SESSION)) 
     { 
         session_start(); 

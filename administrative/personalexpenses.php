@@ -215,7 +215,7 @@ if ($mode === "new") {
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" Action="personalexpenses.php?mode=new">
+        <form method="post" action="personalexpenses.php?mode=new">
 
             <div class="grid-x grid-margin-x">
                 <div class="large-2 medium-2 small-2 cell">
@@ -257,9 +257,8 @@ $monthname = $formatter->format($dateObj);
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo $strPaidCard?>
-                        <input name="decont_achitat_card" type="radio" value="0" checked />
-                        <?php echo $strYes?>&nbsp;&nbsp;
-                        <input name="decont_achitat_card" type="radio" value="1"><?php echo $strNo?>
+                        <input name="decont_achitat_card" type="radio" value="0" checked /><?php echo $strYes?>&nbsp;&nbsp;
+                        <input name="decont_achitat_card" type="radio" value="1"><?php echo $strNo?> 
                     </label>
                 </div>
                 <div class="large-1 medium-1 small-1 cell">
@@ -273,14 +272,12 @@ $monthname = $formatter->format($dateObj);
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo $strDate?>
-                        <input name="decont_data" type="date" value="<?php echo date("Y-m-d")?>"
-                            min="<?php echo $mindate?>" max="<?php echo $maxdate?>" />
+                        <input name="decont_data" type="date" value="<?php echo date("Y-m-d")?>" min="<?php echo $mindate?>" max="<?php echo $maxdate?>" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
-                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
-                        Value="<?php echo htmlspecialchars($strAdd, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button"></div>
+                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo htmlspecialchars($strAdd, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button"></div>
             </div>
         </form>
         <?php
@@ -310,11 +307,10 @@ elseif ($mode === "edit") {
 ?>
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell">
-                <p><a href="personalexpenses.php" class="button"><?php echo htmlspecialchars($strBack, ENT_QUOTES, 'UTF-8')?>&nbsp;<i
-                            class="fas fa-backward fa-xl"></i></a></p>
+                <p><a href="personalexpenses.php" class="button"><?php echo htmlspecialchars($strBack, ENT_QUOTES, 'UTF-8')?>&nbsp;<i class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="personalexpenses.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
+        <form method="post" action="personalexpenses.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo htmlspecialchars($strExpense, ENT_QUOTES, 'UTF-8')?>
@@ -323,10 +319,8 @@ elseif ($mode === "edit") {
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo htmlspecialchars($strPaidCard, ENT_QUOTES, 'UTF-8')?>
-                        <input name="decont_achitat_card" type="radio" value="0"
-                            <?php if ($row["decont_achitat_card"]==0) echo "checked"?> />&nbsp;<?php echo htmlspecialchars($strYes, ENT_QUOTES, 'UTF-8')?>
-                        <input name="decont_achitat_card" type="radio" value="1"
-                            <?php if ($row["decont_achitat_card"]==1) echo "checked"?> />&nbsp;<?php echo htmlspecialchars($strNo, ENT_QUOTES, 'UTF-8')?>
+                        <input name="decont_achitat_card" type="radio" value="0" <?php if ($row["decont_achitat_card"]==0) echo "checked"?> />&nbsp;<?php echo htmlspecialchars($strYes, ENT_QUOTES, 'UTF-8')?>
+                        <input name="decont_achitat_card" type="radio" value="1" <?php if ($row["decont_achitat_card"]==1) echo "checked"?> />&nbsp;<?php echo htmlspecialchars($strNo, ENT_QUOTES, 'UTF-8')?>
                     </label>
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
@@ -341,15 +335,12 @@ elseif ($mode === "edit") {
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo htmlspecialchars($strDate, ENT_QUOTES, 'UTF-8')?>
-                        <input name="decont_data" type="date" value="<?php echo htmlspecialchars($row["decont_data"], ENT_QUOTES, 'UTF-8')?>"
-                            min="<?php echo htmlspecialchars($mindate, ENT_QUOTES, 'UTF-8')?>" max="<?php echo htmlspecialchars($maxdate, ENT_QUOTES, 'UTF-8')?>" />
+                        <input name="decont_data" type="date" value="<?php echo htmlspecialchars($row["decont_data"], ENT_QUOTES, 'UTF-8')?>"min="<?php echo htmlspecialchars($mindate, ENT_QUOTES, 'UTF-8')?>" max="<?php echo htmlspecialchars($maxdate, ENT_QUOTES, 'UTF-8')?>" />
                     </label>
                 </div>
             </div>
-
             <div class="grid-x grid-margin-x">
-                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
-                        Value="<?php echo htmlspecialchars($strModify, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button"></div>
+                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo htmlspecialchars($strModify, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button"></div>
             </div>
         </form>
         <?php
@@ -357,7 +348,7 @@ elseif ($mode === "edit") {
 else 
 {?>
         <h3><?php echo htmlspecialchars($strSendPE, ENT_QUOTES, 'UTF-8')?></h3>
-        <form method="post" id="users" Action="pe2excel.php">
+        <form method="post"  action="pe2excel.php">
             <div class="grid-x grid-margin-x">
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo htmlspecialchars($strMonth, ENT_QUOTES, 'UTF-8')?>
@@ -392,14 +383,13 @@ $monthname = $formatter->format($dateObj);
                         </select></label>
                 </div>
                 <div class="large-2 medium-2 small-2 cell ">
-                    <p align="right"><input type="submit" Value="<?php echo htmlspecialchars($strSend, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button">
+                    <p align="right"><input type="submit" value="<?php echo htmlspecialchars($strSend, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button">
                     </p>
                 </div>
             </div>
         </form>
 
         <?php
-
 echo "<a href=\"personalexpenses.php?mode=new\" class=\"button\">" . htmlspecialchars($strAddNew, ENT_QUOTES, 'UTF-8') . " <i class=\"fa-xl fa fa-plus\" title=\"" . htmlspecialchars($strAdd, ENT_QUOTES, 'UTF-8') . "\"></i></a><br />";
 
 // Get records with prepared statement

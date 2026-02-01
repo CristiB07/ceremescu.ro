@@ -294,7 +294,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" Action="sitecontracts.php?mode=new" enctype="multipart/form-data">
+        <form method="post" action="sitecontracts.php?mode=new" enctype="multipart/form-data">
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strClient?>
@@ -393,7 +393,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
-                    <label><?php echo $strValue?>
+                    <label><?php echo $strvalue?>
                         <input name="Contract_Suma" type="text" id="numar" class="required" value="" />
                     </label>
                 </div>
@@ -461,7 +461,7 @@ $monthname = $formatter->format($dateObj);
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button">
+                    <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button">
                 </div>
             </div>
         </form>
@@ -496,7 +496,7 @@ mysqli_stmt_close($stmt_edit);
             </div>
         </div>
         <form method="post" enctype="multipart/form-data"
-            Action="sitecontracts.php?mode=edit&cID=<?php echo $cID?>">
+            action="sitecontracts.php?mode=edit&cID=<?php echo $cID?>">
             <?php
 // Prepared statement pentru SELECT abonamente
 $stmt_abon_select = mysqli_prepare($conn, 
@@ -638,7 +638,7 @@ mysqli_stmt_close($stmt_abon_select);
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
-                    <label><?php echo $strValue?>
+                    <label><?php echo $strvalue?>
                         <input name="Contract_Suma" type="text" id="numar" class="required"
                             value="<?php echo $row["Contract_Suma"]?>" />
                     </label>
@@ -736,7 +736,7 @@ if (isset($row['Contract_File']) AND !empty($row['Contract_File']))
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button">
+                    <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button">
                 </div>
             </div>
         </form>
@@ -826,7 +826,7 @@ echo		"</td>
 			<td><a href=\"sitecontracts.php?mode=delete&cID=$row[ID_Contract]\"  OnClick=\"return confirm('$strConfirmDelete');\"><i class=\"fa fa-eraser fa-xl\" title=\"$strDelete\"></i></a></td>
         </tr>";
 }
-echo "</tbody><tfoot><tr><td></td><td  colspan=\"3\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
+echo "</tbody><tfoot><tr><td></td><td  colspan=\"4\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
 }
 }
 ?>

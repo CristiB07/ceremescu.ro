@@ -50,7 +50,8 @@ echo "<h1>$strPageTitle</h1>";
             <?php if ($_SESSION['clearence']=='ADMIN')
 {           echo "<li class=\"tabs-title\"><a href=\"#panel7\">$strInvoices</a></li>
             <li class=\"tabs-title\"><a href=\"#panel8\">$strBalances</a></li>
-            <li class=\"tabs-title\"><a href=\"#panel9\">$strFiscalData</a></li>";
+            <li class=\"tabs-title\"><a href=\"#panel9\">$strFiscalData</a></li>
+            <li class=\"tabs-title\"><a href=\"#panel10\">$strCourtTrials</a></li>";
         }
         ?>
         </ul>
@@ -133,7 +134,6 @@ mysqli_stmt_close($stmt2);
                         <?php If ($row["fisa_GD"]==0) echo $strYes; else echo $strNo; ?>
                         <label><?php echo $strDSPReporting?></label>
                         <?php If ($row["fisa_raportare_DSP"]==0) echo $strYes; else echo $strNo; ?>
-
                     </div>
                     <div class="large-3 medium-3 small-3 cell">
                         <label><?php echo $strPackageManagement?></label>
@@ -281,7 +281,7 @@ ORDER By Client_Denumire ASC");
 mysqli_stmt_bind_param($stmt, 'i', $clientID);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
-$numar=ezpub_num_rows($result,$query);
+$numar=ezpub_num_rows($result,$stmt);
 echo ezpub_error($conn);
 if ($numar==0)
 {
@@ -488,7 +488,7 @@ mysqli_stmt_close($stmt);
  
 $cui = htmlspecialchars($row['Client_CIF'] ?? '', ENT_QUOTES, 'UTF-8');
 $cui_numeric = preg_replace('/\D/', '', $cui);
-
+echo $cui_numeric;
 // Importă și afișează bilanțuri ANAF dacă CUI numeric valid
 if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
     $_GET['cui'] = $cui_numeric;
@@ -510,6 +510,7 @@ mysqli_stmt_close($stmt);
  
 $cui = htmlspecialchars($row['Client_CIF'] ?? '', ENT_QUOTES, 'UTF-8');
 $cui_numeric = preg_replace('/\D/', '', $cui);
+
 // Importă și afișează date fiscale ANAF dacă CUI numeric valid
 if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
     $_GET['cui'] = $cui_numeric;
@@ -517,6 +518,22 @@ if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
     unset($_GET['cui']);
 }
 ?>
+            </div>
+            <div class="tabs-panel" id="panel10">
+                <!--   show trials data -->
+                <?php
+                // Load client name and include the JUST search as an embedded tab.
+                $stmt = mysqli_prepare($conn, "SELECT Client_Denumire FROM clienti_date WHERE ID_Client=?");
+                mysqli_stmt_bind_param($stmt, 'i', $clientID);
+                mysqli_stmt_execute($stmt);
+                $result_j = mysqli_stmt_get_result($stmt);
+                $row_j = mysqli_fetch_array($result_j, MYSQLI_ASSOC);
+                mysqli_stmt_close($stmt);
+
+                $Client_Denumire = $row_j['Client_Denumire'] ?? '';
+                // Include the search UI from common; `just_query.php` detects being included and will auto-run search using $Client_Denumire
+                include_once __DIR__ . '/../common/just_query.php';
+                ?>
             </div>
             <?php } // <-- CLOSE the if block for ADMIN
             ?>

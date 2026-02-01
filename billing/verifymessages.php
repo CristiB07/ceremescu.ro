@@ -58,7 +58,7 @@ if ($_GET["mode"]=='verify')
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
 		$response = curl_exec($ch);
-    curl_close($ch); 
+	    if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 	$obj = json_decode($response, true);
 
 if (isset ($obj['eroare']))
@@ -256,7 +256,7 @@ elseif ($value['tip']=='ERORI FACTURA')
         <?php 
 				}
 print "</tr>";}
-print "</tbody><tfoot><tr><td></td><td  colspan=\"7\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
+print "</tbody><tfoot><tr><td></td><td  colspan=\"6\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
 curl_close ($ch);
 }}
 else
@@ -565,41 +565,16 @@ if (empty($invoicelines['ID']))
 { //there are more than one line
 	$tableline="";
 	$indexdownload=$iddescarcare;
-$stmt2 = mysqli_prepare($conn, "SELECT * FROM facturare_articole_facturi_primite WHERE index_download=?");
-mysqli_stmt_bind_param($stmt2, "s", $indexdownload);
-mysqli_stmt_execute($stmt2);
-$result = mysqli_stmt_get_result($stmt2);
-if (mysqli_num_rows($result)>0)
-{// invoice registered, products registere
-echo "<div class=\"callout alert\">$strSkipped<br />$strReceivedInvoiceAlreadyRegistered</div>" ;
+// Always try to register articles with INSERT IGNORE
 foreach($invoicelines as $index => $value) {
 	if (empty($value['ID'])&&empty($value['Item']['Name'])&&empty($value['Price']['PriceAmount']))
-	{echo "";}	
-	else	{
-	 $tableline = $tableline . "<tr>";
-	 $tableline = $tableline .  "<td>" .$value['ID']. "</td>";
-	 $tableline = $tableline .  "<td>".$value['Item']['Name'] ." - ".$value['Item']['Description']."</td>";
-	 $tableline = $tableline .  "<td align=\"right\">".$value['InvoicedQuantity']."</td>";
-	 $tableline = $tableline .  "<td align=\"right\">".$value['Price']['PriceAmount']."</td>";
-	 $tableline = $tableline .  "<td align=\"right\">".$value['LineExtensionAmount']."</td>";
-	 if (empty($value['Item']['ClassifiedTaxCategory']['Percent']))
-		  {	$procentTVA=0;}
-		 else
-		 { $procentTVA=$value['Item']['ClassifiedTaxCategory']['Percent'];}
-		 $tableline = $tableline .  "<td align=\"right\">$procentTVA</td>";
-	 	$tableline = $tableline .  "</tr>";}
-	} // end multiple lines with invoice registered
-	}//ends emptyline
-else 
-	{ //invoice wasn't registered, register products
-
-	foreach($invoicelines as $index => $value) {
-		if (empty($value['ID'])&&empty($value['Item']['Name'])&&empty($value['Price']['PriceAmount']))
 	{echo "";}	
 	else	{	
 	 $tableline = $tableline . "<tr>";
 	 $tableline = $tableline .  "<td>" .$value['ID']. "</td>";
-	 $tableline = $tableline .  "<td>".htmlentities($value['Item']['Name']) ." - ".htmlentities($value['Item']['Description'])."</td>";
+	 $name = is_array($value['Item']['Name']) ? implode(' ', $value['Item']['Name']) : $value['Item']['Name'];
+	 $desc = is_array($value['Item']['Description']) ? implode(' ', $value['Item']['Description']) : $value['Item']['Description'];
+	 $tableline = $tableline .  "<td>".htmlentities($name) ." - ".htmlentities($desc)."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['InvoicedQuantity']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['Price']['PriceAmount']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$value['LineExtensionAmount']."</td>";
@@ -626,7 +601,7 @@ else
 			$facturaID=$row['fp_id'];
 			mysqli_stmt_close($stmt_fid);
 		}
-$stmt_art = mysqli_prepare($conn, "INSERT INTO facturare_articole_facturi_primite(articolFP_nume, articolFP_unitate, articolFP_cantitate, articolFP_pret, articolFP_procent_TVA, articolFP_valoare, articolFP_TVA, index_download, factura_ID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt_art = mysqli_prepare($conn, "INSERT IGNORE INTO facturare_articole_facturi_primite(articolFP_nume, articolFP_unitate, articolFP_cantitate, articolFP_pret, articolFP_procent_TVA, articolFP_valoare, articolFP_TVA, index_download, factura_ID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
 mysqli_stmt_bind_param($stmt_art, "ssssssssi", $numearticol, $unitatearticol, $cantitatearticol, $pretarticol, $procentTVA, $valoaretotala, $valoareTVA, $indexdownload, $facturaID);
 		
 //It executes the SQL
@@ -636,16 +611,17 @@ if (!mysqli_stmt_execute($stmt_art))
   }
 else{
 echo "<div class=\"callout success\">$strReceivedInvoiceArticlesRegistered</div></div></div>" ;}
-} //ends empty line
-}//we registered products
-}	// ends invoice not registered, products registered
-	} // ends multiple lines invoice
+}
+}
+}
 else
 	{//there is only one line in invoice
 		$tableline="";
     $tableline = $tableline .  "<tr>";
 	 $tableline = $tableline .  "<td>" .$invoicelines['ID']. "</td>";
-	 $tableline = $tableline .  "<td>".$invoicelines['Item']['Name'] ." - ".$invoicelines['Item']['Description']."</td>";
+	 $name = is_array($invoicelines['Item']['Name']) ? implode(' ', $invoicelines['Item']['Name']) : $invoicelines['Item']['Name'];
+	 $desc = is_array($invoicelines['Item']['Description']) ? implode(' ', $invoicelines['Item']['Description']) : $invoicelines['Item']['Description'];
+	 $tableline = $tableline .  "<td>".$name ." - ".$desc."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$invoicelines['InvoicedQuantity']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$invoicelines['Price']['PriceAmount']."</td>";
 	 $tableline = $tableline .  "<td align=\"right\">".$invoicelines['LineExtensionAmount']."</td>";
@@ -655,18 +631,9 @@ else
 		 else
 		 { $procentTVA=$invoicelines['Item']['ClassifiedTaxCategory']['Percent'];}
 		 $tableline = $tableline .  "<td align=\"right\">$procentTVA</td>";
-	 $tableline = $tableline .  "</tr>";}
+	 $tableline = $tableline .  "</tr>";
 $indexdownload=$iddescarcare;
-$stmt3 = mysqli_prepare($conn, "SELECT * FROM facturare_articole_facturi_primite WHERE index_download=?");
-mysqli_stmt_bind_param($stmt3, "s", $indexdownload);
-mysqli_stmt_execute($stmt3);
-$result = mysqli_stmt_get_result($stmt3);
-if (mysqli_num_rows($result)>0)
-{
-echo "<div class=\"callout alert\">$strSkipped<br />$strReceivedInvoiceAlreadyRegistered</div>" ;
-}
-else 
-	{
+// Always try to register the single article with INSERT IGNORE
 		if (empty($facturaID) or !isset($facturaID))
 		{
 			$stmt_fid2 = mysqli_prepare($conn, "SELECT * FROM facturare_facturi_primite WHERE fp_index_download=?");
@@ -678,13 +645,13 @@ else
 			mysqli_stmt_close($stmt_fid2);
 		}
 
-		$numearticol=$invoicelines['Item']['Name']." - ".$invoicelines['Item']['Description'];
+		$numearticol=$name." - ".$desc;
 		$unitatearticol="buc";
 		$cantitatearticol=$invoicelines['InvoicedQuantity'];
 		$pretarticol=$invoicelines['Price']['PriceAmount'];
 		$valoaretotala=$invoicelines['LineExtensionAmount'];
 		$valoareTVA=$valoaretotala * $procentTVA / 100;
-$stmt_art2 = mysqli_prepare($conn, "INSERT INTO facturare_articole_facturi_primite(articolFP_nume, articolFP_unitate, articolFP_cantitate, articolFP_pret, articolFP_procent_TVA, articolFP_valoare, articolFP_TVA, index_download, factura_ID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt_art2 = mysqli_prepare($conn, "INSERT IGNORE INTO facturare_articole_facturi_primite(articolFP_nume, articolFP_unitate, articolFP_cantitate, articolFP_pret, articolFP_procent_TVA, articolFP_valoare, articolFP_TVA, index_download, factura_ID) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
 mysqli_stmt_bind_param($stmt_art2, "ssssssssi", $numearticol, $unitatearticol, $cantitatearticol, $pretarticol, $procentTVA, $valoaretotala, $valoareTVA, $indexdownload, $facturaID);
 			
 //It executes the SQL
@@ -833,7 +800,7 @@ $error_message = isset($result['header']['Error_attr']['errorMessage']) ? $resul
 // Funcție recursivă pentru a extrage toate mesajele de eroare
 function list_error_messages($errorArray, $index_incarcare) {
     if (isset($errorArray['Error_attr']['errorMessage']) && !empty($errorArray['Error_attr']['errorMessage'])) {
-        echo '<div class="callout alert">Factura cu index de încărcare <strong>' . htmlspecialchars($index_incarcare) . '</strong> are următoarea eroare: <strong>' . htmlspecialchars($errorArray['Error_attr']['errorMessage']) . '</strong>!</div>';
+        echo '<div class="callout alert">Factura cu index de încărcare <strong>' . htmlspecialchars($index_incarcare ?? '') . '</strong> are următoarea eroare: <strong>' . htmlspecialchars($errorArray['Error_attr']['errorMessage'] ?? '') . '</strong>!</div>';
     }
     if (isset($errorArray['Error']) && is_array($errorArray['Error'])) {
         // Poate fi o listă de erori sau un singur array

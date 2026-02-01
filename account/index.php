@@ -28,7 +28,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
 If ($message == "WP"){
 echo "<div class=\"callout alert\">$strWrongCredentials</div>" ;
 }
-ElseIf ($message == "NL"){
+elseIf ($message == "NL"){
 echo "<div class=\"callout alert\">$strNotLogedIn</div>" ;
 }?>
                 <div class="grid-x grid-margin-x">
@@ -39,8 +39,7 @@ echo "<div class=\"callout alert\">$strNotLogedIn</div>" ;
                         <div class="callout secondary">
                             <label>
                                 <h3><?php echo $strUserName ?></h3>
-                                <input type="text" id="username" name="username"
-                                    placeholder="<?php echo $strUserName ?>" />
+                                <input type="text" id="username" name="username" placeholder="<?php echo $strUserName ?>" />
                                 <input type="hidden" id="hash" name="hash" value="<?php echo $token ?>" />
                                 <?php if(isset($_GET['redirect'])): ?>
                                 <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($_GET['redirect'], ENT_QUOTES, 'UTF-8'); ?>" />
@@ -48,8 +47,7 @@ echo "<div class=\"callout alert\">$strNotLogedIn</div>" ;
                             </label>
                             <label>
                                 <h3><?php echo $strPassword ?></h3>
-                                <input type="password" id="password" name="password"
-                                    placeholder="<?php echo $strPassword ?>" />
+                                <input type="password" id="password" name="password" placeholder="<?php echo $strPassword ?>" />
                             </label>
                             <p><input type="submit" class="button" value="<?php echo $strLogin ?>" /></p>
                             <p><a href="forgotpassword.php" class="button"><?php echo $strForgotPassword ?></a>

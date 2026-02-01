@@ -1,19 +1,20 @@
 <?php
 //update 8.01.2025
+ob_start();
 include '../settings.php';
 include '../classes/common.php';
-
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' AND IsSet($_POST['Cui'])) {
 
 // Validate and sanitize CUI input
+
 $cui = preg_replace('/[^0-9]/', '', $_POST['Cui']); // Only digits
 if (empty($cui) || !is_numeric($cui)) {
+    ob_end_clean();
     header('Content-Type: application/json');
     echo json_encode(['error' => 'CUI invalid']);
     exit();
 }
-
 $postfields = [];
 
 $url='https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva';
@@ -32,42 +33,27 @@ curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_POST,TRUE);
 curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($postfields));
 $result = curl_exec($ch);
-if (empty($result)) //fallback on OpenAPI
-    { 
-		
-	$ch = curl_init();
-
-curl_setopt($ch, CURLOPT_URL, "https://api.openapi.ro/api/companies/" . urlencode($cui));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-curl_setopt($ch, CURLOPT_HEADER, FALSE);
-
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-  $openapikey
-));
-if( ! $response = curl_exec($ch)) 
-    { 
-        trigger_error(curl_error($ch)); 
-    } 
-    curl_close($ch); 
-$obj = json_decode($response, true);
-$denumire=$obj['denumire'] ?? '';
-
-If (!empty($obj['tva'])){
-$tva="RO";}
-else
-{$tva="";}
-$cif=$obj['cif'] ?? '';
-$denumire=strtoupper($obj['denumire'] ?? '');
-$adresa=$obj['adresa'] ?? '';
-$judet=normalizeDiacritice(strtoupper($obj['judet'] ?? ''));
-$numar_reg_com=$obj['numar_reg_com'] ?? '';
-$codpostal=$obj['cod_postal'] ?? '';
-If (!empty($obj['cod_postal'])){
-$codpostal=$obj['cod_postal'];
-	$cpl=strlen($codpostal);
+//curl_close($ch);
+$data = json_decode($result, true);
+if (empty($data['found'][0])) {
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Nu s-au găsit date pentru CUI-ul specificat']);
+    exit();
+}
+$dategenerale=$data['found'][0];
+$numar_reg_com=$dategenerale['date_generale']['nrRegCom'] ?? '';
+$cif=$dategenerale['date_generale']['cui'] ?? '';
+$denumire=strtoupper($dategenerale['date_generale']['denumire'] ?? '');
+$adresa=$dategenerale['date_generale']['adresa'] ?? '';
+$codpostal=$dategenerale['date_generale']['codPostal'] ?? '';
+$cpl=strlen($codpostal);
 	if ($cpl!=6)
 	{$codpostal=str_pad($codpostal, 6, '0', STR_PAD_LEFT); }
-  
+
+$judet=normalizeDiacritice(strtoupper($dategenerale['adresa_sediu_social']['sdenumire_Judet'] ?? ''));
+$codlocalitate=$dategenerale['adresa_sediu_social']['scod_Localitate'] ?? '';
+$localitate=$dategenerale['adresa_sediu_social']['sdenumire_Localitate'] ?? '';
+
   // Use prepared statement to prevent SQL injection
   $stmt = mysqli_prepare($conn, "SELECT Localitate FROM generale_coduripostale WHERE Codpostal = ?");
   mysqli_stmt_bind_param($stmt, 's', $codpostal);
@@ -76,121 +62,17 @@ $codpostal=$obj['cod_postal'];
   $row = mysqli_fetch_assoc($result);
   mysqli_stmt_close($stmt);
   $oras = $row["Localitate"] ?? '';
-}
-else
+if (empty($oras)&&!empty($codpostal))
 {
-	if ($judet=='MUNICIPIUL BUCUREȘTI')
-	{$oras="BUCUREȘTI";}
-	else 
-	{$oras=" ";}
-	}
-$datecontract= $denumire. ", cu sediul social în ". $adresa . ", oraș ".$oras.", județul ".$judet.", înregistrată la Registrul Comerțului sub nr. ".$numar_reg_com.", CUI ".$tva." ".$cif . " sursa date OpenApi";
-$formresult=json_encode([
-  'tva' => $tva,
-  'cif' => $cif,
-  'adresa' => $adresa,
-  'denumire' => $denumire,
-  'numar_reg_com' => $numar_reg_com,
-  'oras' => $oras,
-  'judet' => $judet,
-  'codpostal' => $codpostal,
-  'datecontract'=>$datecontract
-]);
-header('Content-Type: application/json');
-echo $formresult;
-		
-    } 
-    else 
-	{
-$result = curl_exec($ch);
-$data = json_decode($result, true);
-If (empty($data['found'][0])) //again to Open API
+  If ($judet!='MUNICIPIUL BUCUREȘTI' && !empty($codlocalitate))
+  {
+    $oras=$localitate;
+  }
+elseif ($judet=='MUNICIPIUL BUCUREȘTI')
 {
-		$ch = curl_init();
-
-curl_setopt($ch, CURLOPT_URL, "https://api.openapi.ro/api/companies/" . urlencode($cui));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-curl_setopt($ch, CURLOPT_HEADER, FALSE);
-
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-  $openapikey
-));
-if( ! $response = curl_exec($ch)) 
-    { 
-        trigger_error(curl_error($ch)); 
-    } 
-    curl_close($ch); 
-$obj = json_decode($response, true);
-$denumire=$obj['denumire'] ?? '';
-
-If (!empty($obj['tva'])){
-$tva="RO";}
-else
-{$tva="";}
-$cif=$obj['cif'] ?? '';
-$denumire=strtoupper($obj['denumire'] ?? '');
-$adresa=$obj['adresa'] ?? '';
-$judet=normalizeDiacritice(strtoupper($obj['judet'] ?? ''));
-$numar_reg_com=$obj['numar_reg_com'] ?? '';
-$codpostal=$obj['cod_postal'] ?? '';
-If (!empty($obj['cod_postal'])){
-$codpostal=$obj['cod_postal'];
-	$cpl=strlen($codpostal);
-	if ($cpl!=6)
-	{$codpostal=str_pad($codpostal, 6, '0', STR_PAD_LEFT); }
-  
-  // Use prepared statement to prevent SQL injection
-  $stmt = mysqli_prepare($conn, "SELECT Localitate FROM coduripostale WHERE Codpostal = ?");
-  mysqli_stmt_bind_param($stmt, 's', $codpostal);
-  mysqli_stmt_execute($stmt);
-  $result = mysqli_stmt_get_result($stmt);
-  $row = mysqli_fetch_assoc($result);
-  mysqli_stmt_close($stmt);
-  $oras = $row["Localitate"] ?? '';
-}
-else
-{
-	if ($judet=='MUNICIPIUL BUCUREȘTI')
-	{$oras="BUCUREȘTI";}
-	else 
-	{$oras=" ";}
-	}
-$datecontract= $denumire. ", cu sediul social în ". $adresa . ", oraș ".$oras.", județul ".$judet.", înregistrată la Registrul Comerțului sub nr. ".$numar_reg_com.", CUI ".$tva." ".$cif . " sursa date OpenApi";
-$formresult=json_encode([
-  'tva' => $tva,
-  'cif' => $cif,
-  'adresa' => $adresa,
-  'denumire' => $denumire,
-  'numar_reg_com' => $numar_reg_com,
-  'oras' => $oras,
-  'judet' => $judet,
-  'codpostal' => $codpostal,
-  'datecontract'=>$datecontract
-]);
-header('Content-Type: application/json');
-echo $formresult;
-		
-}
-else {
-	// go on with ANAF
-$dategenerale=$data['found'][0];
-$numar_reg_com=$dategenerale['date_generale']['nrRegCom'] ?? '';
-$cif=$dategenerale['date_generale']['cui'] ?? '';
-$denumire=strtoupper($dategenerale['date_generale']['denumire'] ?? '');
-$adresa=$dategenerale['date_generale']['adresa'] ?? '';
-$codpostal=$dategenerale['date_generale']['codPostal'] ?? '';
-$judet=normalizeDiacritice(strtoupper($dategenerale['adresa_sediu_social']['sdenumire_Judet'] ?? ''));
-$oras=strtoupper($dategenerale['adresa_sediu_social']['sdenumire_Localitate'] ?? '');
-$oras=str_replace("MUN. ","",$oras); 
-If ($judet=='MUNICIPIUL BUCUREȘTI')
-{
-	$oras=str_replace("BUCUREȘTI","",$oras);
-	$oras=str_replace(" ","",$oras);
-	$cpl=strlen($codpostal);
-	if ($cpl!=6)
-	{$codpostal=str_pad($codpostal, 6, '0', STR_PAD_LEFT); }
+	$oras="SECTOR".$codlocalitate;
  }
-
+}
 
 If (!empty($dategenerale['inregistrare_scop_Tva']['scpTVA']))
 {
@@ -201,7 +83,7 @@ else
 	$tva="";
 	}
 
-$datecontract= $denumire. ", cu sediul social în ". $adresa . ", oraș ".$oras.", județul ".$judet.", înregistrată la Registrul Comerțului sub nr. ".$numar_reg_com.", CUI ".$tva." ".$cif . " sursa date ANAF";
+$datecontract= $denumire. ", cu sediul social în ". $adresa . ", înregistrată la Registrul Comerțului sub nr. ".$numar_reg_com.", CUI ".$tva." ".$cif;
 $formresult=json_encode([
   'tva' => $tva,
   'cif' => $cif,
@@ -214,14 +96,14 @@ $formresult=json_encode([
   'datecontract'=>$datecontract
 ]);
 
+ob_end_clean();
 header('Content-Type: application/json');
 echo $formresult;
 }
-}
-}
 else
 {
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Nu există conexiune']);
+  ob_end_clean();
+  header('Content-Type: application/json');
+  echo json_encode(['error' => 'Nu există conexiune']);
 }
 ?>

@@ -192,7 +192,7 @@ else {
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 	echo "<a href=\"siteproducts.php\" class=\"button\">$strBack &nbsp;<i class=\"fas fa-backward fa-xl\"></i></a>";
 ?>
-<form method="post" Action="siteproducts.php?mode=new">
+<form method="post" action="siteproducts.php?mode=new">
     <div class="grid-x grid-padding-x">
         <div class="large-4 medium-4 small-4 cell">
             <label><?php echo $strTitle?></label></label>
@@ -272,12 +272,12 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
     <div class="grid-x grid-padding-x">
         <div class="large-12 medium-12 small-12 cell">
             <label><?php echo $strProductShort?></label>
-            <textarea name="produs_descriere" rows="5" class="simple-html-editor"></textarea>
+            <textarea name="produs_descriere" rows="5" class="simple-html-editor" data-upload-dir="shop"></textarea>
         </div>
     </div>
     <div class="grid-x grid-padding-x">
         <div class="large-12 medium-12 small-12 cell text-center">
-            <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="submit button">
+            <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="submit button">
         </div>
     </div>
 </form>
@@ -306,7 +306,7 @@ if (!$row) {
 
 echo "<a href=\"siteproducts.php\" class=\"button\">" . htmlspecialchars($strBack, ENT_QUOTES, 'UTF-8') . " &nbsp;<i class=\"fas fa-backward fa-xl\"></i></a>";
 ?>
-<form method="post" Action="siteproducts.php?mode=edit&pID=<?php echo (int)$row['produs_id']?>">
+<form method="post" action="siteproducts.php?mode=edit&pID=<?php echo (int)$row['produs_id']?>">
     <div class="grid-x grid-padding-x">
         <div class="large-4 medium-4 small-4 cell">
             <label><?php echo $strTitle?></label>
@@ -387,12 +387,12 @@ echo "<a href=\"siteproducts.php\" class=\"button\">" . htmlspecialchars($strBac
         <div class="large-12 medium-12 small-12 cell">
             <label><?php echo $strProductShort?></label>
             <textarea name="produs_descriere" class="simple-html-editor"
-                rows="5"><?php echo $row['produs_descriere']?></textarea>
+                data-upload-dir="shop" rows="5"><?php echo $row['produs_descriere']?></textarea>
         </div>
     </div>
     <div class="grid-x grid-padding-x">
         <div class="large-12 medium-12 small-12 cell text-center">
-            <input type="submit" Value="<?php echo $strModify?>" name="Submit" class="submit button">
+            <input type="submit" value="<?php echo $strModify?>" name="Submit" class="submit button">
         </div>
     </div>
 </form>

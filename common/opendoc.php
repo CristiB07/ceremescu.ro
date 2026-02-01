@@ -27,7 +27,7 @@ if ((isset($_GET['docID'])) && (isset($_GET['type'])) && !empty($_GET['docID']) 
     } elseif ($type == 4) {
         $filefolder = $contracts_folder;
     } elseif ($type == 5) {
-            $filefolder = $elearningfiles."/".$_GET['folder'];
+        $filefolder = $elearning_folder."/".$_GET['folder'];
     }
     
     // Construct full file path securely

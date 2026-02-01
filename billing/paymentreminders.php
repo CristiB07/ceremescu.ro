@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
         foreach ($_POST['clients'] as $client_data) {
             list($client_id, $client_email_raw) = explode('|', $client_data);
             $client_id = (int)$client_id;
-            // Split multiple emails
-            $email_list = array_filter(array_map('trim', preg_split('/;[ ]*/', $client_email_raw)));
+            // Split multiple emails (avoid preg_split)
+            $email_list = array_filter(array_map('trim', explode(';', $client_email_raw)));
             $valid_email_found = false;
             foreach ($email_list as $email) {
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -293,9 +293,9 @@ include '../dashboard/header.php';
                         <?php
                         while ($row = ezpub_fetch_array($result)) {
                             $client_id = (int)$row['factura_client_ID'];
-                            $client_email = htmlspecialchars($row['client_email'], ENT_QUOTES, 'UTF-8');
-                            $client_name = htmlspecialchars($row['factura_client_denumire'], ENT_QUOTES, 'UTF-8');
-                            $client_cif = htmlspecialchars($row['factura_client_CIF'], ENT_QUOTES, 'UTF-8');
+                            $client_email = htmlspecialchars($row['client_email'] ?? '', ENT_QUOTES, 'UTF-8');
+                            $client_name = htmlspecialchars($row['factura_client_denumire'] ?? '', ENT_QUOTES, 'UTF-8');
+                            $client_cif = htmlspecialchars($row['factura_client_CIF'] ?? '', ENT_QUOTES, 'UTF-8');
                             $client_value = $client_id . '|' . $row['client_email'];
 
                             // 1. Numerele facturilor restante (concatenate)

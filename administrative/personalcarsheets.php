@@ -66,7 +66,7 @@ if ($message === "Success") {
             </div>
         </div>
 
-        <form method="post" id="users" Action="cs2excel.php">
+        <form method="post"  action="cs2excel.php">
             <div class="grid-x grid-margin-x">
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo htmlspecialchars($strMonth, ENT_QUOTES, 'UTF-8')?>
@@ -101,7 +101,7 @@ $monthname = $formatter->format($dateObj);
                         </select></label>
                 </div>
                 <div class="large-1 medium-1 small-1 cell">
-                    <p align="right"><input type="submit" Value="<?php echo htmlspecialchars($strSend, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button">
+                    <p align="right"><input type="submit" value="<?php echo htmlspecialchars($strSend, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button">
                     </p>
                 </div>
         </form>
@@ -117,20 +117,16 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
             <label><?php echo htmlspecialchars($strMonth, ENT_QUOTES, 'UTF-8')?>
                 <select name="menu1" onChange="MM_jumpMenu('parent',this,1)">
                     <option value="00" selected>--</option>
-                    <option value="carsheets.php?mode=fill&month=<?php echo htmlspecialchars($lastmonth, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($lastyear, ENT_QUOTES, 'UTF-8')?>">
-                        <?php echo htmlspecialchars($lastmonthname . " " . $lastyear, ENT_QUOTES, 'UTF-8')?></option>
-                    <option value="carsheets.php?mode=fill&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
-                        <?php echo htmlspecialchars($currentmonthname . " " . $year, ENT_QUOTES, 'UTF-8')?></option>
+                    <option value="carsheets.php?mode=fill&month=<?php echo htmlspecialchars($lastmonth, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($lastyear, ENT_QUOTES, 'UTF-8')?>"><?php echo htmlspecialchars($lastmonthname . " " . $lastyear, ENT_QUOTES, 'UTF-8')?></option>
+                    <option value="carsheets.php?mode=fill&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>"><?php echo htmlspecialchars($currentmonthname . " " . $year, ENT_QUOTES, 'UTF-8')?></option>
                 </select> </label>
         </div>
         <div class="large-4 medium-4 small-4 cell">
             <label><?php echo htmlspecialchars($strMonth, ENT_QUOTES, 'UTF-8')?>
                 <select name="menu1" onChange="MM_jumpMenu('parent',this,1)">
                     <option value="00" selected>--</option>
-                    <option value="carsheets.php?mode=show&month=<?php echo htmlspecialchars($lastmonth, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($lastyear, ENT_QUOTES, 'UTF-8')?>">
-                        <?php echo htmlspecialchars($lastmonthname . " " . $lastyear, ENT_QUOTES, 'UTF-8')?></option>
-                    <option value="carsheets.php?mode=show&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
-                        <?php echo htmlspecialchars($currentmonthname . " " . $year, ENT_QUOTES, 'UTF-8')?></option>
+                    <option value="carsheets.php?mode=show&month=<?php echo htmlspecialchars($lastmonth, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($lastyear, ENT_QUOTES, 'UTF-8')?>"><?php echo htmlspecialchars($lastmonthname . " " . $lastyear, ENT_QUOTES, 'UTF-8')?></option>
+                    <option value="carsheets.php?mode=show&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>"><?php echo htmlspecialchars($currentmonthname . " " . $year, ENT_QUOTES, 'UTF-8')?></option>
                 </select> </label>
         </div>
     </div>

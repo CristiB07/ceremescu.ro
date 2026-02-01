@@ -106,7 +106,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="sitewastecodes.php?mode=new">
+        <form method="post"  Action="sitewastecodes.php?mode=new">
             <div class="grid-x grid-margin-x">
                 
                 <div class="large-1 medium-1 small-4 cell">

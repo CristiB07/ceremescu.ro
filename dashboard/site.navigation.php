@@ -101,10 +101,10 @@ if ($blog==1)
 }//end of admin check, start CLIENT
 elseif ($role=='CLIENT')
 {
-    $queryclient=ezpub_query($conn,"SELECT account_first_name, account_last_name FROM site_accounts WHERE account_id='$uid'");
+    $queryclient=ezpub_query($conn,"SELECT utilizator_Prenume, utilizator_Nume FROM date_utilizatori WHERE utilizator_id='$uid'");
     $rowclient=ezpub_fetch_array($queryclient);
-    $strClientFirstName=$rowclient['account_first_name'];
-    $strClientLastName=$rowclient['account_last_name'];
+    $strClientFirstName=$rowclient['utilizator_Prenume'];
+    $strClientLastName=$rowclient['utilizator_Nume'];
 ?>
 <li>
     <a href="#"><i class="far fa-user fa-xl"></i>&nbsp;<?php echo $strHello . ' ' . $strClientFirstName. '' . $strClientLastName ?></a>

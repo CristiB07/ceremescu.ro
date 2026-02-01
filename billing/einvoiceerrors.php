@@ -112,7 +112,7 @@ $error_message = isset($result['header']['Error_attr']['errorMessage']) ? $resul
 // Funcție recursivă pentru a extrage toate mesajele de eroare
 function list_error_messages($errorArray, $index_incarcare) {
     if (isset($errorArray['Error_attr']['errorMessage']) && !empty($errorArray['Error_attr']['errorMessage'])) {
-        echo '<div class="callout alert">Factura cu index de încărcare <strong>' . htmlspecialchars($index_incarcare) . '</strong> are următoarea eroare: <strong>' . htmlspecialchars($errorArray['Error_attr']['errorMessage']) . '</strong>!</div>';
+        echo '<div class="callout alert">Factura cu index de încărcare <strong>' . htmlspecialchars($index_incarcare ?? '') . '</strong> are următoarea eroare: <strong>' . htmlspecialchars($errorArray['Error_attr']['errorMessage'] ?? '') . '</strong>!</div>';
     }
     if (isset($errorArray['Error']) && is_array($errorArray['Error'])) {
         // Poate fi o listă de erori sau un singur array

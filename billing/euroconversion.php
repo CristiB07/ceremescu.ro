@@ -135,7 +135,7 @@ mysqli_stmt_close($stmt_ins);
 else {
 ?>
     <h3><?php echo $strExchangeRate?></h3>
-    <form method="post" Action="euroconversion.php">
+    <form method="post" action="euroconversion.php">
         <div class="grid-x grid-padding-x ">
             <div class="large-3 medium-3 cell">
                 <h3><?php echo $strChooseDate?></h3>

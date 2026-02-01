@@ -170,7 +170,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" Action="siteclientauthorizations.php?mode=new">
+        <form method="post" action="siteclientauthorizations.php?mode=new">
             <div class="grid-x grid-margin-x">
                 <div class="large-6 medium-6 small-6 cell">
                     <label><?php echo $strTitle?>
@@ -363,7 +363,7 @@ $monthname = $formatter->format($dateObj);
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
-                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" Value="<?php echo $strAdd?>"
+                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo $strAdd?>"
                         name="Submit" class="button success">
                 </div>
             </div>
@@ -388,7 +388,7 @@ $row=ezpub_fetch_array($result);
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" action="siteclientauthorizations.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
+        <form method="post"  action="siteclientauthorizations.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-6 medium-6 small-6 cell">
                     <label><?php echo $strTitle?>
@@ -655,7 +655,7 @@ $monthname = $formatter->format($dateObj);
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
-                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" Value="<?php echo $strModify?>"
+                <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo $strModify?>"
                         name="Submit" class="button success" />
                 </div>
             </div>

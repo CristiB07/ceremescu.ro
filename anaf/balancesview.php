@@ -36,6 +36,9 @@ if ($cui_selectat) {
         include_once __DIR__ . '/balancesgetlib.php';
         if (function_exists('getLatestBalanceForCUI')) {
             getLatestBalanceForCUI($cui_selectat, $expectedYear, $conn);
+        } elseif (function_exists('import_bilanturi_anaf')) {
+            // older function name used in balancesgetlib.php
+            import_bilanturi_anaf($cui_selectat, $conn);
         }
     }
 }
@@ -44,7 +47,7 @@ echo '<form method="get" action="">'
     . '<select name="cui" id="cui" required>';
 foreach ($cuiuri as $cui) {
     $sel = ($cui == $cui_selectat) ? 'selected' : '';
-    echo '<option value="'.htmlspecialchars($cui).'" '.$sel.'>'.$cui.'</option>';
+    echo '<option value="'.htmlspecialchars((string)$cui).'" '.$sel.'>'.htmlspecialchars((string)$cui).'</option>';
 }
 echo '</select> <button type="submit">Afișează bilanțuri</button></form><br />';
 
@@ -63,10 +66,10 @@ if ($cui_selectat) {
         $bilanturi_cresc = array_reverse($bilanturi);
         $latest = $bilanturi[0];
         echo '<div style="margin-bottom:1em;">';
-        echo '<strong>Denumire:</strong> '.htmlspecialchars($latest['deni']).'<br />';
-        echo '<strong>CUI:</strong> '.htmlspecialchars($latest['cui']).'<br />';
-        echo '<strong>CAEN:</strong> '.htmlspecialchars($latest['caen']).'<br />';
-        echo '<strong>Denumire CAEN:</strong> '.htmlspecialchars($latest['den_caen']).'<br />';
+        echo '<strong>Denumire:</strong> '.htmlspecialchars((string)$latest['deni']).'<br />';
+        echo '<strong>CUI:</strong> '.htmlspecialchars((string)$latest['cui']).'<br />';
+        echo '<strong>CAEN:</strong> '.htmlspecialchars((string)$latest['caen']).'<br />';
+        echo '<strong>Denumire CAEN:</strong> '.htmlspecialchars((string)$latest['den_caen']).'<br />';
         echo '</div>';
         $cols = [
             'cifra_afaceri_net' => 'Cifra de afaceri neta',
@@ -95,7 +98,7 @@ if ($cui_selectat) {
         echo '</tr></thead><tbody>';
         foreach ($bilanturi as $row) {
             echo '<tr>';
-            echo '<td>'.htmlspecialchars($row['an']).'</td>';
+            echo '<td>'.htmlspecialchars((string)$row['an']).'</td>';
             // Unificare profit/pierdere brută
             $valoare_brut = 0; $style_brut = 'text-align:right;'; $valoare_fmt_brut = '';
             if ($row['profit_brut'] > 0) {

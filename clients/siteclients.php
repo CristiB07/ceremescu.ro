@@ -202,64 +202,84 @@ else {
 
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 ?>
-        <script src="<?php echo $strSiteURL ?>/js/foundation/jquery.js"></script>
         <script language="JavaScript" type="text/JavaScript">
-            $(document).ready(function(){
-	$("#Cui").keyup(function(){
-		$.ajax({
-		type: "POST",
-		url: "../common/check_client.php",
-		data:'keyword='+$(this).val(),
-		beforeSend: function(){
-			$("#Cui").css("background","#FFF url(../img/LoaderIcon.gif) no-seeneat 165px");
-		},
-		success: function(data){
-			$("#suggesstion-box").show();
-			$("#suggesstion-box").html(data);
-			$("#search-box").css("background","#FFF");
-		}
-		});
-	});
-});
+        // Autocomplete CUI field (vanilla JS)
+        document.addEventListener('DOMContentLoaded', function() {
+            var cuiInput = document.getElementById('Cui');
+            var suggestionBox = document.getElementById('suggesstion-box');
+            if (cuiInput) {
+                cuiInput.addEventListener('keyup', function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '../common/check_client.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                suggestionBox.style.display = 'block';
+                                suggestionBox.innerHTML = xhr.responseText;
+                                cuiInput.style.background = '#FFF';
+                            }
+                        }
+                    };
+                    cuiInput.style.background = "#FFF url(../img/LoaderIcon.gif) no-repeat 165px";
+                    xhr.send('keyword=' + encodeURIComponent(cuiInput.value));
+                });
+            }
+        });
 
-function selectCountry(val) {
-	split_str=val.split(" - ");
-$("#Cui").val(split_str[0]);
-$("#judet").val(split_str[1]);
-$("#suggesstion-box").hide();
-}
-</script>
+        function selectCountry(val) {
+            var split_str = val.split(" - ");
+            document.getElementById('Cui').value = split_str[0];
+            document.getElementById('judet').value = split_str[1];
+            document.getElementById('suggesstion-box').style.display = 'none';
+        }
+        </script>
 
         <script>
-        $(document).ready(function() {
-            $("#btn1").click(function() {
-                $("#loaderIcon").show();
-                jQuery.ajax({
-                    url: "../common/cui.php",
-                    dataType: "json",
-                    data: 'Cui=' + $("#Cui").val(),
-                    type: "POST",
-                    success: function(data) {
-                        try {
-                            $('#denumire').val((data["denumire"] || "").toUpperCase());
-                            $("#cif").val(data["cif"]);
-                            $("#tva").val(data["tva"]);
-                            $("#adresa").val(data["adresa"]);
-                            $("#judet").val((data["judet"]).toUpperCase());
-                            $("#oras").val((data["oras"]).toUpperCase());
-                            $("#numar_reg_com").val(data["numar_reg_com"]);
-                            $("#datecontract").val(data["datecontract"]);
-                            $("#codpostal").val(data["codpostal"]);
-                            $("#loaderIcon").hide();
-                        } catch (err) {
-                            document.getElementById("response").innerHTML = err.message;
+        // CUI check button (vanilla JS)
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn1 = document.getElementById('btn1');
+            var cuiInput = document.getElementById('Cui');
+            var loaderIcon = document.getElementById('loaderIcon');
+            if (btn1 && cuiInput) {
+                btn1.addEventListener('click', function() {
+                    if (loaderIcon) loaderIcon.style.display = '';
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '../common/cui.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                try {
+                                    var data = JSON.parse(xhr.responseText);
+                                    if (data.error) {
+                                        document.getElementById("response").innerHTML = '<div class="callout alert">' + data.error + '</div>';
+                                        if (loaderIcon) loaderIcon.style.display = 'none';
+                                        return;
+                                    }
+                                    document.getElementById('denumire').value = (data["denumire"] || "").toUpperCase();
+                                    document.getElementById('cif').value = data["cif"];
+                                    document.getElementById('tva').value = data["tva"];
+                                    document.getElementById('adresa').value = data["adresa"];
+                                    document.getElementById('judet').value = (data["judet"] || '').toUpperCase();
+                                    document.getElementById('oras').value = (data["oras"] || '').toUpperCase();
+                                    document.getElementById('numar_reg_com').value = data["numar_reg_com"];
+                                    document.getElementById('datecontract').value = data["datecontract"];
+                                    document.getElementById('codpostal').value = data["codpostal"];
+                                    if (loaderIcon) loaderIcon.style.display = 'none';
+                                } catch (err) {
+                                    document.getElementById("response").innerHTML = '<div class="callout alert">Eroare la parsarea răspunsului: ' + err.message + '</div>';
+                                    if (loaderIcon) loaderIcon.style.display = 'none';
+                                }
+                            } else {
+                                alert('Nu se poate face legătura la serverul ANAF!');
+                                if (loaderIcon) loaderIcon.style.display = 'none';
+                            }
                         }
-                    },
-                    error: function() {
-                        alert('Nu se poate face legătura la serverul ANAF!');
-                    }
+                    };
+                    xhr.send('Cui=' + encodeURIComponent(cuiInput.value));
                 });
-            });
+            }
         });
         </script>
         <div class="grid-x grid-margin-x">
@@ -283,7 +303,7 @@ $("#suggesstion-box").hide();
                 <div id="suggesstion-box"></div>
             </div>
         </div>
-        <form method="post" Action="siteclients.php?mode=new">
+        <form method="post" action="siteclients.php?mode=new">
             <div class="grid-x grid-margin-x">
                 <div class="large-8 medium-8 small-8 cell">
                     <label><?php echo $strTitle?>
@@ -399,7 +419,7 @@ $("#suggesstion-box").hide();
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
-                        Value="<?php echo $strAdd?>" name="Submit" class="button" /></div>
+                        value="<?php echo $strAdd?>" name="Submit" class="button" /></div>
             </div>
         </form>
         <?php
@@ -415,36 +435,50 @@ mysqli_stmt_close($stmt);
 ?>
         <script src="<?php echo $strSiteURL ?>/js/foundation/jquery.js"></script>
         <script>
-        $(document).ready(function() {
-            $("#btn11").click(function() {
-                $("#loaderIcon").show();
-                jQuery.ajax({
-                    url: "../common/cui.php",
-                    dataType: "json",
-                    data: 'Cui=' + $("#Cui").val(),
-                    type: "POST",
-                    success: function(data) {
-                        try {
-                            $('#denumire').val((data["denumire"] || "").toUpperCase());
-                            $("#cif").val(data["cif"]);
-                            $("#tva").val(data["tva"]);
-                            $("#adresa").val(data["adresa"]);
-                            $("#judet").val((data["judet"]).toUpperCase());
-                            $("#oras").val((data["oras"]).toUpperCase());
-                            $("#numar_reg_com").val(data["numar_reg_com"]);
-                            $("#datecontract").val(data["datecontract"]);
-                            $("#codpostal").val(data["codpostal"]);
-                            $("#loaderIcon").hide();
-                        } catch (err) {
-                            document.getElementById("response").innerHTML = err.message;
+        // CUI update button (vanilla JS)
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn11 = document.getElementById('btn11');
+            var cuiInput = document.getElementById('Cui');
+            var loaderIcon = document.getElementById('loaderIcon');
+            if (btn11 && cuiInput) {
+                btn11.addEventListener('click', function() {
+                    if (loaderIcon) loaderIcon.style.display = '';
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '../common/cui.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                try {
+                                    var data = JSON.parse(xhr.responseText);
+                                    if (data.error) {
+                                        document.getElementById("response").innerHTML = '<div class="callout alert">' + data.error + '</div>';
+                                        if (loaderIcon) loaderIcon.style.display = 'none';
+                                        return;
+                                    }
+                                    document.getElementById('denumire').value = (data["denumire"] || "").toUpperCase();
+                                    document.getElementById('cif').value = data["cif"];
+                                    document.getElementById('tva').value = data["tva"];
+                                    document.getElementById('adresa').value = data["adresa"];
+                                    document.getElementById('judet').value = (data["judet"] || '').toUpperCase();
+                                    document.getElementById('oras').value = (data["oras"] || '').toUpperCase();
+                                    document.getElementById('numar_reg_com').value = data["numar_reg_com"];
+                                    document.getElementById('datecontract').value = data["datecontract"];
+                                    document.getElementById('codpostal').value = data["codpostal"];
+                                    if (loaderIcon) loaderIcon.style.display = 'none';
+                                } catch (err) {
+                                    document.getElementById("response").innerHTML = '<div class="callout alert">Eroare la parsarea răspunsului: ' + err.message + '</div>';
+                                    if (loaderIcon) loaderIcon.style.display = 'none';
+                                }
+                            } else {
+                                alert('Nu se poate face legătura la serverul ANAF!');
+                                if (loaderIcon) loaderIcon.style.display = 'none';
+                            }
                         }
-                    },
-                    error: function() {
-                        alert($("#Cui").val());
-                        document.getElementById("Cui").innerHTML = data;
-                    }
+                    };
+                    xhr.send('Cui=' + encodeURIComponent(cuiInput.value));
                 });
-            });
+            }
         });
         </script>
 
@@ -468,7 +502,7 @@ mysqli_stmt_close($stmt);
                 </div>
             </div>
         </div>
-        <form method="post" Action="siteclients.php?mode=edit&cID=<?php echo $row['ID_Client']?>">
+        <form method="post" action="siteclients.php?mode=edit&cID=<?php echo $row['ID_Client']?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-8 medium-8 small-8 cell">
                     <label><?php echo $strTitle?>
@@ -493,7 +527,7 @@ mysqli_stmt_close($stmt);
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo $strCompanyVAT?>
-                        <input name="Client_CIF" type="text" id="ro" value="<?php echo $row['Client_CIF'] ?>" />
+                        <input name="Client_CIF" type="text" id="cif" value="<?php echo $row['Client_CIF'] ?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
@@ -522,8 +556,7 @@ mysqli_stmt_close($stmt);
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCode?>
-                        <input name="Client_Codpostal" type="text" id="codpostal"
-                            value="<?php echo $row['Client_Codpostal'] ?>" />
+                        <input name="Client_Codpostal" type="text" id="codpostal" value="<?php echo $row['Client_Codpostal'] ?>" />
                     </label>
                 </div>
             </div>
@@ -584,25 +617,22 @@ mysqli_stmt_close($stmt);
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strActivities?>
-                        <textarea name="Client_Descriere_Activitate" id="simple-editor-html" class="simple-editor-html"
-                            rows="5"><?php echo $row['Client_Descriere_Activitate'] ?></textarea>
+                        <textarea name="Client_Descriere_Activitate" id="simple-editor-html" class="simple-editor-html" rows="5"><?php echo $row['Client_Descriere_Activitate'] ?></textarea>
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell">
                     <label><?php echo $strProfile?>
-                        <textarea name="Client_Caracterizare" id="simple-editor-html" class="simple-editor-html"
-                            rows="5"><?php echo $row['Client_Caracterizare'] ?></textarea>
+                        <textarea name="Client_Caracterizare" id="simple-editor-html" class="simple-editor-html" rows="5"><?php echo $row['Client_Caracterizare'] ?></textarea>
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input type="submit" Value="<?php echo $strModify?>" name="Submit" class="button" />
+                    <input type="submit" value="<?php echo $strModify?>" name="Submit" class="button" />
                     <?php If ($row["Client_Tip"]==1) { ?>
-                    <a href="siteclientsbranch.php?cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>"
-                        class="button"><?php echo $strAddBranch?></a>
+                    <a href="siteclientsbranch.php?cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>" class="button"><?php echo $strAddBranch?></a>
                     <?php }?>
                 </div>
             </div>
@@ -614,25 +644,35 @@ else
 	?>
         <script src="<?php echo $strSiteURL ?>/js/foundation/jquery.js"></script>
         <script language="JavaScript" type="text/JavaScript">
-            $(document).ready(function(){
-	$("#Cui").keyup(function(){
-		$.ajax({
-		type: "POST",
-		url: "../common/check_client.php",
-		data:'keyword='+$(this).val(),
-		beforeSend: function(){
-			$("#Cui").css("background","#FFF url(../img/LoaderIcon.gif) no-seeneat 165px");
-		},
-		success: function(data){
-			$("#suggesstion-box").show();
-			$("#suggesstion-box").html(data);
-			$("#cui").css("background","#FFF");
-		}
-		});
-	});
-});
+        // Autocomplete CUI field (vanilla JS) with auto uppercase
+        document.addEventListener('DOMContentLoaded', function() {
+            var cuiInput = document.getElementById('Cui');
+            var suggestionBox = document.getElementById('suggesstion-box');
+            if (cuiInput) {
+                cuiInput.addEventListener('keyup', function() {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '../common/check_client.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                suggestionBox.style.display = 'block';
+                                suggestionBox.innerHTML = xhr.responseText;
+                                cuiInput.style.background = '#FFF';
+                            }
+                        }
+                    };
+                    cuiInput.style.background = "#FFF url(../img/LoaderIcon.gif) no-repeat 165px";
+                    xhr.send('keyword=' + encodeURIComponent(cuiInput.value));
+                });
 
-</script>
+                // Auto uppercase input
+                cuiInput.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
+            }
+        });
+        </script>
         <div class="grid-x grid-margin-x">
             <div class="large-6 medium-6 small-6 cell">
                 <div id="response"></div>

@@ -2,8 +2,12 @@
 include_once '../settings.php';
 include_once '../classes/common.php';
 
-// Preia toate coloanele din structura tabelului clienti_date_fiscale
-$query = "DESCRIBE clienti_date_fiscale";
+// Determine target table (allows usage for sales prospects)
+$target_table = isset($_GET['target_table']) ? preg_replace('/[^A-Za-z0-9_]/', '', $_GET['target_table']) : 'clienti_date_fiscale';
+$parent_table = isset($_GET['parent_table']) ? preg_replace('/[^A-Za-z0-9_]/', '', $_GET['parent_table']) : 'clienti_date';
+
+// Preia toate coloanele din structura tabelului selectat
+$query = "DESCRIBE {$target_table}";
 $result = ezpub_query($conn, $query);
 $fields = [];
 while ($row = ezpub_fetch_array($result)) {
@@ -15,9 +19,21 @@ while ($row = ezpub_fetch_array($result)) {
 $cui = isset($_GET['cui']) ? $_GET['cui'] : '';
 $sample = [];
 if ($cui) {
-    $query2 = "SELECT * FROM clienti_date_fiscale WHERE cui = '".mysqli_real_escape_string($conn, $cui)."' LIMIT 1";
+    $query2 = "SELECT * FROM {$target_table} WHERE cui = '".mysqli_real_escape_string($conn, $cui)."' LIMIT 1";
     $result2 = ezpub_query($conn, $query2);
     $sample = ezpub_fetch_array($result2);
+
+    // If no local record found, attempt to fetch from ANAF and insert into DB
+    if (empty($sample)) {
+        include_once __DIR__ . '/getfiscaldata.lib.php';
+        if (function_exists('getFiscalDataByCUI')) {
+            // Attempt to fetch and store data; ignore return value but reload afterwards
+            getFiscalDataByCUI($cui, $conn, $target_table, $parent_table);
+            // Re-query after attempted import
+            $result2 = ezpub_query($conn, $query2);
+            $sample = ezpub_fetch_array($result2);
+        }
+    }
 }
 
 // Dacă există date și data este mai veche de 3 luni, actualizează automat
@@ -32,9 +48,10 @@ if (!empty($sample) && !empty($sample['data'])) {
             if (!empty($cui)) {
                 include_once __DIR__ . '/getfiscaldata.lib.php';
                 if (function_exists('getFiscalDataByCUI')) {
-                    getFiscalDataByCUI($cui, $conn);
+                    // Pass the selected target and parent tables so sales side can store separately
+                    getFiscalDataByCUI($cui, $conn, $target_table, $parent_table);
                     // Reîncarcă datele după actualizare
-                    $query2 = "SELECT * FROM clienti_date_fiscale WHERE cui = '".mysqli_real_escape_string($conn, $cui)."' LIMIT 1";
+                    $query2 = "SELECT * FROM {$target_table} WHERE cui = '".mysqli_real_escape_string($conn, $cui)."' LIMIT 1";
                     $result2 = ezpub_query($conn, $query2);
                     $sample = ezpub_fetch_array($result2);
                 }
@@ -87,7 +104,7 @@ $field_labels = [
 <div class="grid-x grid-margin-x">
     <div class="large-12 cell">
         <h3>Date fiscale ANAF pentru CUI: <?php echo htmlspecialchars($cui); ?></h3>
-        <table border="1" cellpadding="5" cellspacing="0">
+        <table width="50%">
             <thead>
                 <tr>
                     <th>Indicator</th>
@@ -113,17 +130,17 @@ $field_labels = [
                         ];
                         if (in_array($field, $date_fields) && !empty($value) && $value !== '0000-00-00') {
                             $d = DateTime::createFromFormat('Y-m-d', $value);
-                            echo $d ? $d->format('d.m.Y') : htmlspecialchars($value);
+                            echo $d ? $d->format('d.m.Y') : htmlspecialchars((string)$value);
                         } elseif (in_array($field, $bool_fields)) {
                             if ($value === '1' || $value === 1) {
                                 echo 'Da';
                             } elseif ($value === '0' || $value === 0) {
                                 echo 'Nu';
                             } else {
-                                echo htmlspecialchars($value);
+                                echo htmlspecialchars((string)$value);
                             }
                         } else {
-                            echo htmlspecialchars($value);
+                            echo htmlspecialchars((string)$value);
                         }
                         ?>
                         </td>

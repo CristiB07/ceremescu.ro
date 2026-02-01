@@ -37,7 +37,7 @@ $data = date('Y-m-d', strtotime($dataemiterii));
 	$mSQL = $mSQL . "curs_valutar_zi,";
 	$mSQL = $mSQL . "curs_valutar_valoare)";
 
-	$mSQL = $mSQL . "Values(";
+	$mSQL = $mSQL . "values(";
 	$mSQL = $mSQL . "'" .$data . "', ";
 	$mSQL = $mSQL . "'" .$cursvalutar . "') ";
 
@@ -80,7 +80,7 @@ $data = date('Y-m-d', strtotime($dataemiterii));
 	$mSQL = $mSQL . "curs_valutar_zi,";
 	$mSQL = $mSQL . "curs_valutar_valoare)";
 
-	$mSQL = $mSQL . "Values(";
+	$mSQL = $mSQL . "values(";
 	$mSQL = $mSQL . "'" .$data . "', ";
 	$mSQL = $mSQL . "'" .$cursvalutar . "') ";
 
@@ -420,8 +420,44 @@ $emailbody=$emailbody . "<p>Stimate client,</p>
 <tr><th>Valoare factură curentă</th><th>Scadență</th><th>Sold la data emiterii</th><th>Total de plătit</th></tr>
 </thead>
 <tr><td align=\"right\">". romanize($row22["factura_client_valoare_totala"]) ."</td><td align=\"right\">". date('d.m.Y',strtotime($row22["factura_client_termen"])). "</td><td align=\"right\">". romanize($soldanterior)."</td><td align=\"right\">".romanize($soldtotal)."</td></tr>
-</table>
-<p>Mulțumim,<br />
+</table>";
+$queryRest = "SELECT factura_numar, factura_client_valoare_totala, factura_data_emiterii, factura_client_termen FROM facturare_facturi WHERE factura_client_ID=? AND factura_client_achitat='0' AND factura_ID <> ? ORDER BY factura_data_emiterii ASC";
+$stmtRest = mysqli_prepare($conn, $queryRest);
+mysqli_stmt_bind_param($stmtRest, "ii", $clientID, $invoiceID);
+mysqli_stmt_execute($stmtRest);
+$resultRest = mysqli_stmt_get_result($stmtRest);
+if (mysqli_num_rows($resultRest) > 0) {
+	$emailbody .= "<p><strong>Facturi restante:</strong></p>";
+	$emailbody .= "<table align='center' width='85%'>
+	<thead>
+	<tr><th>Număr</th>
+	<th>Valoare</th>
+	<th>Emisă la</th>
+	<th>Scadență</th>
+	<th>Zile întârziere</th>
+	</tr>
+	</thead>
+	<tbody>";
+	while ($rowRest = ezpub_fetch_array($resultRest)) {
+		$data_emiterii = $rowRest['factura_data_emiterii'];
+		$termen = (int)$rowRest['factura_client_termen'];
+		$scadenta = date('Y-m-d', strtotime("$data_emiterii +$termen days"));
+		$scadenta_disp = date('d.m.Y', strtotime($scadenta));
+		$emisa_disp = date('d.m.Y', strtotime($data_emiterii));
+		$zile_intarziere = (strtotime(date('Y-m-d')) - strtotime($scadenta)) / (60*60*24);
+		$zile_intarziere = $zile_intarziere > 0 ? (int)$zile_intarziere : 0;
+		$emailbody .= "<tr><td>".htmlspecialchars($rowRest['factura_numar'])."</td>
+		<td align='right'>".romanize($rowRest['factura_client_valoare_totala'])."</td>
+		<td>".$emisa_disp."</td>
+		<td>".$scadenta_disp."</td>
+		<td align='center'>".$zile_intarziere."</td>
+		</tr>";
+	}
+	$emailbody .= "</tbody></table>";
+}
+mysqli_stmt_close($stmtRest);
+
+$emailbody .= "<p>Mulțumim,<br />
 $strSiteOwner<br />
 $iconFacebook &nbsp;&nbsp;&nbsp;
 $iconLinkedin 
@@ -525,7 +561,7 @@ else {
         </div>
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell">
-                <form method="post" id="users" Action="sitebulkinvoices.php">
+                <form method="post"  action="sitebulkinvoices.php">
                     <div class="grid-x grid-margin-x">
                         <div class="large-6 medium-6 small-6 cell">
                             <input name="luna_facturarii" type="text" placeholder=<?php echo $strInvoiceMonth ?>
@@ -692,7 +728,7 @@ echo "</tbody><tfoot><tr><td></td><td><em></em></td><td>&nbsp;</td><td>&nbsp;</t
         </div>
 
         <div class="grid-x grid-margin-x">
-            <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" Value="<?php echo $strAdd?>"
+            <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit" value="<?php echo $strAdd?>"
                     name="Submit" class="button success">
             </div>
         </div>

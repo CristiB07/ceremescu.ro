@@ -1,8 +1,25 @@
 <?php
-// Funcție de import date fiscale ANAF pentru un CUI dat (fără inregistrare_SplitTVA)
-function get_date_fiscale_anaf($cui, $conn) {
-        // Verifică dacă există deja și dacă data este mai recentă de 3 luni
-        $stmt_check = mysqli_prepare($conn, "SELECT data FROM clienti_date_fiscale WHERE cui = ?");
+/**
+ * Import fiscal data from ANAF for a given CUI.
+ *
+ * @param string $cui
+ * @param mysqli $conn
+ * @param string $target_table Table where fiscal data will be stored (default: clienti_date_fiscale)
+ * @param string $parent_table Parent client table to update status (default: clienti_date)
+ * @return bool|null
+ */
+function getFiscalDataByCUI($cui, $conn, $target_table = 'clienti_date_fiscale', $parent_table = 'clienti_date') {
+    // Validate table names
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $target_table)) {
+        $target_table = 'clienti_date_fiscale';
+    }
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $parent_table)) {
+        $parent_table = 'clienti_date';
+    }
+
+    // Verifică dacă există deja și dacă data este mai recentă de 3 luni
+    $stmt_check_sql = "SELECT `data` FROM {$target_table} WHERE cui = ?";
+    $stmt_check = mysqli_prepare($conn, $stmt_check_sql);
         mysqli_stmt_bind_param($stmt_check, "s", $cui);
         mysqli_stmt_execute($stmt_check);
         mysqli_stmt_bind_result($stmt_check, $data_existenta);
@@ -41,7 +58,8 @@ function get_date_fiscale_anaf($cui, $conn) {
 
     if ($response === false) {
         // Marchează cu 2 dacă nu există date
-        $update = mysqli_prepare($conn, "UPDATE clienti_date SET date_fiscale=2 WHERE Client_CIF=?");
+        $update_sql = "UPDATE {$parent_table} SET date_fiscale=2 WHERE Client_CIF=?";
+        $update = mysqli_prepare($conn, $update_sql);
         mysqli_stmt_bind_param($update, "s", $cui);
         mysqli_stmt_execute($update);
         mysqli_stmt_close($update);
@@ -49,7 +67,8 @@ function get_date_fiscale_anaf($cui, $conn) {
     }
     $json = json_decode($response, true);
     if (!$json || !isset($json['found'][0]['date_generale'])) {
-        $update = mysqli_prepare($conn, "UPDATE clienti_date SET date_fiscale=2 WHERE Client_CIF=?");
+        $update_sql = "UPDATE {$parent_table} SET date_fiscale=2 WHERE Client_CIF=?";
+        $update = mysqli_prepare($conn, $update_sql);
         mysqli_stmt_bind_param($update, "s", $cui);
         mysqli_stmt_execute($update);
         mysqli_stmt_close($update);
@@ -133,10 +152,10 @@ function get_date_fiscale_anaf($cui, $conn) {
         'statusInactivi' => ($stare_inactiv['statusInactivi'] ?? false) ? 1 : 0,
         'domiciliuFiscal' => $domiciliuFiscal,
     ];
-    // Insert/update în DB
+    // Insert/update în DB (target table validated earlier)
     $cols = array_keys($data);
     $placeholders = implode(',', array_fill(0, count($cols), '?'));
-    $sql = 'INSERT INTO clienti_date_fiscale (' . implode(',', $cols) . ') VALUES (' . $placeholders . ') ON DUPLICATE KEY UPDATE ' . implode(',', array_map(function($c){return "$c=VALUES($c)";}, $cols));
+    $sql = 'INSERT INTO ' . $target_table . ' (' . implode(',', $cols) . ') VALUES (' . $placeholders . ') ON DUPLICATE KEY UPDATE ' . implode(',', array_map(function($c){return "$c=VALUES($c)";}, $cols));
     $stmt = mysqli_prepare($conn, $sql);
     $types = '';
     foreach ($cols as $col) {
@@ -146,8 +165,9 @@ function get_date_fiscale_anaf($cui, $conn) {
     mysqli_stmt_bind_param($stmt, $types, ...$values);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
-    // Marchează status 1 (import reușit)
-    $update = mysqli_prepare($conn, "UPDATE clienti_date SET date_fiscale=1 WHERE Client_CIF=?");
+    // Marchează status 1 (import reușit) în tabelul părinte
+    $update_sql = "UPDATE {$parent_table} SET date_fiscale=1 WHERE Client_CIF=?";
+    $update = mysqli_prepare($conn, $update_sql);
     mysqli_stmt_bind_param($update, "s", $cui);
     mysqli_stmt_execute($update);
     mysqli_stmt_close($update);

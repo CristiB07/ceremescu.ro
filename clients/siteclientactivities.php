@@ -84,7 +84,7 @@ if (!mysqli_stmt_execute($stmt))
   mysqli_stmt_close($stmt);
   die('Error: ' . mysqli_error($conn));
   }
-Else{
+else{
 mysqli_stmt_close($stmt);
 echo "<div class=\"success callout\">$strRecordAdded</div>";
 echo "<script type=\"text/javascript\">
@@ -98,7 +98,7 @@ function delayer(){
 include '../bottom.php';
 die;
 }}
-Else
+else
 {// edit
 // Validare și sanitizare input
 $ID_Client = isset($_POST["ID_Client"]) && is_numeric($_POST["ID_Client"]) ? (int)$_POST["ID_Client"] : null;
@@ -126,7 +126,7 @@ if (!mysqli_stmt_execute($stmt))
   mysqli_stmt_close($stmt);
   die('Error: ' . mysqli_error($conn));
   }
-Else{
+else{
 mysqli_stmt_close($stmt);
 echo "<div class=\"success callout\">$strRecordModified</div>" ;
 echo "<script type=\"text/javascript\">
@@ -153,7 +153,7 @@ if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="siteclientactivities.php?mode=new">
+        <form method="post"  action="siteclientactivities.php?mode=new">
 
             <div class="grid-x grid-padding-x">
                 <div class="large-6 medium-6 small-6 cell">
@@ -284,14 +284,14 @@ $monthname = $formatter->format($dateObj);
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success">
+                    <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success">
                 </div>
             </div>
         </form>
 
         <?php
 }
-ElseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
+elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
 
 // Prepared statement pentru SQL injection prevention
 $stmt = mysqli_prepare($conn, "SELECT clienti_date.ID_Client, clienti_date.Client_Denumire, clienti_contracte.Contract_Alocat, clienti_contracte.ID_Contract,
@@ -314,7 +314,7 @@ mysqli_stmt_close($stmt);
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" Action="siteclientactivities.php?mode=edit&cID=<?php echo $row['ID_activitati_client']?>">
+        <form method="post" action="siteclientactivities.php?mode=edit&cID=<?php echo $row['ID_activitati_client']?>">
             <div class="grid-x grid-padding-x">
                 <div class="large-6 medium-6 small-6 cell">
                     <label><?php echo $strTitle?>
@@ -421,7 +421,7 @@ $monthname = $formatter->format($dateObj);
 {
     $month="00";
 }
-Else 		{
+else 		{
 			//$month=date("m", strtotime($row['Activitate_Client_Termen']));	
 			$time=strtotime($row['Activitate_Client_Termen']);
 			$month=date("m",$time);
@@ -429,7 +429,7 @@ Else 		{
     		// create option With numeric value of day
 			if ($month==$m){
     			echo "<option selected value=\"$m\">$montNname</option>";}
-				Else
+				else
 				{echo "<option value=\"$m\">$monthname</option>";}
 				} 
 			?>
@@ -448,7 +448,7 @@ Else 		{
     		// create option With numeric value of day
 			if ($year==$y){
     	echo "<option selected value=\"$y\">$y</option>";}
-		Else{
+		else{
 		echo "<option value=\"$y\">$y</option>";
 		} }
 			?>
@@ -473,7 +473,7 @@ Else 		{
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center">
-                    <input Type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success">
+                    <input Type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success">
                 </div>
             </div>
         </form>

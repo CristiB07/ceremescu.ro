@@ -80,7 +80,12 @@ else {
 $strDescription="Pagina nu a fost găsită";
 $strPageTitle="Pagina nu a fost găsită";
 $pageurl='404.php';
+if ($sitefunction=="Site") {
 include 'header.php';
+}
+elseif ($sitefunction=="CRM") {
+include 'dashboard/header.php';
+}
 $previous = "javascript:history.go(-1)";
 if(isset($_SERVER['HTTP_REFERER'])) {
     $previous = $_SERVER['HTTP_REFERER'];

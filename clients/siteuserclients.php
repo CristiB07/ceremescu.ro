@@ -84,7 +84,7 @@ include '../bottom.php';
 die;
 }
 
-ElseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
+elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
 // Prepared statement pentru SELECT
 $stmt_select = mysqli_prepare($conn, "SELECT * FROM clienti_date WHERE ID_Client=?");
 mysqli_stmt_bind_param($stmt_select, 'i', $cID);
@@ -111,7 +111,7 @@ mysqli_stmt_close($stmt_select);
                 <p><a href="siteuserclients.php" class="button"><?php echo $strBack?></a></p>
             </div>
         </div>
-        <form Method="post" id="users" Action="siteuserclients.php?mode=edit&cID=<?php echo $row['ID_Client']?>">
+        <form method="post"  action="siteuserclients.php?mode=edit&cID=<?php echo $row['ID_Client']?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCompanyName?></label>
@@ -195,14 +195,14 @@ mysqli_stmt_close($stmt_select);
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"> <input Type="submit"
-                        Value="<?php echo $strAdd?>" name="Submit" class="button success" />
+                        value="<?php echo $strAdd?>" name="Submit" class="button success" />
                 </div>
             </div>
         </form>
 
         <?php
 }
-Else
+else
 {
 $query="SELECT clienti_date.ID_Client, clienti_contracte.ID_Client, Contract_Alocat, Client_Denumire, Client_CUI, Client_Localitate, Client_Judet FROM clienti_date, clienti_contracte 
 WHERE Contract_Alocat='$code' AND  clienti_date.ID_Client=clienti_contracte.ID_Client AND Contract_Activ=0";

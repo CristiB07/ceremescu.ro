@@ -64,10 +64,10 @@ elseIf (!empty($code)) {
 		
 		if (curl_errno($ch)) {
 			$error_msg = curl_error($ch);
-			curl_close($ch);
+			if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 			die('<div class="callout alert">cURL Error: ' . htmlspecialchars($error_msg, ENT_QUOTES, 'UTF-8') . '</div>');
 		}
-		curl_close($ch);
+		if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 		
 		$arr = json_decode($jsonobj, true);
 		
@@ -108,10 +108,10 @@ else {
 		
 		if (curl_errno($ch)) {
 			$error_msg = curl_error($ch);
-			curl_close($ch);
+			if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 			die('<div class="callout alert">cURL Error: ' . htmlspecialchars($error_msg, ENT_QUOTES, 'UTF-8') . '</div>');
 		}
-		curl_close($ch);
+		if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 		
 		$arr = json_decode($jsonobj, true);
 		

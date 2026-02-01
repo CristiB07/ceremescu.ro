@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-        <form method="post" id="form1" Action="createaccount.php">
+        <form method="post" id="form1" action="createaccount.php">
 
             <div class="grid-x grid-padding-x">
                 <div class="large-2 medium-2 small-2 cell">

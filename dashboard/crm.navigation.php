@@ -22,6 +22,7 @@ if ($role=='ADMIN')
         <li><a href="<?php echo $strSiteURL ?>/clients/siteclientactivities.php"><i class="fa fa-hourglass-half"></i><?php echo $strActivities?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/clientsdashboard.php"><i class="fas fa-chart-line"></i><?php echo $strClientsDashboard?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/sitevisitreports.php"><i class="fas fa-newspaper"></i><?php echo $strReports?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/clients/clientsplanning.php"><i class="fas fa-calendar"></i><?php echo $strSchedules?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/sitecontacts.php"><i class="fas fa-address-book"></i><?php echo $strContacts?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/clientcontractdetails.php"><i class="far fa-address-book"></i><?php echo $strGetContractData?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/admin/exportclients.php"><i class="fas fa-file-export"></i><?php echo $strExportClients?></a></li>
@@ -49,6 +50,29 @@ if ($role=='ADMIN')
         <li><a href="<?php echo $strSiteURL ?>/admin/exportinvoices.php"><i class="fas fa-file-export"></i><?php echo $strExportInvoices?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/admin/exportreceivedinvoices.php"><i class="fas fa-file-export"></i><?php echo $strExportReceivedInvoices?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/bank/sitebanktransactions.php"><i class="fas fa-file-invoice-dollar"></i><?php echo $strBankTransactions?></a></li>
+    </ul>
+</li>
+<?php
+}?>
+
+<?php if ($booking==1)
+    {?>
+<li>
+    <a href="#"><?php echo $strBookings?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/booking/index.php"><i class="fas fa-calendar"></i>Calendar</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/booking/confirm.php"><i class="fas fa-check"></i>Confirmare programări</a></li>
+    </ul>
+</li>
+<?php
+}?>
+<?php if ($documents==1)
+    {?>
+<li>
+    <a href="#"><?php echo $strDocuments?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/documents/sitedocuments.php"><i class="fas fa-file-alt"></i>Documente</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/documents/sitesignatures.php"><i class="fas fa-check"></i>Semnare documente</a></li>
     </ul>
 </li>
 <?php
@@ -85,8 +109,9 @@ if ($role=='ADMIN')
 <li>
     <a href="#"><?php echo $strProspects?></a>
     <ul class="menu">
-        <li><a href="<?php echo $strSiteURL ?>/sales/siteprospects.php"><i class="fa-xl fa fa-users"></i>&nbsp;<?php echo $strProspects?></a></li>
-        <li><a href="<?php echo $strSiteURL ?>/sales/sitevisitreports.php"><i class="large fas fa-newspaper"></i>&nbsp;<?php echo $strVisits?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/sales/salesprospects.php"><i class="fa-xl fa fa-users"></i>&nbsp;<?php echo $strProspects?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/sales/salesvisitreports.php"><i class="large fas fa-newspaper"></i>&nbsp;<?php echo $strVisits?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/sales/salesplanning.php"><i class="fas fa-calendar-alt"></i>&nbsp;<?php echo $strSchedules?></a></li>
     </ul>
 </li>
 <?php
@@ -122,7 +147,6 @@ if ($role=='ADMIN')
         <li><a href="<?php echo $strSiteURL ?>/wasteman/sitewastecodes.php"><i class="fas fa-recycle"></i><?php echo $strWasteCodes?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/wasteman/sitewasteoperations.php"><i class="far fa-window-restore"></i><?php echo $strWasteOperations?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/wasteman/sitewastereporting.php"><i class="far fa-file-excel"></i><?php echo $strWasteReporting?></a></li>
-        <li><hr /></li>
         <li> <li><a href="<?php echo $strSiteURL ?>/packman/sitepackages.php"><i class="fas fa-recycle"></i><?php echo $strPackages?></a></li>
         <li> <li><a href="<?php echo $strSiteURL ?>/packman/sitepackagesanex1a.php"><i class="far fa-file-word"></i><?php echo $strAnnex1Table1?></a></li>
         <li> <li><a href="<?php echo $strSiteURL ?>/packman/sitepackagesanex1b.php"><i class="far fa-file-word"></i><?php echo $strAnnex1Table2?></a></li>
@@ -180,9 +204,20 @@ elseif ($role=='USER')
 		<li><a href="<?php echo $strSiteURL ?>/clients/siteclientauthorizations.php"><i class="fa fa-certificate fa-xl"></i>&nbsp;<?php echo $strAuthorizations?></a></li>
 		<li><a href="<?php echo $strSiteURL ?>/clients/sitecontacts.php"><i class="fa fa-address-card fa-xl"></i>&nbsp;<?php echo $strContacts?></a></li>
 		<li><a href="<?php echo $strSiteURL ?>/clients/sitevisitreports.php"><i class="fas fa-newspaper fa-xl"></i>&nbsp;<?php echo $strVisits?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/clients/clientsplanning.php"><i class="fas fa-calendar fa-xl"></i>&nbsp;<?php echo $strSchedules?></a></li>
 							</ul>
 	</li>
     
+<?php if ($role=='PROFESSIONAL' && $booking==1) { ?>
+<li>
+    <a href="#"><?php echo $strBookings?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/booking/index.php"><i class="fas fa-calendar"></i>Calendar</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/booking/confirm.php"><i class="fas fa-check"></i>Confirmare programări</a></li>
+    </ul>
+</li>
+<?php } ?>
+
 <?php if ($wastemanagement==1)
     {?>
 <li>
@@ -196,6 +231,16 @@ elseif ($role=='USER')
     </ul>
 </li>
 <?php }
+if ($documents==1)
+    {?>
+<li>
+    <a href="#"><?php echo $strDocuments?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/documents/sitedocuments.php"><i class="fas fa-file-alt"></i>Documente</a></li>
+    </ul>
+</li>
+<?php
+}
 
 } //end of user check, start AGENT
 elseif ($role=='AGENT')
@@ -210,7 +255,16 @@ elseif ($role=='AGENT')
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalcarsheets.php"><i class="fas fa-car-side"></i>&nbsp;<?php echo $strCarSheet?></a></li>
 	        </ul>
 	    </li>
-
+<?php if ($documents==1)
+    {?>
+<li>
+    <a href="#"><?php echo $strDocuments?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/documents/sitedocuments.php"><i class="fas fa-file-alt"></i>Documente</a></li>
+    </ul>
+</li>
+<?php
+}?>
  <li>
 	      <a href="#"><?php echo $strHelpdesk?></a>
 					<ul class="menu">		

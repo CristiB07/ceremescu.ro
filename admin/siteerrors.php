@@ -29,14 +29,10 @@ $user_id = isset($_GET['uid']) && is_numeric($_GET['uid']) ? (int)$_GET['uid'] :
                     <label>Error Type
                         <select name="type">
                             <option value="">All Types</option>
-                            <option value="PHP Error" <?php echo $error_type === 'PHP Error' ? 'selected' : '' ?>>PHP
-                                Error</option>
-                            <option value="PHP Warning" <?php echo $error_type === 'PHP Warning' ? 'selected' : '' ?>>
-                                PHP Warning</option>
-                            <option value="PHP Exception"
-                                <?php echo $error_type === 'PHP Exception' ? 'selected' : '' ?>>PHP Exception</option>
-                            <option value="MySQL Error" <?php echo $error_type === 'MySQL Error' ? 'selected' : '' ?>>
-                                MySQL Error</option>
+                            <option value="PHP Error" <?php echo $error_type === 'PHP Error' ? 'selected' : '' ?>>PHP Error</option>
+                            <option value="PHP Warning" <?php echo $error_type === 'PHP Warning' ? 'selected' : '' ?>>PHP Warning</option>
+                            <option value="PHP Exception" <?php echo $error_type === 'PHP Exception' ? 'selected' : '' ?>>PHP Exception</option>
+                            <option value="MySQL Error" <?php echo $error_type === 'MySQL Error' ? 'selected' : '' ?>> MySQL Error</option>
                         </select>
                     </label>
                 </div>
@@ -52,8 +48,7 @@ $user_id = isset($_GET['uid']) && is_numeric($_GET['uid']) ? (int)$_GET['uid'] :
                 </div>
                 <div class="large-2 medium-6 small-12 cell">
                     <label>User ID
-                        <input type="number" name="uid" value="<?php echo $user_id ? htmlspecialchars($user_id, ENT_QUOTES, 'UTF-8') : ''?>"
-                            placeholder="Optional">
+                        <input type="number" name="uid" value="<?php echo $user_id ? htmlspecialchars($user_id, ENT_QUOTES, 'UTF-8') : ''?>" placeholder="Optional">
                     </label>
                 </div>
                 <div class="large-3 medium-12 small-12 cell">

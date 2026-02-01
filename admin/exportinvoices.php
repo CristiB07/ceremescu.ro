@@ -268,7 +268,7 @@ $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 else
 {
 ?>
-    <form method="post" Action="exportinvoices.php">
+    <form method="post" action="exportinvoices.php">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
 
         <div class="grid-x grid-margin-x">
@@ -309,7 +309,7 @@ $monthname = $formatter->format($dateObj);
         </div>
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell text-center">
-                <input Type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" />
+                <input Type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" />
             </div>
         </div>
     </form>

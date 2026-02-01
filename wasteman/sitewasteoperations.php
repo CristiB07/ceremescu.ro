@@ -140,7 +140,7 @@ $row=ezpub_fetch_array($result);
                 <p><a href="sitewasteoperations.php" class="button"><?php echo $strBack?>&nbsp;<i class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" action="sitewasteoperations.php?mode=edit&cID=<?php echo $row['operatiune_id']?>">
+        <form method="post"  action="sitewasteoperations.php?mode=edit&cID=<?php echo $row['operatiune_id']?>">
                         <div class="grid-x grid-margin-x">
                 <div class="large-2 medium-2 small-4 cell">
                     <label><?php echo $strType?></label>

@@ -7,14 +7,14 @@
 	$_SESSION['lang']="RO";
 	$lang=$_SESSION['lang'];
 }
-Else
+else
 {
 	$lang=$_SESSION['lang'];
 }
 if ($lang=="RO") {
 include '../lang/language_RO.php';
 }
-Else
+else
 {
 	include '../lang/language_EN.php';
 }	
@@ -126,13 +126,11 @@ for ( $i = 1; $i <= $d; $i ++) {
  {
 	 $dd=$dd;
  }
- Else
+ else
  {
 	 		$dd=$dd+1;
  }
  }
-
-
 $dateObj   = DateTime::createFromFormat('!m', $month);
 $formatter = new IntlDateFormatter("ro_RO",
                                     IntlDateFormatter::FULL, 
@@ -141,7 +139,6 @@ $formatter = new IntlDateFormatter("ro_RO",
                                     IntlDateFormatter::GREGORIAN,
                                     'MMMM');
 $monthname = $formatter->format($dateObj);
-
 //
 // Use prepared statement
 $stmt = $conn->prepare("SELECT SUM(fp_km) AS valoaretotala FROM administrative_foi_parcurs WHERE fp_luna=? AND fp_aloc=?");
@@ -260,7 +257,7 @@ If ($row["alimentare_platit"]==0)
 {
 	$alimentare_insert.="<Cell><Data ss:Type=\"String\">Achitat cardul firmei</Data></Cell>";
 }
-Else
+else
 {
 	$alimentare_insert.="<Cell><Data ss:Type=\"String\">Achitat cardul de benzină</Data></Cell>";
 }
@@ -322,7 +319,7 @@ $schema_insert.="<Cell><Data ss:Type=\"String\">". $i . "</Data></Cell>";
 	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
 	 $schema_insert.="<Cell><Data ss:Type=\"String\">-</Data></Cell>";
  }
- Else
+ else
  {
 	 		$dateObj   = DateTime::createFromFormat('Y-m-d', $dayofmonth);
 		$formatter = new IntlDateFormatter("ro_RO",
@@ -429,5 +426,4 @@ if (!$mail->send()) {
 	header("location:$strSiteURL". "/administrative/personalcarsheets.php?message=Success");
 	exit();
 }
-
 ?>

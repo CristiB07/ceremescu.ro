@@ -300,7 +300,7 @@ else {
             {
 		?>
 
-            <form method="post" Action="siteinvoiceitems.php?mode=new&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
+            <form method="post" action="siteinvoiceitems.php?mode=new&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
                 <tr>
                     <td><input name="articol_descriere" type="text" id="obiect"></td>
                     <td><input name="articol_unitate" type="text" size="4" value="" /></td>
@@ -315,7 +315,7 @@ else {
                             onfocus="calculateTVA(0)" /></td>
                     <td><input name="articol_total" type="text" id="articol_total_0" size="10" value=""
                             onfocus="calculateTotal(0)" /></td>
-                    <td><input type="submit" Value="<?php echo $strAdd?>" class="button" name="Submit"></td>
+                    <td><input type="submit" value="<?php echo $strAdd?>" class="button" name="Submit"></td>
                     <td>
                         <p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></p>
                     </td>
@@ -340,8 +340,8 @@ else
 	While ($row=ezpub_fetch_array($result)){
 $i=$i+1;
 		?>
-        <form method="post" id="users"
-            Action="siteinvoiceitems.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>&aID=<?php echo htmlspecialchars($row["articol_ID"], ENT_QUOTES, 'UTF-8')?>">
+        <form method="post" 
+            action="siteinvoiceitems.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>&aID=<?php echo htmlspecialchars($row["articol_ID"], ENT_QUOTES, 'UTF-8')?>">
             <tr>
                 <td><input name="articol_descriere" type="text" id="obiect"
                         value="<?php echo htmlspecialchars($row["articol_descriere"], ENT_QUOTES, 'UTF-8')?>"></td>
@@ -359,7 +359,7 @@ $i=$i+1;
                         value="<?php echo htmlspecialchars($row["articol_TVA"], ENT_QUOTES, 'UTF-8')?>" onfocus="calculateTVA(<?php echo $i?>)" /></td>
                 <td><input name="articol_total" type="text" id="articol_total_<?php echo $i?>" size="10"
                         value="<?php echo htmlspecialchars($row["articol_total"], ENT_QUOTES, 'UTF-8')?>" onfocus="calculateTotal(<?php echo $i?>)" /></td>
-                <td><input type="submit" Value="<?php echo $strModify?>" name="Submit" class="button"></td>
+                <td><input type="submit" value="<?php echo $strModify?>" name="Submit" class="button"></td>
                 <td>
                     <a href="siteinvoiceitems.php?mode=delete&aID=<?php echo htmlspecialchars($row["articol_ID"], ENT_QUOTES, 'UTF-8')?>&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>"
                         class="button" OnClick="return confirm('<?php echo $strConfirmDelete?>');">
@@ -371,7 +371,7 @@ $i=$i+1;
 	$valoareproduse=$valoareproduse+$row["articol_valoare"];
 	$valoareTVA=$valoareTVA+$row["articol_TVA"];
 	} ?>
-        <form method="post" Action="siteinvoiceitems.php?mode=new&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
+        <form method="post" action="siteinvoiceitems.php?mode=new&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
             <tr>
                 <td><input name="articol_descriere" type="text" id="obiect" value=""></td>
                 <td><input name="articol_unitate" type="text" size="4" value="" /></td>
@@ -385,7 +385,7 @@ $i=$i+1;
                         onfocus="calculateTVA(0)" /></td>
                 <td><input name="articol_total" type="text" id="articol_total_0" size="10" value=""
                         onfocus="calculateTotal(0)" /></td>
-                <td><input type="submit" Value="<?php echo $strAdd?>" class="button" name="Submit"></td>
+                <td><input type="submit" value="<?php echo $strAdd?>" class="button" name="Submit"></td>
                 <td>
                     <p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></p>
                 </td>

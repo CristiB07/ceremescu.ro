@@ -9,6 +9,28 @@
     background: #fff;
 }
 
+.simple-editor-wrapper.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    border: none;
+    border-radius: 0;
+    margin: 0;
+}
+
+.simple-editor-wrapper.fullscreen .simple-editor-content {
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+}
+
+.simple-editor-wrapper.fullscreen .toolbar-btn[title="Fullscreen"] {
+    background: #007cba;
+    color: white;
+}
+
 .simple-editor-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -17,6 +39,9 @@
     background: #f5f5f5;
     border-bottom: 1px solid #ddd;
     border-radius: 4px 4px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .toolbar-format-select {
@@ -248,14 +273,13 @@
 }
 
 .simple-editor-content {
-    min-height: 400px;
-    max-height: 600px;
-    overflow-y: auto;
+    min-height: 200px;
     padding: 15px;
     font-family: Arial, sans-serif;
     font-size: 14px;
     line-height: 1.6;
     outline: none;
+    overflow-y: visible;
 }
 
 .simple-editor-content:focus {

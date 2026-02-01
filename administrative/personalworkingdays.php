@@ -1,4 +1,3 @@
-<?php // Last Modified Time: Monday, August 11, 2025 at 10:57:35 PM Eastern European Summer Time ?>
 <?php
 include '../settings.php';
 include '../classes/paginator.class.php';
@@ -53,7 +52,7 @@ if ($message === "Success") {
 <div class="grid-x grid-margin-x">
     <div class="large-12 medium-12 small-12 cell">
         <h1><?php echo htmlspecialchars($strPageTitle, ENT_QUOTES, 'UTF-8')?></h1>
-        <form method="post" id="users" Action="pwd2excel.php">
+        <form method="post"  action="pwd2excel.php">
             <div class="grid-x grid-margin-x">
                 <div class="large-4 medium-4 small-4 cell">
                     <h3><?php echo htmlspecialchars($strSendWD, ENT_QUOTES, 'UTF-8')?></h3>
@@ -99,7 +98,7 @@ $monthname = $formatter->format($dateObj);
                         </select></label>
                 </div>
                 <div class="large-1 medium-1 small-1 cell">
-                    <p align="right"><input type="submit" Value="<?php echo htmlspecialchars($strSend, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button">
+                    <p align="right"><input type="submit" value="<?php echo htmlspecialchars($strSend, ENT_QUOTES, 'UTF-8')?>" name="Submit" class="button">
                     </p>
                 </div>
 

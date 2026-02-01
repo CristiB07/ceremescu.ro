@@ -148,7 +148,7 @@ die;
 else {
 ?>
 
-        <form method="post" id="users" Action="sitecashin.php">
+        <form method="post"  action="sitecashin.php">
             <div class="grid-x grid-padding-x ">
                 <div class="large-6 medium-6 small-12 cell">
                     <label> <?php echo $strInvoice?>

@@ -138,7 +138,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="sitecontacts.php?mode=new">
+        <form method="post"  action="sitecontacts.php?mode=new">
             <div class="grid-x grid-margin-x">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strClient?>
@@ -191,7 +191,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
-                        Value="<?php echo $strAdd?>" name="Submit" class="button success" />
+                        value="<?php echo $strAdd?>" name="Submit" class="button success" />
                 </div>
             </div>
         </form>
@@ -218,7 +218,7 @@ mysqli_stmt_close($stmt);
                 <p><a href="sitecontacts.php" class="button"><?php echo $strBack?></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="sitecontacts.php?mode=edit&cID=<?php echo $row['contact_ID']?>">
+        <form method="post"  action="sitecontacts.php?mode=edit&cID=<?php echo $row['contact_ID']?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strClient?></label>
@@ -272,7 +272,7 @@ mysqli_stmt_close($stmt);
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"> <input type="submit"
-                        Value="<?php echo $strModify?>" name="Submit" class="button success" />
+                        value="<?php echo $strModify?>" name="Submit" class="button success" />
                 </div>
             </div>
         </form>

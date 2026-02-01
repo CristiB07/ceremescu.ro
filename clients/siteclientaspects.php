@@ -332,7 +332,7 @@ function delayer(){
 include '../bottom.php';
 die;
 }
-Else
+else
 {// edit
 
 $cID = (int)$_GET["cID"];
@@ -382,7 +382,7 @@ include '../bottom.php';
 die;
 }
 }
-Else {
+else {
 ?>
 <?php
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
@@ -392,7 +392,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
         <p><a href="siteclientaspects.php" class="button"><?php echo $strBack?></a></p>
     </div>
 </div>
-<form Method="post" id="users" Action="siteclientaspects.php?mode=new">
+<form method="post"  action="siteclientaspects.php?mode=new">
     <div class="grid-x grid-margin-x">
         <div class="large-4 medium-4 small-4 cell">
             <label><?php echo $strClient?></label>
@@ -562,14 +562,14 @@ ORDER BY Client_Denumire ASC";
     </div>
 
     <div class="grid-x grid-margin-x">
-        <div class="large-12 medium-12 small-12 cell text-center"> <input Type="submit" Value="<?php echo $strAdd?>" name="Submit"
+        <div class="large-12 medium-12 small-12 cell text-center"> <input Type="submit" value="<?php echo $strAdd?>" name="Submit"
                 class="button success">
         </div>
     </div>
 </form>
 <?php
 }
-ElseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
+elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
 $fID = (int)$_GET['fID'];
 $stmt = mysqli_prepare($conn, "SELECT * FROM clienti_fisa WHERE fisa_ID=?");
 mysqli_stmt_bind_param($stmt, "i", $fID);
@@ -583,7 +583,7 @@ mysqli_stmt_close($stmt);
         <p><a href="siteclientaspects.php" class="button"><?php echo $strBack?></a></p>
     </div>
 </div>
-<form Method="post" id="users" Action="siteclientaspects.php?mode=edit&cID=<?php echo $row['fisa_ID']?>">
+<form method="post"  action="siteclientaspects.php?mode=edit&cID=<?php echo $row['fisa_ID']?>">
 
     <div class="grid-x grid-margin-x">
         <div class="large-4 medium-4 small-4 cell">
@@ -742,7 +742,7 @@ ORDER BY Client_Denumire ASC";
     </div>
     <div class="grid-x grid-margin-x">
         <div class="large-12 medium-12 small-12 cell text-center">
-            <input Type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success">
+            <input Type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success">
         </div>
     </div>
 </form>

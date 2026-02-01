@@ -217,7 +217,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="sitesubscribtions.php?mode=new">
+        <form method="post"  action="sitesubscribtions.php?mode=new">
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strClient?>
@@ -337,7 +337,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
 
-                    <label><?php echo $strValue?>
+                    <label><?php echo $strvalue?>
                         <input name="abonament_client_valoare" type="text" id="numar" class="required" value="" />
                     </label>
                 </div>
@@ -384,7 +384,7 @@ $monthname = $formatter->format($dateObj);
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"><input type="submit"
-                        Value="<?php echo $strAdd?>" name="Submit" class="button"></div>
+                        value="<?php echo $strAdd?>" name="Submit" class="button"></div>
             </div>
         </form>
         <?php
@@ -421,15 +421,7 @@ $datecontract = $row["abonament_client_contract"] ?? '';
                     type: "POST",
                     success: function(data) {
                         try {
-                            $('#denumire').val((data["denumire"] || "").toUpperCase());
-                            $("#cif").val(data["cif"]);
-                            $("#tva").val(data["tva"]);
-                            $("#adresa").val(data["adresa"]);
-                            $("#judet").val((data["judet"]).toUpperCase());
-                            $("#oras").val((data["oras"]).toUpperCase());
-                            $("#numar_reg_com").val(data["numar_reg_com"]);
                             $("#datecontract").val(data["datecontract"]);
-                            $("#codpostal").val(data["codpostal"]);
                             $("#loaderIcon").hide();
                         } catch (err) {
                             document.getElementById("response").innerHTML = err.message;
@@ -463,7 +455,7 @@ $datecontract = $row["abonament_client_contract"] ?? '';
 </label>	</div>	
 	</div>	
 
-        <form method="post" id="users" Action="sitesubscribtions.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
+        <form method="post"  action="sitesubscribtions.php?mode=edit&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>">
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strTitle?>
@@ -568,7 +560,7 @@ $datecontract = $row["abonament_client_contract"] ?? '';
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
-                    <label><?php echo $strValue?>
+                    <label><?php echo $strvalue?>
                         <input name="abonament_client_valoare" type="text" id="numar" class="required"
                             value="<?php echo $row["abonament_client_valoare"]?>" />
                     </label>
@@ -650,7 +642,7 @@ else $str_flag="";
 
             <div class="grid-x grid-margin-x">
                 <div class="large-12 medium-12 small-12 cell text-center"><input type="submit"
-                        Value="<?php echo $strModify?>" name="Submit" class="button"></div>
+                        value="<?php echo $strModify?>" name="Submit" class="button"></div>
             </div>
         </form>
         <?php

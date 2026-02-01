@@ -491,7 +491,7 @@ else
 $mSQL = "INSERT INTO facturare_facturi(";
 	$mSQL = $mSQL . "factura_tip,";
 	$mSQL = $mSQL . "factura_numar)";
-	$mSQL = $mSQL . "Values(";
+	$mSQL = $mSQL . "values(";
 	$mSQL = $mSQL . "'" . $tipfactura . "', ";
 	$mSQL = $mSQL . "'" .$numarfactura . "') ";		
 //It executes the SQL
@@ -527,6 +527,15 @@ else{
               return response.json();
             })
             .then(data => {
+              if (data.error) {
+                const responseEl = document.getElementById('response');
+                if (responseEl) {
+                  responseEl.innerHTML = '<div class="callout alert">' + data.error + '</div>';
+                }
+                const loaderIcon = document.getElementById('loaderIcon');
+                if (loaderIcon) loaderIcon.style.display = 'none';
+                return;
+              }
               try {
                 const denumireEl = document.getElementById('factura_client_denumire');
                 const cifEl = document.getElementById('factura_client_CIF');
@@ -550,8 +559,10 @@ else{
               } catch(err) {
                 const responseEl = document.getElementById('response');
                 if (responseEl) {
-                  responseEl.innerHTML = err.message;
+                  responseEl.innerHTML = '<div class="callout alert">Eroare la procesarea datelor: ' + err.message + '</div>';
                 }
+                const loaderIcon = document.getElementById('loaderIcon');
+                if (loaderIcon) loaderIcon.style.display = 'none';
               }
             })
             .catch(error => {
@@ -641,7 +652,7 @@ else{
             </div>
           </div>
       </div>
-      <form method="post" id="users" Action="siteinvoices.php?mode=new&cID=<?php echo $invoiceID?>">
+      <form method="post"  action="siteinvoices.php?mode=new&cID=<?php echo $invoiceID?>">
       <div class="large-3 medium-3 cell">
           <label><?php echo $strType?></label>
             <input type="radio" name="existent" value="1" id="existent">
@@ -649,7 +660,7 @@ else{
             <input type="radio" name="existent" value="0" id="nou">
             <label for="nou"><?php echo $strNewClient?></label>
         </div>
-   <form method="post" id="users" Action="siteinvoices.php?mode=new&cID=<?php echo $invoiceID?>">
+   <form method="post"  action="siteinvoices.php?mode=new&cID=<?php echo $invoiceID?>">
         <div class="large-2 medium-2 cell">
           <label><?php echo $strReceipt?></label>
             <input type="radio" name="factura_client_achitat" value="0" checked id="chitanta"><label
@@ -828,6 +839,15 @@ elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
               return response.json();
             })
             .then(data => {
+              if (data.error) {
+                const responseEl = document.getElementById('response');
+                if (responseEl) {
+                  responseEl.innerHTML = '<div class="callout alert">' + data.error + '</div>';
+                }
+                const loaderIcon = document.getElementById('loaderIcon');
+                if (loaderIcon) loaderIcon.style.display = 'none';
+                return;
+              }
               try {
                 const denumireEl = document.getElementById('factura_client_denumire');
                 const cifEl = document.getElementById('factura_client_CIF');
@@ -847,8 +867,10 @@ elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
               } catch(err) {
                 const responseEl = document.getElementById('response');
                 if (responseEl) {
-                  responseEl.innerHTML = err.message;
+                  responseEl.innerHTML = '<div class="callout alert">Eroare la procesarea datelor: ' + err.message + '</div>';
                 }
+                const loaderIcon = document.getElementById('loaderIcon');
+                if (loaderIcon) loaderIcon.style.display = 'none';
               }
             })
             .catch(error => {

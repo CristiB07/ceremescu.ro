@@ -235,7 +235,7 @@ if (isset($_GET['oID']) && is_numeric($_GET['oID'])) {
             if (suggestionBox) suggestionBox.style.display = 'none';
         }
     </script>
-    <form method="post" Action="senddirectorder.php?oID=<?php echo $oID ?>&action=new">
+    <form method="post" action="senddirectorder.php?oID=<?php echo $oID ?>&action=new">
         <div class="grid-x grid-padding-x">
             <div class="large-6 cell">
                 <div id="response"></div>

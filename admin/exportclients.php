@@ -158,7 +158,7 @@ function delayer() {
     else
     {
     ?>
-    <form method="post" id="users" Action="exportclients.php">
+    <form method="post"  action="exportclients.php">
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell">
                 <label><?php echo $strLastClientID?>
@@ -168,7 +168,7 @@ function delayer() {
         </div>
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell text-center">
-                <input Type="submit" Value="<?php echo $strExport?>" name="Submit" class="button success" />
+                <input Type="submit" value="<?php echo $strExport?>" name="Submit" class="button success" />
             </div>
         </div>
     </form>

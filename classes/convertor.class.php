@@ -15,6 +15,13 @@ if (!is_numeric($No) && !is_string($No)) {
     return "zero lei";
 }
 
+// If it's a string, parse it to float
+if (is_string($No)) {
+    $No = str_replace($pct, '.', $No);
+    $No = str_replace($sp, '', $No);
+    $No = floatval($No);
+}
+
 // Prevent negative numbers
 $No = abs($No);
 

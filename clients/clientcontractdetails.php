@@ -75,11 +75,11 @@ curl_setopt($ch, CURLOPT_HEADER, FALSE);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
   $openapikey
 ));
-if( ! $response = curl_exec($ch)) 
-    { 
-        trigger_error(curl_error($ch)); 
-    } 
-    curl_close($ch); 
+  if( ! $response = curl_exec($ch)) 
+  { 
+    trigger_error(curl_error($ch)); 
+  } 
+  if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 $obj = json_decode($response, true);
 $denumire=$obj['denumire'];
 
@@ -154,10 +154,10 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
   $openapikey
 ));
 if( ! $response = curl_exec($ch)) 
-    { 
-        trigger_error(curl_error($ch)); 
-    } 
-    curl_close($ch); 
+  { 
+    trigger_error(curl_error($ch)); 
+  } 
+  if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 $obj = json_decode($response, true);
 $denumire=$obj['denumire'];
 
@@ -328,7 +328,7 @@ else
 	 
  <div class="grid-x grid-margin-x">
      <div class="large-12 medium-12 small-12 cell text-center"> 
-	 <input type="submit" Value="<?php echo $strSearch?>" name="Submit" class="button success" /> 
+	 <input type="submit" value="<?php echo $strSearch?>" name="Submit" class="button success" /> 
 	</div>
 	</div>
   </form>

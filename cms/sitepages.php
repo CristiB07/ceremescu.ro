@@ -14,8 +14,7 @@ if (empty($_SESSION['csrf_token'])) {
 $strPageTitle="Administrează paginile!";
 include '../dashboard/header.php';
 ?>
-<link rel="stylesheet" href="../js/simple-editor/simple-editor.css">
-<script src="../js/simple-editor/simple-editor.js"></script>
+
 <div class="grid-x grid-padding-x">
     <div class="large-12 cell">
         <?php
@@ -166,7 +165,7 @@ else { // starts entering data
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){ // we have new page
 echo "<a href=\"sitepages.php\" class=\"button\">$strBack &nbsp;<i class=\"fas fa-backward fa-xl\"></i></a>";
 ?>
-        <form method="post" id="users" Action="sitepages.php?mode=new">
+        <form method="post"  action="sitepages.php?mode=new">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
             <div class="grid-x grid-padding-x">
                 <div class="large-2 medium-2 small-2 cell">
@@ -264,7 +263,7 @@ echo "<a href=\"sitepages.php\" class=\"button\">$strBack &nbsp;<i class=\"fas f
     </div>
     <div class="grid-x grid-padding-x">
         <div class="large-12 medium-12 small-12 cell text-center"><br /><input type="submit"
-                Value="<?php echo $strAdd?>" name="Submit" class="submit button"></div>
+                value="<?php echo $strAdd?>" name="Submit" class="submit button"></div>
     </div>
     </form>
     <?php
@@ -287,7 +286,7 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $stmt->close();
 ?>
-    <form method="post" id="users" Action="sitepages.php?mode=edit&pID=<?php echo htmlspecialchars($pID, ENT_QUOTES, 'UTF-8'); ?>">
+    <form method="post"  action="sitepages.php?mode=edit&pID=<?php echo htmlspecialchars($pID, ENT_QUOTES, 'UTF-8'); ?>">
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
         <div class="grid-x grid-padding-x">
             <div class="large-2 medium-2 small-2 cell">
@@ -390,7 +389,7 @@ $stmt->close();
         </div>
         </div>
         <div class="grid-x grid-padding-x">
-            <div class="large-12 medium-12 small-12 cell text-center"><input type="submit" Value="<?php echo $strModify?>"
+            <div class="large-12 medium-12 small-12 cell text-center"><input type="submit" value="<?php echo $strModify?>"
                     name="Submit" class="button"></div>
         </div>
     </form>

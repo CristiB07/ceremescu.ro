@@ -15,10 +15,13 @@
     <title><?php echo $strSiteName ?>: <?php echo $strPageTitle ?></title>
     <meta property="og:image" content="<?php echo $strSiteURL ?>/img/<?php echo $siteOGImage?>" />
     <link rel="canonical" href="<?php echo $strSiteURL."/".$pageurl ?>" />
+    <?php if ($blog==1) {?>
+    <link rel="alternate" type="application/rss+xml" title="<?php echo $strSiteName ?>; Flux" href="<?php echo $strSiteURL ?>/blog/rss.php" />
+    <?php }?>
     <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/all.css" />
     <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/foundation.css" />
     <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/<?php echo $cssname?>.css" />
-    <link rel="shortcut icon" type="image/favicon" href="favicon.ico" />
+    <link rel="shortcut icon" type="image/favicon" href="<?php echo $strSiteURL ?>/favicon.ico" />
     <script language="javascript" type="text/javascript">
     function resizeIframe(obj) {
         obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
@@ -74,8 +77,7 @@ setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1
     <div class="top-bar" data-sticky data-options="marginTop:0;" style="width:100%">
         <div class="top-bar-left" id="responsive-menu">
             <ul class="dropdown menu" data-dropdown-menu>
-                <li><a href="<?php echo $strSiteURL ?>/index.php"><i class="fas fa-home"
-                            title="<?php echo $strHome ?>"></i></a></li>
+                <li><a href="<?php echo $strSiteURL ?>/index.php"><i class="fas fa-home" title="<?php echo $strHome ?>"></i></a></li>
                 <?php
 			 if($shop==1) {?>
                 <li><a href="<?php echo $strSiteURL ?>/shop/"><?php echo $strOnlineShop?></a></li>
@@ -111,15 +113,12 @@ setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1
             </ul>
         </div>
         <div class="top-bar-right text-right">
-            <ul class="menu">
+            <ul class="dropdown menu" data-dropdown-menu>
                 <li><a href="https://wa.me/40722575390"><i class="fab fa-whatsapp"></i></a></li>
                 <li><a href="tel: 0722575390"><i class="fas fa-mobile-alt"></i> 0722575390</a></li>
-                <li><a href="https://facebook.com/consaltisconsultantasiaudit"><i class="fab fa-facebook-f"></i></a>
-                </li>
-                <li><a href="https://www.linkedin.com/company/consaltis-consultanta-si-audit/"><i
-                            class="fab fa-linkedin-in"></i></a></li>
-                <li><a href="mailto:office@consaltis.ro?Subject=Doresc%20o%20ofertă" target="_top"><i
-                            class="far fa-envelope"></i> </a></li>
+                <li><a href="https://facebook.com/consaltisconsultantasiaudit"><i class="fab fa-facebook-f"></i></a></li>
+                <li><a href="https://www.linkedin.com/company/consaltis-consultanta-si-audit/"><i class="fab fa-linkedin-in"></i></a></li>
+                <li><a href="mailto:office@consaltis.ro?Subject=Doresc%20o%20ofertă" target="_top"><i class="far fa-envelope"></i> </a></li>
                 <?php
 			 if($shop==1) {
 $buyer=$_SESSION['buyer'];
@@ -137,10 +136,15 @@ $ordertotal=0;
 	$nume=ezpub_num_rows($resulti,$itemq);}
 	
 				?>
-                <li><a href="<?php echo $strSiteURL ?>/shop/<?php If($numar!=0){echo "order.php?oID=$oID";}?>"><i
-                            class="fas fa-shopping-cart"></i><span class="badge"
-                            id="CartCount"><?php echo $nume?></span></a></li>
-
+                <li class="has-submenu">
+                    <a href="<?php echo $strSiteURL ?>/shop/<?php If($numar!=0){echo "order.php?oID=$oID";}?>"><i
+                            class="fas fa-shopping-cart"></i><span class="badge" id="CartCount"><?php echo $nume?></span></a>
+                      <ul class="submenu menu vertical" data-submenu>
+                        <?php 
+                        define('IN_HEADER', true);
+                        include 'shop/cart.php';
+                        ?>
+    </ul></li>
                 <?php }
 				 if($elearning==1 || $useraccount==1) {
 				if (isSet($_SESSION['userlogedin'])){	?>

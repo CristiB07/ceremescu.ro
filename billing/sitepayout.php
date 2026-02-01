@@ -154,7 +154,7 @@ die;
 else {
 ?>
 
-        <form method="post" id="users" Action="sitepayout.php">
+        <form method="post"  action="sitepayout.php">
             <div class="grid-x grid-padding-x ">
                 <div class="large-6 medium-6 small-12 cell">
                     <label> <?php echo $strInvoice?>

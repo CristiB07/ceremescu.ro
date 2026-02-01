@@ -770,6 +770,13 @@ foreach ($available_years as $year_val) {
 // Salvare date în JSON pentru grafic
 $json_data = json_encode($comparison_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 file_put_contents($hddpath . "/" . $charts_folder . "/finance_comparison_" . date('Y-m-d') . ".json", $json_data);
+
+// Șterge fișierele mai vechi de 3 zile din folderul charts
+$charts_dir = $hddpath . '/' . $charts_folder;
+$three_days = 3 * 24 * 60 * 60;
+if (function_exists('delete_older_than')) {
+    delete_older_than($charts_dir, $three_days);
+}
 ?>
             
             <h3><?php echo $strComparison?></h3>

@@ -282,7 +282,7 @@ echo htmlspecialchars($strNumberOfWorkingDaysInMonth, ENT_QUOTES, 'UTF-8') . " "
 
             <tr>
                 <form method="post"
-                    Action="workingdays.php?mode=new&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
+                    action="workingdays.php?mode=new&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
                     <td><input name="pontaj_zi" type="text" value="<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="month" type="text" value="<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="year" type="text" value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" readonly></td>
@@ -292,10 +292,8 @@ echo htmlspecialchars($strNumberOfWorkingDaysInMonth, ENT_QUOTES, 'UTF-8') . " "
                     <td><input name="pontaj_ore_B" type="text" size="4" value="" /></td>
                     <td><input name="pontaj_ore_A" type="text" size="4" value="" /></td>
                     <td><input name="pontaj_observatii" type="text" size="4" value="" /></td>
-                    <td><input type="submit" Value="<?php echo htmlspecialchars($strAdd, ENT_QUOTES, 'UTF-8')?>" class="button" name="Submit"></td>
-                    <td>
-                        <p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo htmlspecialchars($strDelete, ENT_QUOTES, 'UTF-8')?>"></i></p>
-                    </td>
+                    <td><input type="submit" value="<?php echo htmlspecialchars($strAdd, ENT_QUOTES, 'UTF-8')?>" class="button" name="Submit"></td>
+                    <td><p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo htmlspecialchars($strDelete, ENT_QUOTES, 'UTF-8')?>"></i></p></td>
                 </form>
             </tr>
             <?php
@@ -305,30 +303,20 @@ echo htmlspecialchars($strNumberOfWorkingDaysInMonth, ENT_QUOTES, 'UTF-8') . " "
 
             <tr>
                 <form method="post"
-                    Action="workingdays.php?mode=edit&cID=<?php echo htmlspecialchars($row["pontaj_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
+                    action="workingdays.php?mode=edit&cID=<?php echo htmlspecialchars($row["pontaj_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>">
                     <td><input name="pontaj_zi" type="text" value="<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="month" type="text" value="<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="year" type="text" value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="pontaj_CO" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_CO"], ENT_QUOTES, 'UTF-8')?>" /></td>
-                    <td><input name="pontaj_ore_WFH" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_WFH"], ENT_QUOTES, 'UTF-8')?>" />
-                    </td>
-                    <td><input name="pontaj_ore_T" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_T"], ENT_QUOTES, 'UTF-8')?>" />
-                    </td>
-                    <td><input name="pontaj_ore_B" type="text" value="<?php echo htmlspecialchars($row["pontaj_ore_B"], ENT_QUOTES, 'UTF-8')?>" />
-                    </td>
-                    <td><input name="pontaj_ore_A" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_A"], ENT_QUOTES, 'UTF-8')?>" />
-                    </td>
-                    <td><input name="pontaj_observatii" type="text" size="4"
-                            value="<?php echo htmlspecialchars($row["pontaj_observatii"], ENT_QUOTES, 'UTF-8')?>" /></td>
-                    <td><input type="submit" Value="<?php echo htmlspecialchars($strModify, ENT_QUOTES, 'UTF-8')?>" class="button" name="Submit"></td>
-                    <td>
-                        <a href="workingdays.php?mode=delete&cID=<?php echo htmlspecialchars($row["pontaj_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>"
-                            class="ask button" OnClick="return confirm('<?php echo htmlspecialchars($strConfirmDelete, ENT_QUOTES, 'UTF-8')?>');">
-                            <i class="fa fa-eraser fa-xl" title="<?php echo htmlspecialchars($strDelete, ENT_QUOTES, 'UTF-8')?>"></i></a>
-                    </td>
+                    <td><input name="pontaj_ore_WFH" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_WFH"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input name="pontaj_ore_T" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_T"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input name="pontaj_ore_B" type="text" value="<?php echo htmlspecialchars($row["pontaj_ore_B"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input name="pontaj_ore_A" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_A"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input name="pontaj_observatii" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_observatii"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input type="submit" value="<?php echo htmlspecialchars($strModify, ENT_QUOTES, 'UTF-8')?>" class="button" name="Submit"></td>
+                    <td><a href="workingdays.php?mode=delete&cID=<?php echo htmlspecialchars($row["pontaj_ID"], ENT_QUOTES, 'UTF-8')?>&month=<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>&year=<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" class="ask button" OnClick="return confirm('<?php echo htmlspecialchars($strConfirmDelete, ENT_QUOTES, 'UTF-8')?>');"><i class="fa fa-eraser fa-xl" title="<?php echo htmlspecialchars($strDelete, ENT_QUOTES, 'UTF-8')?>"></i></a></td>
                 </form>
             </tr>
-
             <?php }
  }
  }
@@ -365,8 +353,6 @@ for ( $i = 1; $i <= $d; $i ++) {
 	 		$dd=$dd+1;
  }
  }
-
-
 $dateObj   = DateTime::createFromFormat('!m', $month);
 $formatter = new IntlDateFormatter("ro_RO",
                                     IntlDateFormatter::FULL, 

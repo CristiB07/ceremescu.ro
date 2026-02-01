@@ -167,7 +167,7 @@ else { // starts entering data
 If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){ // we have new page
 echo "<a href=\"blogarticles.php\" class=\"button\">".htmlspecialchars($strBack, ENT_QUOTES, 'UTF-8')." &nbsp;<i class=\"fas fa-backward fa-xl\"></i></a>";
 ?>
-        <form method="post" id="users" Action="blogarticles.php?mode=new">
+        <form method="post"  action="blogarticles.php?mode=new">
             <div class="grid-x grid-padding-x">
                 <div class="large-12 medium-12 small-2 cell">
                   <label><?php echo htmlspecialchars($strTitle, ENT_QUOTES, 'UTF-8')?></label>
@@ -177,7 +177,7 @@ echo "<a href=\"blogarticles.php\" class=\"button\">".htmlspecialchars($strBack,
                  <div class="grid-x grid-padding-x">
                 <div class="large-8 medium-8 small-8 cell">
                         <label><?php echo htmlspecialchars($strArticle, ENT_QUOTES, 'UTF-8')?></label>
-                        <textarea name="articol_continut" class="simple-html-editor" rows="10"></textarea>
+                        <textarea name="articol_continut" class="simple-html-editor" data-upload-dir="blog" rows="10"></textarea>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                        <label><?php echo htmlspecialchars($strURL, ENT_QUOTES, 'UTF-8')?></label>
@@ -358,7 +358,7 @@ $stmt->close();
                  <div class="grid-x grid-padding-x">
                 <div class="large-8 medium-8 small-8 cell">
                         <label><?php echo htmlspecialchars($strArticle, ENT_QUOTES, 'UTF-8')?></label>
-                        <textarea name="articol_continut" class="simple-html-editor" rows="10"><?php echo htmlspecialchars($row['articol_continut'] ?? '', ENT_QUOTES, 'UTF-8')?></textarea>
+                        <textarea name="articol_continut" class="simple-html-editor" data-upload-dir="blog" rows="10"><?php echo htmlspecialchars($row['articol_continut'] ?? '', ENT_QUOTES, 'UTF-8')?></textarea>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                        <label><?php echo htmlspecialchars($strURL, ENT_QUOTES, 'UTF-8')?></label>

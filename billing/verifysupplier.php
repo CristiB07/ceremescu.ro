@@ -58,11 +58,11 @@ curl_setopt($ch, CURLOPT_HEADER, FALSE);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
   $openapikey
 ));
-if( ! $response = curl_exec($ch)) 
+    if( ! $response = curl_exec($ch)) 
     { 
         trigger_error(curl_error($ch)); 
     } 
-    curl_close($ch); 
+    if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 $obj = json_decode($response, true);
 $denumire=$obj['denumire'];
 
@@ -138,7 +138,7 @@ if( ! $response = curl_exec($ch))
     { 
         trigger_error(curl_error($ch)); 
     } 
-    curl_close($ch); 
+    if (PHP_VERSION_ID < 80500) { curl_close($ch); }
 $obj = json_decode($response, true);
 $denumire=$obj['denumire'];
 

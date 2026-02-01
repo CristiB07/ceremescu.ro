@@ -7,14 +7,14 @@
 	$_SESSION['lang']="RO";
 	$lang=$_SESSION['lang'];
 }
-Else
+else
 {
 	$lang=$_SESSION['lang'];
 }
 if ($lang=="RO") {
 include '../lang/language_RO.php';
 }
-Else
+else
 {
 	include '../lang/language_EN.php';
 }	
@@ -160,13 +160,13 @@ $header="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(romanize($row["decont_suma"]), ENT_XML1, 'UTF-8') . "</Data></Cell>";
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">0</Data></Cell>";
                 }
-                ElseIf ($row["decont_achitat_card"]==1)
+                elseIf ($row["decont_achitat_card"]==1)
                 {
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">Nu</Data></Cell>";
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(romanize($row["decont_suma"]), ENT_XML1, 'UTF-8') . "</Data></Cell>";
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(romanize($row["decont_suma"]), ENT_XML1, 'UTF-8') . "</Data></Cell>";
                 }
-                Elseif ($row["decont_achitat_card"]==3) {
+                elseif ($row["decont_achitat_card"]==3) {
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">Da - card benzină</Data></Cell>";
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">" . htmlspecialchars(romanize($row["decont_suma"]), ENT_XML1, 'UTF-8') . "</Data></Cell>";
                 $schema_insert .= "<Cell><Data ss:Type=\"String\">0</Data></Cell>";
@@ -308,5 +308,4 @@ echo "<div class=\"callout success\">" . $strMessageSent ." ". htmlspecialchars(
 header("location:$strSiteURL". "/administrative/personalexpenses.php?message=Success");
 exit();
 }
-
 ?>

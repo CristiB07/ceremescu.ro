@@ -7,14 +7,14 @@
 	$_SESSION['lang']="RO";
 	$lang=$_SESSION['lang'];
 }
-Else
+else
 {
 	$lang=$_SESSION['lang'];
 }
 if ($lang=="RO") {
 include '../lang/language_RO.php';
 }
-Else
+else
 {
 	include '../lang/language_EN.php';
 }	
@@ -135,7 +135,7 @@ for ( $i = 1; $i <= $d; $i ++) {
  {
 	 $dd=$dd;
  }
- Else
+ else
  {
 	 		$dd=$dd+1;
  }
@@ -240,7 +240,7 @@ for ( $i = 1; $i <= $d; $i ++) {
 	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
 	 $schema_insert .= "<Cell><Data ss:Type=\"String\">-</Data></Cell>";
  }
- Else
+ else
  {
 	 		$dateObj   = DateTime::createFromFormat('Y-m-d', $dayofmonth);
 		$formatter = new IntlDateFormatter("ro_RO",

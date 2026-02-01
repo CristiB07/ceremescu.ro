@@ -293,7 +293,7 @@ else{
 	$receiptID=ezpub_inserted_id($conn);
 }
 ?>
-        <form method="post" id="users" Action="sitereceipts.php?mode=new&cID=<?php echo urlencode($receiptID)?>">
+        <form method="post"  action="sitereceipts.php?mode=new&cID=<?php echo urlencode($receiptID)?>">
             <div class="grid-x grid-padding-x ">
                 <div class="large-3 medium-3 small-12 cell">
                     <label> <?php echo $strInvoice?>
@@ -367,7 +367,7 @@ if (!$row) {
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" id="users" Action="sitereceipts.php?mode=edit&cID=<?php echo urlencode($row['chitanta_ID'])?>">
+        <form method="post"  action="sitereceipts.php?mode=edit&cID=<?php echo urlencode($row['chitanta_ID'])?>">
             <div class="grid-x grid-padding-x ">
                 <div class="large-3 medium-3 small-12 cell">
                     <label> <?php echo $strInvoice?>

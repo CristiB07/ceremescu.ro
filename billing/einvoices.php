@@ -41,7 +41,9 @@ else {
             <?php
 echo $strTotal . " " .$numar." ".$strInvoices ;
 echo " <br /><br />";
-echo $pages->display_pages() . " <a href=\"einvoices.php\" title=\"strClearAllFilters\">$strShowAll</a>&nbsp;";
+    echo $pages->display_pages() . " <a href=\"einvoices.php\" title=\"strClearAllFilters\">$strShowAll</a>&nbsp;";
+    // Bulk download button
+    echo " <a href=\"verifyeinvoice.php?mode=bulk\" class=\"button warning\" style=\"margin-left:10px;\">Bulk download</a>";
 echo " <br /><br />";
 ?>
         </div>
@@ -86,7 +88,7 @@ While ($row=ezpub_fetch_array($result)){
           echo"  <td>$factura_descarcata</td>	
         </tr>";
 }
-echo "</tbody><tfoot><tr><td></td><td  colspan=\"8\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
+echo "</tbody><tfoot><tr><td></td><td colspan=\"7\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
 }?>
     </div>
 </div>
