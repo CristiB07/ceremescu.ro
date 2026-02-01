@@ -1,0 +1,2182 @@
+-- MySQL dump 10.13  Distrib 8.0.40, for macos14 (arm64)
+--
+-- Host: localhost    Database: cnsx001_master
+-- ------------------------------------------------------
+-- Server version	8.4.5
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `administrative_alimentari`
+--
+
+DROP TABLE IF EXISTS `administrative_alimentari`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `administrative_alimentari` (
+  `alimentare_ID` int NOT NULL AUTO_INCREMENT,
+  `alimentare_bf` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `alimentare_litri` decimal(10,4) DEFAULT NULL,
+  `alimentare_valoare` decimal(10,4) DEFAULT NULL,
+  `alimentare_data` date DEFAULT NULL,
+  `alimentare_aloc` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `alimentare_auto` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `alimentare_km` int DEFAULT NULL,
+  `alimentare_platit` int DEFAULT NULL,
+  PRIMARY KEY (`alimentare_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `administrative_deconturi`
+--
+
+DROP TABLE IF EXISTS `administrative_deconturi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `administrative_deconturi` (
+  `decont_ID` int NOT NULL AUTO_INCREMENT,
+  `decont_descriere` varchar(450) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `decont_suma` decimal(10,4) DEFAULT NULL,
+  `decont_document` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `decont_data` date DEFAULT NULL,
+  `decont_achitat_card` int DEFAULT NULL,
+  `decont_user` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `decont_luna` date DEFAULT NULL,
+  PRIMARY KEY (`decont_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `administrative_foi_parcurs`
+--
+
+DROP TABLE IF EXISTS `administrative_foi_parcurs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `administrative_foi_parcurs` (
+  `fp_ID` int NOT NULL AUTO_INCREMENT,
+  `fp_aloc` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `fp_numar` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `fp_km_init` int DEFAULT NULL,
+  `fp_km_final` int DEFAULT NULL,
+  `fp_detalii` varchar(450) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `fp_zi` int DEFAULT NULL,
+  `fp_luna` int DEFAULT NULL,
+  `fp_an` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `fp_km` int DEFAULT NULL,
+  `fp_plecare` varchar(450) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `fp_sosire` varchar(450) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`fp_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `administrative_pontaje`
+--
+
+DROP TABLE IF EXISTS `administrative_pontaje`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `administrative_pontaje` (
+  `pontaj_ID` int NOT NULL AUTO_INCREMENT,
+  `pontaj_user` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `pontaj_zi` int DEFAULT NULL,
+  `pontaj_luna` int DEFAULT NULL,
+  `pontaj_an` varchar(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `pontaj_CO` int DEFAULT NULL,
+  `pontaj_ore_WFH` int DEFAULT NULL,
+  `pontaj_ore_T` int DEFAULT NULL,
+  `pontaj_ore_B` int DEFAULT NULL,
+  `pontaj_ore_A` int DEFAULT NULL,
+  `pontaj_observatii` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`pontaj_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ambalaje`
+--
+
+DROP TABLE IF EXISTS `ambalaje`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ambalaje` (
+  `ambalaj_id` int NOT NULL AUTO_INCREMENT,
+  `ambalaj_nume` varchar(45) DEFAULT NULL,
+  `ambalaj_cod` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`ambalaj_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ambalaje_deseuri`
+--
+
+DROP TABLE IF EXISTS `ambalaje_deseuri`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ambalaje_deseuri` (
+  `ad_id` int NOT NULL AUTO_INCREMENT,
+  `ad_client_id` int DEFAULT NULL,
+  `ad_an_raportare` varchar(5) DEFAULT NULL,
+  `ad_ambalaj_id` int DEFAULT NULL,
+  `ad_total` decimal(10,2) DEFAULT NULL,
+  `ad_operator_denumire` varchar(145) DEFAULT NULL,
+  `ad_operator_cui` varchar(10) DEFAULT NULL,
+  `ad_cod_operatiune` varchar(4) DEFAULT NULL,
+  PRIMARY KEY (`ad_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ambalaje_gestionate`
+--
+
+DROP TABLE IF EXISTS `ambalaje_gestionate`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ambalaje_gestionate` (
+  `gestiune_a_id` int NOT NULL AUTO_INCREMENT,
+  `gestiune_a_client_id` int DEFAULT NULL,
+  `gestiune_a_ambalaj_id` int DEFAULT NULL,
+  `gestiune_a_ambalaje_desfacere` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_ambalaje_primare` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_ambalaje_primare_RE` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_ambalaje_secundare` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_ambalaje_secundare_RE` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_ambalaje_contaminate` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_total` decimal(10,2) DEFAULT NULL,
+  `gestiune_a_an_raportare` varchar(4) DEFAULT NULL,
+  PRIMARY KEY (`gestiune_a_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `application_errors`
+--
+
+DROP TABLE IF EXISTS `application_errors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `application_errors` (
+  `error_id` int NOT NULL AUTO_INCREMENT,
+  `error_utilizator_id` int DEFAULT NULL,
+  `error_visitor_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `error_user_role` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `error_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `error_message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `error_file` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `error_line` int DEFAULT NULL,
+  `error_IP_address` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `error_time` datetime NOT NULL,
+  `error_page` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `error_session` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`error_id`),
+  KEY `idx_user` (`error_utilizator_id`),
+  KEY `idx_visitor` (`error_visitor_id`),
+  KEY `idx_type` (`error_type`),
+  KEY `idx_time` (`error_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `application_logs`
+--
+
+DROP TABLE IF EXISTS `application_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `application_logs` (
+  `log_id` int NOT NULL AUTO_INCREMENT,
+  `log_utilizator_id` int DEFAULT NULL,
+  `log_visitor_id` varchar(100) DEFAULT NULL,
+  `log_IP_address` varchar(45) DEFAULT NULL,
+  `log_utilizator_time` datetime DEFAULT NULL,
+  `log_utilizator_page` varchar(245) DEFAULT NULL,
+  `log_utilizator_session` varchar(145) DEFAULT NULL,
+  PRIMARY KEY (`log_id`),
+  KEY `idx_visitor` (`log_visitor_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2649 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bilanturi`
+--
+
+DROP TABLE IF EXISTS `bilanturi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bilanturi` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `an` int DEFAULT NULL,
+  `cui` bigint DEFAULT NULL,
+  `deni` varchar(255) DEFAULT NULL,
+  `caen` int DEFAULT NULL,
+  `den_caen` varchar(255) DEFAULT NULL,
+  `cifra_afaceri_net` int DEFAULT NULL,
+  `venituri_totale` int DEFAULT NULL,
+  `venituri_in_avans` int DEFAULT NULL,
+  `cheltuieli_totale` int DEFAULT NULL,
+  `cheltuieli_in_avans` int DEFAULT NULL,
+  `profit_brut` int DEFAULT NULL,
+  `pierdere_bruta` int DEFAULT NULL,
+  `profit_net` int DEFAULT NULL,
+  `pierdere_neta` int DEFAULT NULL,
+  `provizioane` int DEFAULT NULL,
+  `capitaluri_total` int DEFAULT NULL,
+  `capital_subscris` int DEFAULT NULL,
+  `patrimoniu_regie` int DEFAULT NULL,
+  `numar_salariati` int DEFAULT NULL,
+  `active_imobilizate` int DEFAULT NULL,
+  `active_circulante` int DEFAULT NULL,
+  `stocuri` int DEFAULT NULL,
+  `creante` int DEFAULT NULL,
+  `casa_banci` int DEFAULT NULL,
+  `datorii` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=349 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `blog_articole`
+--
+
+DROP TABLE IF EXISTS `blog_articole`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `blog_articole` (
+  `articol_ID` int NOT NULL AUTO_INCREMENT,
+  `articol_titlu` varchar(245) DEFAULT NULL,
+  `articol_continut` blob,
+  `articol_url` varchar(245) DEFAULT NULL,
+  `articol_categorie` varchar(245) DEFAULT NULL,
+  `articol_descriere` varchar(1445) DEFAULT NULL,
+  `articol_status` int DEFAULT NULL,
+  `articol_tip` int DEFAULT NULL,
+  `articol_imaginetitlu` varchar(245) DEFAULT NULL,
+  `articol_keywords` varchar(1245) DEFAULT NULL,
+  `articol_autor` varchar(245) DEFAULT NULL,
+  `articol_data_publicarii` datetime DEFAULT NULL,
+  PRIMARY KEY (`articol_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bookings`
+--
+
+DROP TABLE IF EXISTS `bookings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bookings` (
+  `booking_id` int NOT NULL AUTO_INCREMENT,
+  `booking_location` int DEFAULT NULL,
+  `booking_professional` int DEFAULT NULL,
+  `booking_first_name` varchar(245) DEFAULT NULL,
+  `booking_last_name` varchar(245) DEFAULT NULL,
+  `booking_email` varchar(145) DEFAULT NULL,
+  `booking_phone` varchar(145) DEFAULT NULL,
+  `booking_start_time` datetime DEFAULT NULL,
+  `booking_end_time` datetime DEFAULT NULL,
+  `booking_secret` varchar(12) DEFAULT NULL,
+  `booking_validation` int DEFAULT NULL,
+  `booking_confirmation` int DEFAULT NULL,
+  `booking_user_id` int DEFAULT NULL,
+  `booking_description` varchar(245) DEFAULT NULL,
+  `booking_hash` varchar(1000) DEFAULT NULL,
+  `booking_service` int DEFAULT NULL,
+  PRIMARY KEY (`booking_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bookings_locations`
+--
+
+DROP TABLE IF EXISTS `bookings_locations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bookings_locations` (
+  `location_id` int NOT NULL AUTO_INCREMENT,
+  `location_name` varchar(145) DEFAULT NULL,
+  `location_description` varchar(450) DEFAULT NULL,
+  `location_address` varchar(645) DEFAULT NULL,
+  `location_phone` varchar(45) DEFAULT NULL,
+  `location_city` varchar(245) DEFAULT NULL,
+  `location_county` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`location_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bookings_reservations`
+--
+
+DROP TABLE IF EXISTS `bookings_reservations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bookings_reservations` (
+  `reservation_id` int NOT NULL AUTO_INCREMENT,
+  `reservation_type` int DEFAULT NULL,
+  `reservation_start` datetime DEFAULT NULL,
+  `reservation_end` datetime DEFAULT NULL,
+  `reservation_display` varchar(45) DEFAULT NULL,
+  `reservation_location` int DEFAULT NULL,
+  `reservation_professional` int DEFAULT NULL,
+  `reservation_start_hours` datetime DEFAULT NULL,
+  `reservation_end_hours` datetime DEFAULT NULL,
+  PRIMARY KEY (`reservation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bookings_services`
+--
+
+DROP TABLE IF EXISTS `bookings_services`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bookings_services` (
+  `service_id` int NOT NULL AUTO_INCREMENT,
+  `service_name` varchar(145) DEFAULT NULL,
+  `service_description` varchar(450) DEFAULT NULL,
+  `service_duration` int DEFAULT NULL,
+  PRIMARY KEY (`service_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cash_banca`
+--
+
+DROP TABLE IF EXISTS `cash_banca`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cash_banca` (
+  `cash_banca_ING` decimal(10,4) DEFAULT NULL,
+  `cash_banca_trezorerie` decimal(10,4) DEFAULT NULL,
+  `cash_banca_transilvania` decimal(10,4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_abonamente`
+--
+
+DROP TABLE IF EXISTS `clienti_abonamente`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_abonamente` (
+  `abonament_ID` int NOT NULL AUTO_INCREMENT,
+  `abonament_client_ID` int DEFAULT NULL,
+  `abonament_client_valoare` decimal(10,4) DEFAULT NULL,
+  `abonament_client_valuta` int DEFAULT NULL,
+  `abonament_client_frecventa` int DEFAULT NULL,
+  `abonament_client_detalii` varchar(255) DEFAULT NULL,
+  `abonament_client_unitate` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `abonament_client_contract` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `abonament_client_aloc` varchar(45) DEFAULT NULL,
+  `abonament_client_zifacturare` int DEFAULT NULL,
+  `abonament_client_termen` int DEFAULT NULL,
+  `abonament_client_activ` int DEFAULT NULL,
+  `abonament_client_email` varchar(450) DEFAULT NULL,
+  `abonament_client_an` varchar(45) DEFAULT NULL,
+  `abonament_client_BU` varchar(45) DEFAULT NULL,
+  `abonament_client_lunafacturare` varchar(500) DEFAULT NULL,
+  `abonament_client_anexa` int DEFAULT NULL,
+  `abonament_client_pdf` varchar(145) DEFAULT NULL,
+  `abonament_client_sales` varchar(10) DEFAULT NULL,
+  `abonament_client_contract_ID` int DEFAULT NULL,
+  PRIMARY KEY (`abonament_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=193 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_activitati`
+--
+
+DROP TABLE IF EXISTS `clienti_activitati`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_activitati` (
+  `ID_activitati_client` int NOT NULL AUTO_INCREMENT,
+  `ID_Activitate` int DEFAULT NULL,
+  `ID_Client` int DEFAULT NULL,
+  `ID_User` varchar(10) DEFAULT NULL,
+  `Activitate_Client_Frecventa` varchar(45) DEFAULT NULL,
+  `Activitate_Client_Termen` varchar(12) DEFAULT NULL,
+  `Activitate_Client_Coleg` varchar(45) DEFAULT NULL,
+  `Activitate_Client_Contract` int DEFAULT NULL,
+  PRIMARY KEY (`ID_activitati_client`)
+) ENGINE=InnoDB AUTO_INCREMENT=626 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_activitati_clienti`
+--
+
+DROP TABLE IF EXISTS `clienti_activitati_clienti`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_activitati_clienti` (
+  `ID_activitati_client` int NOT NULL AUTO_INCREMENT,
+  `ID_Activitate` int DEFAULT NULL,
+  `ID_Client` int DEFAULT NULL,
+  `ID_User` varchar(10) COLLATE utf8mb4_bin DEFAULT NULL,
+  `Activitate_Client_Frecventa` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `Activitate_Client_Termen` date DEFAULT NULL,
+  `Activitate_Client_Coleg` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `Activitate_Client_Contract` int DEFAULT NULL,
+  PRIMARY KEY (`ID_activitati_client`)
+) ENGINE=InnoDB AUTO_INCREMENT=625 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_activitati_contracte`
+--
+
+DROP TABLE IF EXISTS `clienti_activitati_contracte`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_activitati_contracte` (
+  `activitate_contracte_ID` int NOT NULL AUTO_INCREMENT,
+  `activitate_contracte_denumire` varchar(245) DEFAULT NULL,
+  `activitate_contracte_cod` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`activitate_contracte_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_activitati_lista`
+--
+
+DROP TABLE IF EXISTS `clienti_activitati_lista`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_activitati_lista` (
+  `ID_Activitate` int NOT NULL AUTO_INCREMENT,
+  `Activitate_Descriere` blob,
+  `Activitate_Nume` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID_Activitate`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_autorizatii`
+--
+
+DROP TABLE IF EXISTS `clienti_autorizatii`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_autorizatii` (
+  `ID_autorizatii` int NOT NULL AUTO_INCREMENT,
+  `Autorizatie` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `Descriere` blob,
+  PRIMARY KEY (`ID_autorizatii`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_autorizatii_clienti`
+--
+
+DROP TABLE IF EXISTS `clienti_autorizatii_clienti`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_autorizatii_clienti` (
+  `ID_Autorizatie_Client` int NOT NULL AUTO_INCREMENT,
+  `ID_Client` int DEFAULT NULL,
+  `ID_Autorizatie` int DEFAULT NULL,
+  `Autorizatie_Client_Expirare` date DEFAULT NULL,
+  `Autorizatie_Client_Emitere` date DEFAULT NULL,
+  `Autorizatie_Client_Numar` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  `Autorizatie_Client_Tip` int DEFAULT NULL,
+  `ID_User` int DEFAULT NULL,
+  `Autorizatie_Client_Viza` date DEFAULT NULL,
+  PRIMARY KEY (`ID_Autorizatie_Client`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_contacte`
+--
+
+DROP TABLE IF EXISTS `clienti_contacte`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_contacte` (
+  `contact_ID` int NOT NULL AUTO_INCREMENT,
+  `client_ID` int DEFAULT NULL,
+  `contact_nume` varchar(255) DEFAULT NULL,
+  `contact_prenume` varchar(245) DEFAULT NULL,
+  `contact_telefon` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_tip` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`contact_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_contracte`
+--
+
+DROP TABLE IF EXISTS `clienti_contracte`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_contracte` (
+  `ID_Contract` int NOT NULL AUTO_INCREMENT,
+  `ID_Client` int DEFAULT NULL,
+  `Contract_Alocat` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_Obiect` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_Numar` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_Data` date DEFAULT NULL,
+  `Contract_Activ` int DEFAULT NULL,
+  `Contract_Suma` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_Valuta` int DEFAULT NULL,
+  `Contract_Termen` int DEFAULT NULL,
+  `Contract_Zifacturare` int DEFAULT NULL,
+  `Contract_Tip` int DEFAULT NULL,
+  `Contract_Responsabil` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_Email_Facturare` varchar(450) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_An` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_abonament` int DEFAULT NULL,
+  `Contract_BU` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_lunifacturare` varchar(450) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Contract_File` varchar(545) DEFAULT NULL,
+  `Contract_Sales` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  PRIMARY KEY (`ID_Contract`)
+) ENGINE=InnoDB AUTO_INCREMENT=219 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_date`
+--
+
+DROP TABLE IF EXISTS `clienti_date`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_date` (
+  `Client_Aloc` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Denumire` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Adresa` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Telefon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_CUI` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Banca` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_IBAN` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Judet` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_RC` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Email` varchar(550) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Nr_Contract` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Numar_Angajati` int DEFAULT NULL,
+  `Client_Cod_CAEN` varchar(450) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Descriere_Activitate` blob,
+  `Client_Caracterizare` blob,
+  `Client_Localitate` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Tip` int DEFAULT NULL,
+  `Client_Contract_Tip` int DEFAULT NULL,
+  `Client_ID` int DEFAULT NULL,
+  `ID_Client` int NOT NULL AUTO_INCREMENT,
+  `ID_Aloc` int DEFAULT NULL,
+  `Client_abonament_ID` int DEFAULT NULL,
+  `Client_Web` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_HQ` int DEFAULT NULL,
+  `Client_Nr_Angajati` int DEFAULT NULL,
+  `Client_Descriere_Activitati` blob,
+  `Client_RO` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_CIF` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Client_Codpostal` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `date_bilant` int DEFAULT NULL,
+  `date_fiscale` int DEFAULT NULL,
+  PRIMARY KEY (`ID_Client`)
+) ENGINE=InnoDB AUTO_INCREMENT=1192 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_date_fiscale`
+--
+
+DROP TABLE IF EXISTS `clienti_date_fiscale`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_date_fiscale` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cui` varchar(16) NOT NULL,
+  `data` date DEFAULT NULL,
+  `denumire` varchar(255) DEFAULT NULL,
+  `adresa` varchar(255) DEFAULT NULL,
+  `nrRegCom` varchar(64) DEFAULT NULL,
+  `telefon` varchar(64) DEFAULT NULL,
+  `fax` varchar(64) DEFAULT NULL,
+  `codPostal` varchar(32) DEFAULT NULL,
+  `act` varchar(128) DEFAULT NULL,
+  `stare_inregistrare` varchar(64) DEFAULT NULL,
+  `data_inregistrare` date DEFAULT NULL,
+  `cod_CAEN` varchar(16) DEFAULT NULL,
+  `iban` varchar(64) DEFAULT NULL,
+  `statusRO_e_Factura` tinyint(1) DEFAULT NULL,
+  `organFiscalCompetent` varchar(128) DEFAULT NULL,
+  `forma_de_proprietate` varchar(64) DEFAULT NULL,
+  `forma_organizare` varchar(64) DEFAULT NULL,
+  `forma_juridica` varchar(64) DEFAULT NULL,
+  `scpTVA` tinyint(1) DEFAULT NULL,
+  `data_inceput_ScpTVA` date DEFAULT NULL,
+  `data_sfarsit_ScpTVA` date DEFAULT NULL,
+  `data_anul_imp_ScpTVA` date DEFAULT NULL,
+  `mesaj_ScpTVA` varchar(455) DEFAULT NULL,
+  `dataInceputTvaInc` date DEFAULT NULL,
+  `dataSfarsitTvaInc` date DEFAULT NULL,
+  `dataActualizareTvaInc` date DEFAULT NULL,
+  `dataPublicareTvaInc` date DEFAULT NULL,
+  `tipActTvaInc` varchar(64) DEFAULT NULL,
+  `statusTvaIncasare` tinyint(1) DEFAULT NULL,
+  `dataInactivare` date DEFAULT NULL,
+  `dataReactivare` date DEFAULT NULL,
+  `dataPublicareInactiv` date DEFAULT NULL,
+  `dataRadiere` date DEFAULT NULL,
+  `statusInactivi` tinyint(1) DEFAULT NULL,
+  `domiciliuFiscal` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cui` (`cui`)
+) ENGINE=InnoDB AUTO_INCREMENT=418 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_fisa`
+--
+
+DROP TABLE IF EXISTS `clienti_fisa`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_fisa` (
+  `fisa_ID` int NOT NULL AUTO_INCREMENT,
+  `ID_Client` int DEFAULT NULL,
+  `fisa_GD` int DEFAULT NULL,
+  `fisa_GA` int DEFAULT NULL,
+  `fisa_OTR` varchar(245) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `fisa_DEE` int DEFAULT NULL,
+  `fisa_OTR_EE` varchar(245) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `fisa_baterii` int DEFAULT NULL,
+  `fisa_OTR_BAT` varchar(245) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `fisa_anvelope` int DEFAULT NULL,
+  `fisa_OTR_Anvelope` varchar(245) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `fisa_uleiuri` int DEFAULT NULL,
+  `fisa_substante` int DEFAULT NULL,
+  `fisa_COV` int DEFAULT NULL,
+  `fisa_emisii_stationare` int DEFAULT NULL,
+  `fisa_monitorizari_apa` int DEFAULT NULL,
+  `fisa_detalii_monitorizari_apa` blob,
+  `fisa_monitorizari_aer` int DEFAULT NULL,
+  `fisa_detalii_monitorizari_aer` blob,
+  `fisa_monitorizari_sol` int DEFAULT NULL,
+  `fisa_detalii_monitorizari_sol` blob,
+  `fisa_alte_detalii` blob,
+  `fisa_raportare_DSP` int DEFAULT NULL,
+  PRIMARY KEY (`fisa_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=152 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_programari`
+--
+
+DROP TABLE IF EXISTS `clienti_programari`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_programari` (
+  `programare_id` int NOT NULL AUTO_INCREMENT,
+  `programare_user` int DEFAULT NULL,
+  `programare_client` int DEFAULT NULL,
+  `programare_data_inceput` datetime DEFAULT NULL,
+  `programare_obiectiv` varchar(245) DEFAULT NULL,
+  `programare_finalizata` int DEFAULT NULL,
+  `programare_vizita_id` int DEFAULT NULL,
+  `programare_zona` varchar(245) DEFAULT NULL,
+  `programare_tipvizita` varchar(45) DEFAULT NULL,
+  `programare_detalii` varchar(500) DEFAULT NULL,
+  `programare_data_sfarsit` datetime DEFAULT NULL,
+  `programare_durata` int DEFAULT NULL,
+  `programare_invite_email` varchar(500) DEFAULT NULL,
+  `programare_sent` datetime DEFAULT NULL,
+  `programare_graph_event_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`programare_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `clienti_vizite`
+--
+
+DROP TABLE IF EXISTS `clienti_vizite`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clienti_vizite` (
+  `ID_vizita` int NOT NULL AUTO_INCREMENT,
+  `client_vizita` int DEFAULT NULL,
+  `alocat` varchar(4) DEFAULT NULL,
+  `tip_vizita` varchar(255) DEFAULT NULL,
+  `data_vizita` datetime DEFAULT NULL,
+  `scop_vizita` varchar(255) DEFAULT NULL,
+  `observatii_vizita` mediumblob,
+  `urmatoarea_vizita` mediumblob,
+  `programare_id` int DEFAULT NULL,
+  `programare_tipvizita` varchar(45) DEFAULT NULL,
+  `programare_detalii` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`ID_vizita`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cms_pagini`
+--
+
+DROP TABLE IF EXISTS `cms_pagini`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `cms_pagini` (
+  `pagina_id` int NOT NULL AUTO_INCREMENT,
+  `pagina_titlu` varchar(255) DEFAULT NULL,
+  `pagina_continut` blob,
+  `pagina_url` varchar(45) DEFAULT NULL,
+  `pagina_categorie` varchar(45) DEFAULT NULL,
+  `pagina_descriere` varchar(255) DEFAULT NULL,
+  `pagina_keywords` varchar(255) DEFAULT NULL,
+  `pagina_master` int DEFAULT NULL,
+  `pagina_numar` int DEFAULT NULL,
+  `pagina_status` int DEFAULT NULL,
+  `pagina_metadescriere` int DEFAULT NULL,
+  `pagina_tip` int DEFAULT NULL,
+  `pagina_limba` varchar(3) DEFAULT NULL,
+  `pagina_imaginetitlu` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`pagina_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `curs_valutar`
+--
+
+DROP TABLE IF EXISTS `curs_valutar`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `curs_valutar` (
+  `curs_valutar_zi` date DEFAULT NULL,
+  `curs_valutar_valoare` double DEFAULT NULL,
+  `curs_id` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`curs_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3525 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `date_utilizatori`
+--
+
+DROP TABLE IF EXISTS `date_utilizatori`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `date_utilizatori` (
+  `utilizator_ID` int NOT NULL AUTO_INCREMENT,
+  `utilizator_Prenume` varchar(255) DEFAULT NULL,
+  `utilizator_Nume` varchar(255) DEFAULT NULL,
+  `utilizator_Email` varchar(85) DEFAULT NULL,
+  `utilizator_Parola` varchar(1550) DEFAULT NULL,
+  `utilizator_Code` varchar(4) DEFAULT NULL,
+  `utilizator_Role` varchar(45) DEFAULT NULL,
+  `utilizator_Phone` varchar(45) DEFAULT NULL,
+  `utilizator_Carplate` varchar(45) DEFAULT NULL,
+  `utilizator_Function` varchar(45) DEFAULT NULL,
+  `utilizator_Team` varchar(45) DEFAULT NULL,
+  `utilizator_CRM` int DEFAULT NULL,
+  `utilizator_Billing` int DEFAULT NULL,
+  `utilizator_Sales` int DEFAULT NULL,
+  `utilizator_Clients` int DEFAULT NULL,
+  `utilizator_CMS` int DEFAULT NULL,
+  `utilizator_Projects` int DEFAULT NULL,
+  `utilizator_Shop` int DEFAULT NULL,
+  `utilizator_Administrative` int DEFAULT NULL,
+  `utilizator_Lab` int DEFAULT NULL,
+  `utilizator_Elearning` int DEFAULT NULL,
+  `utilizator_Transfer` int DEFAULT NULL,
+  `utilizator_Lastlogin` datetime DEFAULT NULL,
+  `utilizator_Upgraded` int DEFAULT NULL,
+  `utilizator_Helpdesk` int DEFAULT NULL,
+  PRIMARY KEY (`utilizator_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `date_utilizatori_chei`
+--
+
+DROP TABLE IF EXISTS `date_utilizatori_chei`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `date_utilizatori_chei` (
+  `cheie_id` int NOT NULL AUTO_INCREMENT,
+  `cheie_primara` varchar(1450) DEFAULT NULL,
+  `cheie_secundara` varchar(1450) DEFAULT NULL,
+  PRIMARY KEY (`cheie_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `deseuri_coduri`
+--
+
+DROP TABLE IF EXISTS `deseuri_coduri`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `deseuri_coduri` (
+  `cd_id` int NOT NULL AUTO_INCREMENT,
+  `cd_01` varchar(2) DEFAULT NULL,
+  `cd_02` varchar(2) DEFAULT NULL,
+  `cd_03` varchar(3) DEFAULT NULL,
+  `cd_description` blob,
+  `cd_full` varchar(7) DEFAULT NULL,
+  PRIMARY KEY (`cd_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=976 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `deseuri_coduri_operatiuni`
+--
+
+DROP TABLE IF EXISTS `deseuri_coduri_operatiuni`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `deseuri_coduri_operatiuni` (
+  `operatiune_id` int NOT NULL AUTO_INCREMENT,
+  `operatiune_tip` int DEFAULT NULL,
+  `operatiune_cod` varchar(45) DEFAULT NULL,
+  `operatiune_descriere` varchar(245) DEFAULT NULL,
+  PRIMARY KEY (`operatiune_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `deseuri_raportari`
+--
+
+DROP TABLE IF EXISTS `deseuri_raportari`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `deseuri_raportari` (
+  `raportare_id` int NOT NULL AUTO_INCREMENT,
+  `raportare_client_id` int DEFAULT NULL,
+  `raportare_luna_raportare` int DEFAULT NULL,
+  `raportare_an_raportare` varchar(45) DEFAULT NULL,
+  `raportare_cod_deseu` varchar(45) DEFAULT NULL,
+  `raportare_tip_activitate` int DEFAULT NULL,
+  `raportare_cod_operatiune_eliminare` varchar(45) DEFAULT NULL,
+  `raportare_cantitate_totala` decimal(10,2) DEFAULT NULL,
+  `raportare_operator` varchar(245) DEFAULT NULL,
+  `raportare_um` varchar(45) DEFAULT NULL,
+  `raportare_stocare` decimal(10,2) DEFAULT NULL,
+  `raportare_tip_stocare` varchar(10) DEFAULT NULL,
+  `raportare_tratare` decimal(10,2) DEFAULT NULL,
+  `raportare_tip_tratare` varchar(45) DEFAULT NULL,
+  `raportare_scop_tratare` varchar(45) DEFAULT NULL,
+  `raportare_transport` varchar(45) DEFAULT NULL,
+  `raportare_tip_transport` varchar(45) DEFAULT NULL,
+  `raportare_cantitate_eliminata` decimal(10,2) DEFAULT NULL,
+  `raportare_cantitate_valorificata` decimal(10,2) DEFAULT NULL,
+  `raportare_cod_operatiune_valorificare` varchar(45) DEFAULT NULL,
+  `raportare_stoc` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`raportare_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `deseuri_stocuri`
+--
+
+DROP TABLE IF EXISTS `deseuri_stocuri`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `deseuri_stocuri` (
+  `stoc_id` int NOT NULL AUTO_INCREMENT,
+  `stoc_client_id` int DEFAULT NULL,
+  `stoc_an_raportare` varchar(4) DEFAULT NULL,
+  `stoc_cod_deseu` varchar(45) DEFAULT NULL,
+  `stoc_cantitate` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`stoc_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `documente`
+--
+
+DROP TABLE IF EXISTS `documente`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `documente` (
+  `document_id` int NOT NULL AUTO_INCREMENT,
+  `document_tip` varchar(145) DEFAULT NULL,
+  `document_titlu` varchar(245) DEFAULT NULL,
+  `document_continut` blob,
+  `document_lastupdated` datetime DEFAULT NULL,
+  `document_atasamente` varchar(450) DEFAULT NULL,
+  `document_autor` varchar(145) DEFAULT NULL,
+  `document_categorie` varchar(145) DEFAULT NULL,
+  `document_cod` varchar(45) DEFAULT NULL,
+  `document_versiune` int DEFAULT NULL,
+  PRIMARY KEY (`document_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `documente_semnaturi`
+--
+
+DROP TABLE IF EXISTS `documente_semnaturi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `documente_semnaturi` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `document_id` int NOT NULL,
+  `utilizator_ID` int NOT NULL,
+  `document_lastupdated` datetime NOT NULL,
+  `data_semnare` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_sign` (`document_id`,`utilizator_ID`,`document_lastupdated`),
+  KEY `document_id` (`document_id`),
+  KEY `utilizator_ID` (`utilizator_ID`),
+  CONSTRAINT `fk_documente_semnaturi_document` FOREIGN KEY (`document_id`) REFERENCES `documente` (`document_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_documente_semnaturi_utilizator` FOREIGN KEY (`utilizator_ID`) REFERENCES `date_utilizatori` (`utilizator_ID`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `efactura`
+--
+
+DROP TABLE IF EXISTS `efactura`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `efactura` (
+  `efactura_ID` int NOT NULL AUTO_INCREMENT,
+  `factura_ID` int DEFAULT NULL,
+  `factura_xml` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_data_incarcarii` datetime DEFAULT NULL,
+  `factura_index_incarcare` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_status` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_index_descarcare` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_descarcata` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_data_descarcarii` datetime DEFAULT NULL,
+  `factura_CIF` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`efactura_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `efactura_erori`
+--
+
+DROP TABLE IF EXISTS `efactura_erori`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `efactura_erori` (
+  `eroare_ID` int NOT NULL AUTO_INCREMENT,
+  `data_erorii` datetime DEFAULT NULL,
+  `index_incarcare` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `index_descarcare` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `data_descarcare` datetime DEFAULT NULL,
+  `status` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`eroare_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `efactura_mesaje`
+--
+
+DROP TABLE IF EXISTS `efactura_mesaje`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `efactura_mesaje` (
+  `message_ID` int NOT NULL AUTO_INCREMENT,
+  `message_datacreare` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `message_cif` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `message_id_solicitare` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `message_detalii` varchar(1500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `message_tip` varchar(245) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `message_downloadid` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`message_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=920 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `efactura_primite`
+--
+
+DROP TABLE IF EXISTS `efactura_primite`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `efactura_primite` (
+  `efactura_ID` int NOT NULL AUTO_INCREMENT,
+  `efactura_primita_CUI` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `efactura_primita_index` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `efactura_primita_download` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `efactura_primita_datap` datetime DEFAULT NULL,
+  `efactura_primita_datad` datetime DEFAULT NULL,
+  PRIMARY KEY (`efactura_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=512 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_answers`
+--
+
+DROP TABLE IF EXISTS `elearning_answers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_answers` (
+  `answer_ID` int NOT NULL AUTO_INCREMENT,
+  `answer_student` int DEFAULT NULL,
+  `answer_time` datetime DEFAULT NULL,
+  `answer_question` int DEFAULT NULL,
+  `answer_option` blob,
+  `answer_grade` int DEFAULT NULL,
+  `answer_test` int DEFAULT NULL,
+  `answer_test_take` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`answer_ID`),
+  KEY `answer_student_idx` (`answer_student`),
+  KEY `answer_question_idx` (`answer_question`)
+) ENGINE=InnoDB AUTO_INCREMENT=2550 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_coursecategory`
+--
+
+DROP TABLE IF EXISTS `elearning_coursecategory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_coursecategory` (
+  `elearning_coursecategory_ID` int NOT NULL AUTO_INCREMENT,
+  `elearning_coursecategory_name` varchar(100) DEFAULT NULL,
+  `elearning_coursecategory_description` mediumtext,
+  `elearning_coursecategory_picture` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`elearning_coursecategory_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_courses`
+--
+
+DROP TABLE IF EXISTS `elearning_courses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_courses` (
+  `Course_id` int NOT NULL AUTO_INCREMENT,
+  `course_name` varchar(500) DEFAULT NULL,
+  `course_author` int DEFAULT NULL,
+  `course_code` varchar(45) DEFAULT NULL,
+  `course_price` decimal(10,4) DEFAULT NULL,
+  `course_discount` decimal(10,4) DEFAULT NULL,
+  `course_description` blob,
+  `course_type` varchar(11) DEFAULT NULL,
+  `course_objective` blob,
+  `course_target` blob,
+  `course_picture` varchar(45) DEFAULT NULL,
+  `course_thumb` varchar(45) DEFAULT NULL,
+  `course_url` varchar(75) DEFAULT NULL,
+  `course_keywords` varchar(255) DEFAULT NULL,
+  `course_category` int DEFAULT NULL,
+  `course_whatyouget` blob,
+  `course_metadescription` varchar(255) DEFAULT NULL,
+  `course_location` int DEFAULT NULL,
+  `course_active` int DEFAULT NULL,
+  `course_vat` int DEFAULT NULL,
+  `course_delivery` int DEFAULT NULL,
+  PRIMARY KEY (`Course_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_courseschedules`
+--
+
+DROP TABLE IF EXISTS `elearning_courseschedules`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_courseschedules` (
+  `schedule_ID` int NOT NULL AUTO_INCREMENT,
+  `schedule_course_ID` int DEFAULT NULL,
+  `schedule_start_date` date DEFAULT NULL,
+  `schedule_end_date` date DEFAULT NULL,
+  `schedule_enrolments` int DEFAULT NULL,
+  `schedule_max_enrolments` int DEFAULT NULL,
+  `schedule_start_hour` varchar(45) DEFAULT NULL,
+  `schedule_exam_date` date DEFAULT NULL,
+  `schedule_exam_hour` varchar(45) DEFAULT NULL,
+  `schedule_class_id` int DEFAULT NULL,
+  `schedule_details` blob,
+  PRIMARY KEY (`schedule_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_coursetypes`
+--
+
+DROP TABLE IF EXISTS `elearning_coursetypes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_coursetypes` (
+  `coursetype_ID` int NOT NULL AUTO_INCREMENT,
+  `course_type` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`coursetype_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_enrollments`
+--
+
+DROP TABLE IF EXISTS `elearning_enrollments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_enrollments` (
+  `elearning_enrollments_id` int NOT NULL AUTO_INCREMENT,
+  `elearning_enrollments_stud_id` int DEFAULT NULL,
+  `elearning_enrollments_course_id` int DEFAULT NULL,
+  `elearning_enrollments_courseschedule_id` int DEFAULT NULL,
+  `elearning_enrollments_active` int DEFAULT NULL,
+  `elearning_enrollments_date` datetime DEFAULT NULL,
+  `elearning_enrollments_activation_date` datetime DEFAULT NULL,
+  `elearning_enrollments_deactivation_date` datetime DEFAULT NULL,
+  `elearning_enrollments_score` varchar(45) DEFAULT NULL,
+  `elearning_enrollments_lector_observations` longblob,
+  `elearning_enrollments_diploma` varchar(255) DEFAULT NULL,
+  `elearning_enrollments_credits` int DEFAULT NULL,
+  PRIMARY KEY (`elearning_enrollments_id`),
+  KEY `elearning_enrollments_id` (`elearning_enrollments_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_lessons`
+--
+
+DROP TABLE IF EXISTS `elearning_lessons`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_lessons` (
+  `lesson_ID` int NOT NULL AUTO_INCREMENT,
+  `lesson_title` varchar(255) DEFAULT NULL,
+  `lesson_trainer` int DEFAULT NULL,
+  `lesson_level` int DEFAULT NULL,
+  `lesson_course` int DEFAULT NULL,
+  `lesson_body` blob,
+  `lesson_files` varchar(245) DEFAULT NULL,
+  `lesson_video` varchar(245) DEFAULT NULL,
+  PRIMARY KEY (`lesson_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_questions`
+--
+
+DROP TABLE IF EXISTS `elearning_questions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_questions` (
+  `question_ID` int NOT NULL AUTO_INCREMENT,
+  `question_type` int DEFAULT NULL,
+  `question_question` blob,
+  `question_hint` varchar(255) DEFAULT NULL,
+  `question_score` varchar(45) DEFAULT NULL,
+  `question_test` int DEFAULT NULL,
+  PRIMARY KEY (`question_ID`),
+  KEY `elearning_questions_test_idx` (`question_test`)
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_quizoptions`
+--
+
+DROP TABLE IF EXISTS `elearning_quizoptions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_quizoptions` (
+  `quizoption_ID` int NOT NULL AUTO_INCREMENT,
+  `quizoption_question` int DEFAULT NULL,
+  `quizoption_option` varchar(255) DEFAULT NULL,
+  `quizoption_score` varchar(45) DEFAULT NULL,
+  `quizoption_comment` varchar(255) DEFAULT NULL,
+  `quizoption_value` int DEFAULT NULL,
+  PRIMARY KEY (`quizoption_ID`),
+  KEY `quioption_question_idx` (`quizoption_question`),
+  CONSTRAINT `quioption_question` FOREIGN KEY (`quizoption_question`) REFERENCES `elearning_questions` (`question_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=214 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_student_questions`
+--
+
+DROP TABLE IF EXISTS `elearning_student_questions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_student_questions` (
+  `qID` int NOT NULL AUTO_INCREMENT,
+  `student_id` int DEFAULT NULL,
+  `student_question` varchar(500) DEFAULT NULL,
+  `trainer_answer` blob,
+  `lesson_id` int DEFAULT NULL,
+  `course_id` int DEFAULT NULL,
+  PRIMARY KEY (`qID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_tests`
+--
+
+DROP TABLE IF EXISTS `elearning_tests`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_tests` (
+  `test_ID` int NOT NULL AUTO_INCREMENT,
+  `test_description` blob,
+  `test_score` varchar(45) DEFAULT NULL,
+  `test_name` varchar(255) DEFAULT NULL,
+  `test_author` int DEFAULT NULL,
+  `test_course` int DEFAULT NULL,
+  PRIMARY KEY (`test_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_tests_takes`
+--
+
+DROP TABLE IF EXISTS `elearning_tests_takes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_tests_takes` (
+  `take_id` int NOT NULL AUTO_INCREMENT,
+  `take_stud_id` int DEFAULT NULL,
+  `take_date` datetime DEFAULT NULL,
+  `take_test_id` int DEFAULT NULL,
+  `take_score` varchar(45) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `take_observation` blob,
+  `take_code` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`take_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=253 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `elearning_trainers`
+--
+
+DROP TABLE IF EXISTS `elearning_trainers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `elearning_trainers` (
+  `trainer_id` int NOT NULL AUTO_INCREMENT,
+  `trainer_name` varchar(500) DEFAULT NULL,
+  `trainer_presentation_short` blob,
+  `trainer_picture` varchar(45) DEFAULT NULL,
+  `trainer_thumb` varchar(45) DEFAULT NULL,
+  `trainer_url` varchar(45) DEFAULT NULL,
+  `trainer_keywords` varchar(255) DEFAULT NULL,
+  `trainer_metadescription` varchar(255) DEFAULT NULL,
+  `trainer_email` varchar(45) DEFAULT NULL,
+  `trainer_password` varchar(45) DEFAULT NULL,
+  `trainer_phone` varchar(45) DEFAULT NULL,
+  `trainer_active` int DEFAULT NULL,
+  `trainer_utilizator_ID` int DEFAULT NULL,
+  PRIMARY KEY (`trainer_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `facturare_articole_facturi`
+--
+
+DROP TABLE IF EXISTS `facturare_articole_facturi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturare_articole_facturi` (
+  `ID_Document` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `articol_descriere` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `articol_unitate` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `articol_pret` decimal(10,4) DEFAULT NULL,
+  `articol_bucati` int DEFAULT NULL,
+  `articol_valoare` decimal(10,4) DEFAULT NULL,
+  `articol_TVA` decimal(10,4) DEFAULT NULL,
+  `articol_total` decimal(10,4) DEFAULT NULL,
+  `articol_ID` int NOT NULL AUTO_INCREMENT,
+  `factura_ID` int DEFAULT NULL,
+  `articol_procent_TVA` int DEFAULT NULL,
+  PRIMARY KEY (`articol_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=8096 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `facturare_articole_facturi_primite`
+--
+
+DROP TABLE IF EXISTS `facturare_articole_facturi_primite`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturare_articole_facturi_primite` (
+  `articolFP_ID` int NOT NULL AUTO_INCREMENT,
+  `articolFP_nume` varchar(600) DEFAULT NULL,
+  `articolFP_pret` decimal(10,4) DEFAULT NULL,
+  `articolFP_cantitate` decimal(10,4) DEFAULT NULL,
+  `articolFP_unitate` varchar(45) DEFAULT NULL,
+  `articolFP_valoare` decimal(10,4) DEFAULT NULL,
+  `articolFP_TVA` decimal(10,4) DEFAULT NULL,
+  `articolFP_procent_TVA` int DEFAULT NULL,
+  `factura_ID` int DEFAULT NULL,
+  `index_download` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`articolFP_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `facturare_chitante`
+--
+
+DROP TABLE IF EXISTS `facturare_chitante`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturare_chitante` (
+  `chitanta_ID` int NOT NULL AUTO_INCREMENT,
+  `chitanta_factura_ID` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
+  `chitanta_data_incasarii` date DEFAULT NULL,
+  `chitanta_suma_incasata` decimal(10,4) DEFAULT NULL,
+  `chitanta_numar` int DEFAULT NULL,
+  `chitanta_inchisa` int DEFAULT NULL,
+  `chitanta_descriere` varchar(555) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `chitanta_anulat` int DEFAULT NULL,
+  `chitanta_pdf` int DEFAULT NULL,
+  `chitanta_pdf_generat` date DEFAULT NULL,
+  PRIMARY KEY (`chitanta_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=260 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `facturare_facturi`
+--
+
+DROP TABLE IF EXISTS `facturare_facturi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturare_facturi` (
+  `factura_data_emiterii` date DEFAULT NULL,
+  `factura_numar` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_tip` int DEFAULT NULL,
+  `factura_client_denumire` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_CUI` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_adresa` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_valoare` decimal(10,4) DEFAULT NULL,
+  `factura_client_valoare_tva` decimal(10,4) DEFAULT NULL,
+  `factura_client_valoare_totala` decimal(10,4) DEFAULT NULL,
+  `factura_client_termen` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `factura_client_achitat` int DEFAULT NULL,
+  `factura_client_data_achitat` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_zile_achitat` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_alocat` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `factura_client_BU` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `factura_client_an` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `factura_client_tip_activitate` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `factura_ID` int NOT NULL AUTO_INCREMENT,
+  `factura_client_ID` int DEFAULT NULL,
+  `factura_client_achitat_prin` int DEFAULT NULL,
+  `factura_client_RC` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_inchisa` int DEFAULT NULL,
+  `factura_client_anulat` int DEFAULT NULL,
+  `factura_client_curs_valutar` decimal(10,4) DEFAULT NULL,
+  `factura_client_contract` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_banca` varchar(245) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_IBAN` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_pdf` int DEFAULT NULL,
+  `factura_client_pdf_generat` date DEFAULT NULL,
+  `factura_client_judet` varchar(145) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_banca_achitat` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_RO` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_CIF` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_localitate` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_sales` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_cod_postal` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_client_efactura_generata` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_stornata` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `factura_stornata_data` datetime DEFAULT NULL,
+  `factura_cod_factura` varchar(4) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`factura_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=7916 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `facturare_facturi_primite`
+--
+
+DROP TABLE IF EXISTS `facturare_facturi_primite`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturare_facturi_primite` (
+  `fp_id` int NOT NULL AUTO_INCREMENT,
+  `fp_nume_furnizor` varchar(645) DEFAULT NULL,
+  `fp_adresa_furnizor` varchar(645) DEFAULT NULL,
+  `fp_oras_furnizor` varchar(145) DEFAULT NULL,
+  `fp_CUI_furnizor` varchar(45) DEFAULT NULL,
+  `fp_RC_furnizor` varchar(45) DEFAULT NULL,
+  `fp_valoare_neta` decimal(10,4) DEFAULT NULL,
+  `fp_valoare_totala` decimal(10,4) DEFAULT NULL,
+  `fp_valoare_TVA` decimal(10,4) DEFAULT NULL,
+  `fp_data_emiterii` date DEFAULT NULL,
+  `fp_data_scadenta` date DEFAULT NULL,
+  `fp_data_achitat` date DEFAULT NULL,
+  `fp_achitat` int DEFAULT NULL,
+  `fp_numar_factura` varchar(145) DEFAULT NULL,
+  `fp_index_download` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`fp_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `facturare_notificari_trimise`
+--
+
+DROP TABLE IF EXISTS `facturare_notificari_trimise`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `facturare_notificari_trimise` (
+  `notificare_id` int NOT NULL AUTO_INCREMENT,
+  `notificare_client_id` int DEFAULT NULL,
+  `notificare_data_trimiterii` int DEFAULT NULL,
+  `notificare_facturi_intarziate` varchar(250) DEFAULT NULL,
+  PRIMARY KEY (`notificare_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `generale_coduripostale`
+--
+
+DROP TABLE IF EXISTS `generale_coduripostale`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `generale_coduripostale` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `Judet` varchar(255) DEFAULT NULL,
+  `Localitate` varchar(255) DEFAULT NULL,
+  `Tip_artera` varchar(255) DEFAULT NULL,
+  `Denumire_artera` varchar(255) DEFAULT NULL,
+  `Numar_Bloc` varchar(255) DEFAULT NULL,
+  `Codpostal` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=55124 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `generale_localitati`
+--
+
+DROP TABLE IF EXISTS `generale_localitati`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `generale_localitati` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `county_id` varchar(10) NOT NULL,
+  `siruta` bigint NOT NULL,
+  `longitude` decimal(18,16) NOT NULL,
+  `latitude` decimal(18,16) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `region` varchar(64) NOT NULL,
+  `county` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `generale_localitati_3a0d0688` (`county_id`),
+  KEY `generale_localitati_52094d6e` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=13750 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `legislatie`
+--
+
+DROP TABLE IF EXISTS `legislatie`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `legislatie` (
+  `lege_ID` int NOT NULL AUTO_INCREMENT,
+  `lege_denumire` varchar(500) DEFAULT NULL,
+  `lege_modificari` blob,
+  `lege_link` varchar(345) DEFAULT NULL,
+  `lege_categorie` varchar(45) DEFAULT NULL,
+  `lege_data` varchar(45) DEFAULT NULL,
+  `lege_tip` varchar(45) DEFAULT NULL,
+  `lege_lastupdated` datetime DEFAULT NULL,
+  PRIMARY KEY (`lege_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `legislatie_proprie`
+--
+
+DROP TABLE IF EXISTS `legislatie_proprie`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `legislatie_proprie` (
+  `lege_ID` int NOT NULL AUTO_INCREMENT,
+  `lege_denumire` varchar(500) DEFAULT NULL,
+  `lege_modificari` blob,
+  `lege_link` varchar(345) DEFAULT NULL,
+  `lege_categorie` varchar(45) DEFAULT NULL,
+  `lege_data` varchar(45) DEFAULT NULL,
+  `lege_tip` varchar(45) DEFAULT NULL,
+  `lege_lastupdated` datetime DEFAULT NULL,
+  PRIMARY KEY (`lege_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `magazin_articole`
+--
+
+DROP TABLE IF EXISTS `magazin_articole`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `magazin_articole` (
+  `articol_id` int NOT NULL AUTO_INCREMENT,
+  `articol_produs` int DEFAULT NULL,
+  `articol_cantitate` int DEFAULT NULL,
+  `articol_idcomanda` int DEFAULT NULL,
+  PRIMARY KEY (`articol_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `magazin_comenzi`
+--
+
+DROP TABLE IF EXISTS `magazin_comenzi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `magazin_comenzi` (
+  `comanda_ID` int NOT NULL AUTO_INCREMENT,
+  `comanda_utilizator` varchar(25) DEFAULT NULL,
+  `comanda_deschisa` datetime DEFAULT NULL,
+  `comanda_inchisa` datetime DEFAULT NULL,
+  `comanda_total` int DEFAULT NULL,
+  `comanda_status` int DEFAULT NULL,
+  `comanda_ip` varchar(45) DEFAULT NULL,
+  `comanda_comentarii` varchar(255) DEFAULT NULL,
+  `comanda_cont` int DEFAULT NULL,
+  `comanda_cont_id` int DEFAULT NULL,
+  `company_id` int DEFAULT NULL,
+  PRIMARY KEY (`comanda_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `magazin_cumparatori`
+--
+
+DROP TABLE IF EXISTS `magazin_cumparatori`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `magazin_cumparatori` (
+  `cumparator_id` int NOT NULL AUTO_INCREMENT,
+  `cumparator_prenume` varchar(45) DEFAULT NULL,
+  `cumparator_nume` varchar(45) DEFAULT NULL,
+  `cumparator_uid` varchar(45) DEFAULT NULL,
+  `cumparator_adresa` varchar(450) DEFAULT NULL,
+  `cumparator_oras` varchar(100) DEFAULT NULL,
+  `cumparator_judet` varchar(45) DEFAULT NULL,
+  `cumparator_firma` varchar(15) DEFAULT NULL,
+  `cumparator_factura` varchar(45) DEFAULT NULL,
+  `cumparator_email` varchar(45) DEFAULT NULL,
+  `cumparator_telefon` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`cumparator_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `magazin_firme`
+--
+
+DROP TABLE IF EXISTS `magazin_firme`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `magazin_firme` (
+  `firma_id` int NOT NULL AUTO_INCREMENT,
+  `firma_nume` varchar(255) DEFAULT NULL,
+  `firma_RO` varchar(45) DEFAULT NULL,
+  `firma_reg` varchar(45) DEFAULT NULL,
+  `firma_adresa` text,
+  `firma_banca` varchar(45) DEFAULT NULL,
+  `firma_IBAN` varchar(45) DEFAULT NULL,
+  `firma_reprezentant` varchar(45) DEFAULT NULL,
+  `firma_telefon` varchar(45) DEFAULT NULL,
+  `firma_email` varchar(45) DEFAULT NULL,
+  `firma_cumparatorID` varchar(45) DEFAULT NULL,
+  `firma_CIF` varchar(45) DEFAULT NULL,
+  `firma_oras` varchar(450) DEFAULT NULL,
+  `firma_judet` varchar(450) DEFAULT NULL,
+  PRIMARY KEY (`firma_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `magazin_produse`
+--
+
+DROP TABLE IF EXISTS `magazin_produse`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `magazin_produse` (
+  `produs_descriere` mediumtext,
+  `produs_nume` varchar(255) DEFAULT NULL,
+  `produs_imagine` varchar(255) DEFAULT NULL,
+  `produs_pret` decimal(10,4) DEFAULT NULL,
+  `produs_categorie` varchar(255) DEFAULT NULL,
+  `produs_dpret` decimal(10,4) DEFAULT NULL,
+  `produs_keywords` varchar(255) DEFAULT NULL,
+  `produs_url` varchar(255) DEFAULT NULL,
+  `produs_limba` varchar(255) DEFAULT NULL,
+  `produs_meta` varchar(255) DEFAULT NULL,
+  `produs_thumb` varchar(255) DEFAULT NULL,
+  `produs_id` int NOT NULL AUTO_INCREMENT,
+  `produs_tva` int DEFAULT NULL,
+  `produs_fcategorie` varchar(455) DEFAULT NULL,
+  PRIMARY KEY (`produs_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `newsletter`
+--
+
+DROP TABLE IF EXISTS `newsletter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `newsletter` (
+  `newsletter_ID` int NOT NULL AUTO_INCREMENT,
+  `newsletter_data_trimiterii` datetime DEFAULT NULL,
+  `newsletter_atasament` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `newsletter_content` blob,
+  PRIMARY KEY (`newsletter_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `newsletter_subscribers`
+--
+
+DROP TABLE IF EXISTS `newsletter_subscribers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `newsletter_subscribers` (
+  `newsletter_email_ID` int NOT NULL AUTO_INCREMENT,
+  `newsletter_email_hash` varchar(356) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `newsletter_email_active` int DEFAULT NULL,
+  `newsletter_email_date_unsubscribed` datetime DEFAULT NULL,
+  `newsletter_email` varchar(245) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `newsletter_date_subscribed` datetime DEFAULT NULL,
+  `newsletter_date_confirmed` datetime DEFAULT NULL,
+  `newsletter_first_name` varchar(455) COLLATE utf8mb4_bin DEFAULT NULL,
+  `newsletter_last_name` varchar(455) COLLATE utf8mb4_bin DEFAULT NULL,
+  `newsletter_gender_reveal` int DEFAULT NULL,
+  `newsletter_ip_subscribed` varchar(45) COLLATE utf8mb4_bin DEFAULT NULL,
+  PRIMARY KEY (`newsletter_email_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `proiecte`
+--
+
+DROP TABLE IF EXISTS `proiecte`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `proiecte` (
+  `proiect_id` int NOT NULL AUTO_INCREMENT,
+  `proiect_titlu` varchar(145) DEFAULT NULL,
+  `proiect_descriere` varchar(2000) DEFAULT NULL,
+  `proiect_cod` varchar(45) DEFAULT NULL,
+  `proiect_data_inceput` datetime DEFAULT NULL,
+  `proiect_data_sfarsit` datetime DEFAULT NULL,
+  `proiect_echipa` varchar(145) DEFAULT NULL,
+  `proiect_client` int DEFAULT NULL,
+  `proiect_importanta` varchar(45) DEFAULT NULL,
+  `proiect_lastupdate` datetime DEFAULT NULL,
+  `proiect_fisiere` varchar(2000) DEFAULT NULL,
+  `proiect_status` int DEFAULT NULL,
+  PRIMARY KEY (`proiect_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `proiecte_activitati`
+--
+
+DROP TABLE IF EXISTS `proiecte_activitati`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `proiecte_activitati` (
+  `activitate_id` int NOT NULL AUTO_INCREMENT,
+  `activitate_proiect_id` int DEFAULT NULL,
+  `activitate_titlu` varchar(145) DEFAULT NULL,
+  `activitate_descriere` varchar(2000) DEFAULT NULL,
+  `activitate_data_inceput` datetime DEFAULT NULL,
+  `activitate_data_sfarsit` datetime DEFAULT NULL,
+  `activitate_importanta` varchar(45) DEFAULT NULL,
+  `activitate_responsabil` int DEFAULT NULL,
+  PRIMARY KEY (`activitate_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `proiecte_status`
+--
+
+DROP TABLE IF EXISTS `proiecte_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `proiecte_status` (
+  `status_id` int NOT NULL AUTO_INCREMENT,
+  `status_user_id` int DEFAULT NULL,
+  `status_activitate_id` int DEFAULT NULL,
+  `status_raport` varchar(2000) DEFAULT NULL,
+  `status_data_raport` datetime DEFAULT NULL,
+  PRIMARY KEY (`status_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `readerrss_articole`
+--
+
+DROP TABLE IF EXISTS `readerrss_articole`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `readerrss_articole` (
+  `articol_ID` int NOT NULL AUTO_INCREMENT,
+  `articol_feed_ID` int DEFAULT NULL,
+  `articol_titlu` varchar(545) DEFAULT NULL,
+  `articol_link` varchar(545) DEFAULT NULL,
+  `articol_data_publicarii` datetime DEFAULT NULL,
+  `articol_data_citirii` datetime DEFAULT NULL,
+  `articol_autor` varchar(145) DEFAULT NULL,
+  `articol_descriere` blob,
+  PRIMARY KEY (`articol_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=1910 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `readerrss_feeds`
+--
+
+DROP TABLE IF EXISTS `readerrss_feeds`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `readerrss_feeds` (
+  `feed_ID` int NOT NULL AUTO_INCREMENT,
+  `feed_url` varchar(245) DEFAULT NULL,
+  `feed_descriere` varchar(545) DEFAULT NULL,
+  `feed_lastupdated` datetime DEFAULT NULL,
+  `feed_titlu` varchar(145) DEFAULT NULL,
+  `feed_image_url` varchar(145) DEFAULT NULL,
+  `feed_image_w` varchar(4) DEFAULT NULL,
+  `feed_image_h` varchar(4) DEFAULT NULL,
+  `feed_site_url` varchar(245) DEFAULT NULL,
+  PRIMARY KEY (`feed_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sales_programari`
+--
+
+DROP TABLE IF EXISTS `sales_programari`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sales_programari` (
+  `programare_id` int NOT NULL AUTO_INCREMENT,
+  `programare_user` int DEFAULT NULL,
+  `programare_client` int DEFAULT NULL,
+  `programare_data_inceput` datetime DEFAULT NULL,
+  `programare_obiectiv` varchar(245) DEFAULT NULL,
+  `programare_finalizata` int DEFAULT NULL,
+  `programare_vizita_id` int DEFAULT NULL,
+  `programare_zona` varchar(245) DEFAULT NULL,
+  `programare_tipvizita` varchar(45) DEFAULT NULL,
+  `programare_detalii` varchar(500) DEFAULT NULL,
+  `programare_data_sfarsit` datetime DEFAULT NULL,
+  `programare_durata` int DEFAULT NULL,
+  `programare_invite_email` varchar(500) DEFAULT NULL,
+  `programare_sent` datetime DEFAULT NULL,
+  `programare_graph_event_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`programare_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sales_prospecti`
+--
+
+DROP TABLE IF EXISTS `sales_prospecti`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sales_prospecti` (
+  `prospect_id` int NOT NULL AUTO_INCREMENT,
+  `prospect_denumire` varchar(512) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_adresa` varchar(512) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_oras` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `prospect_activitate` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_judet` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `prospect_cui` varchar(12) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_rc` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_contact` varchar(512) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_telefon` varchar(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_email` varchar(120) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_caracterizare` tinyblob,
+  `prospect_aloc` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL,
+  `prospect_status` varchar(45) COLLATE utf8mb3_bin DEFAULT NULL,
+  PRIMARY KEY (`prospect_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16640 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sales_prospecti_date_fiscale`
+--
+
+DROP TABLE IF EXISTS `sales_prospecti_date_fiscale`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sales_prospecti_date_fiscale` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `cui` varchar(16) NOT NULL,
+  `data` date DEFAULT NULL,
+  `denumire` varchar(255) DEFAULT NULL,
+  `adresa` varchar(255) DEFAULT NULL,
+  `nrRegCom` varchar(64) DEFAULT NULL,
+  `telefon` varchar(64) DEFAULT NULL,
+  `fax` varchar(64) DEFAULT NULL,
+  `codPostal` varchar(32) DEFAULT NULL,
+  `act` varchar(128) DEFAULT NULL,
+  `stare_inregistrare` varchar(64) DEFAULT NULL,
+  `data_inregistrare` date DEFAULT NULL,
+  `cod_CAEN` varchar(16) DEFAULT NULL,
+  `iban` varchar(64) DEFAULT NULL,
+  `statusRO_e_Factura` tinyint(1) DEFAULT NULL,
+  `organFiscalCompetent` varchar(128) DEFAULT NULL,
+  `forma_de_proprietate` varchar(64) DEFAULT NULL,
+  `forma_organizare` varchar(64) DEFAULT NULL,
+  `forma_juridica` varchar(64) DEFAULT NULL,
+  `scpTVA` tinyint(1) DEFAULT NULL,
+  `data_inceput_ScpTVA` date DEFAULT NULL,
+  `data_sfarsit_ScpTVA` date DEFAULT NULL,
+  `data_anul_imp_ScpTVA` date DEFAULT NULL,
+  `mesaj_ScpTVA` varchar(455) DEFAULT NULL,
+  `dataInceputTvaInc` date DEFAULT NULL,
+  `dataSfarsitTvaInc` date DEFAULT NULL,
+  `dataActualizareTvaInc` date DEFAULT NULL,
+  `dataPublicareTvaInc` date DEFAULT NULL,
+  `tipActTvaInc` varchar(64) DEFAULT NULL,
+  `statusTvaIncasare` tinyint(1) DEFAULT NULL,
+  `dataInactivare` date DEFAULT NULL,
+  `dataReactivare` date DEFAULT NULL,
+  `dataPublicareInactiv` date DEFAULT NULL,
+  `dataRadiere` date DEFAULT NULL,
+  `statusInactivi` tinyint(1) DEFAULT NULL,
+  `domiciliuFiscal` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cui` (`cui`)
+) ENGINE=InnoDB AUTO_INCREMENT=417 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sales_vizite_prospecti`
+--
+
+DROP TABLE IF EXISTS `sales_vizite_prospecti`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sales_vizite_prospecti` (
+  `ID_vizita` int NOT NULL AUTO_INCREMENT,
+  `client_vizita` int DEFAULT NULL,
+  `alocat` varchar(10) DEFAULT NULL,
+  `tip_vizita` varchar(255) DEFAULT NULL,
+  `data_vizita` date DEFAULT NULL,
+  `scop_vizita` varchar(255) DEFAULT NULL,
+  `observatii_vizita` mediumblob,
+  `urmatoarea_vizita` mediumblob,
+  `revizitare` int DEFAULT NULL,
+  `programare_id` int DEFAULT NULL,
+  `programare_tipvizita` varchar(45) DEFAULT NULL,
+  `programare_detalii` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`ID_vizita`)
+) ENGINE=InnoDB AUTO_INCREMENT=400 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `site_accounts`
+--
+
+DROP TABLE IF EXISTS `site_accounts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `site_accounts` (
+  `account_id` int NOT NULL AUTO_INCREMENT,
+  `account_first_name` varchar(45) DEFAULT NULL,
+  `account_last_name` varchar(45) DEFAULT NULL,
+  `account_address` varchar(255) DEFAULT NULL,
+  `account_city` varchar(45) DEFAULT NULL,
+  `account_county` varchar(45) DEFAULT NULL,
+  `account_company` int DEFAULT NULL,
+  `account_email` varchar(45) DEFAULT NULL,
+  `account_password` varchar(1000) DEFAULT NULL,
+  `account_phone` varchar(45) DEFAULT NULL,
+  `account_active` int DEFAULT NULL,
+  `account_enrollment` datetime DEFAULT NULL,
+  `account_lastlogin` datetime DEFAULT NULL,
+  `account_function` varchar(45) DEFAULT NULL,
+  `account_role` varchar(45) DEFAULT NULL,
+  `account_activation` varchar(45) DEFAULT NULL,
+  `account_secret` varchar(45) DEFAULT NULL,
+  `account_reset_hash` varchar(245) DEFAULT NULL,
+  `account_reset_expire` datetime DEFAULT NULL,
+  PRIMARY KEY (`account_id`),
+  KEY `student_utilizator_ID` (`account_function`)
+) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `site_companies`
+--
+
+DROP TABLE IF EXISTS `site_companies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `site_companies` (
+  `company_id` int NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(255) DEFAULT NULL,
+  `company_VAT` varchar(45) DEFAULT NULL,
+  `company_reg` varchar(45) DEFAULT NULL,
+  `company_address` varchar(255) DEFAULT NULL,
+  `company_bank` varchar(45) DEFAULT NULL,
+  `company_IBAN` varchar(45) DEFAULT NULL,
+  `company_siteaccount` int DEFAULT NULL,
+  `company_ro` varchar(45) DEFAULT NULL,
+  `company_city` varchar(145) DEFAULT NULL,
+  `company_county` varchar(145) DEFAULT NULL,
+  PRIMARY KEY (`company_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets`
+--
+
+DROP TABLE IF EXISTS `tickets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets` (
+  `ticket_id` int NOT NULL AUTO_INCREMENT,
+  `ticket_createdby` int NOT NULL,
+  `ticket_asignedto` int DEFAULT NULL,
+  `ticket_createdat` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ticket_lastupdated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ticket_lastupdatedby` int DEFAULT NULL,
+  `ticket_importantance` enum('low','medium','high','urgent') DEFAULT 'medium',
+  `ticket_status` tinyint DEFAULT '0',
+  `ticket_area` int DEFAULT NULL,
+  `ticket_title` varchar(245) NOT NULL,
+  `ticket_content` text NOT NULL,
+  PRIMARY KEY (`ticket_id`),
+  KEY `idx_tickets_client` (`ticket_createdby`),
+  KEY `idx_tickets_agent` (`ticket_asignedto`),
+  KEY `idx_tickets_status` (`ticket_status`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_attachments`
+--
+
+DROP TABLE IF EXISTS `tickets_attachments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_attachments` (
+  `attachment_id` int NOT NULL AUTO_INCREMENT,
+  `ticket_id` int NOT NULL,
+  `reply_id` int NOT NULL,
+  `stored` varchar(255) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `mime` varchar(100) DEFAULT NULL,
+  `size` int DEFAULT NULL,
+  `is_internal` tinyint(1) NOT NULL DEFAULT '0',
+  `uploaded_by_type` enum('admin','agent','client') NOT NULL,
+  `uploaded_by_ui` int NOT NULL,
+  `uploaded_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`attachment_id`),
+  KEY `idx_att_ticket` (`ticket_id`),
+  KEY `idx_att_reply` (`reply_id`),
+  CONSTRAINT `fk_att_reply` FOREIGN KEY (`reply_id`) REFERENCES `tickets_replies` (`reply_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_att_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_log`
+--
+
+DROP TABLE IF EXISTS `tickets_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_log` (
+  `action_id` int NOT NULL AUTO_INCREMENT,
+  `ticket_id` int NOT NULL,
+  `actor_type` enum('admin','agent','client') NOT NULL,
+  `actor_ui` int NOT NULL,
+  `action_type` enum('CREATE_TICKET','ASSIGN_TICKET','CHANGE_PRIORITY','CHANGE_STATUS','POST_REPLY','VALIDATE_REPLY','REJECT_REPLY','CLOSE_TICKET','REQUEST_REOPEN','REOPEN_TICKET','ADD_INTERNAL_NOTE','ATTACH_UPLOAD','ATTACH_DOWNLOAD','ATTACH_DELETE') NOT NULL,
+  `action_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `details` json DEFAULT NULL,
+  PRIMARY KEY (`action_id`),
+  KEY `idx_logs_ticket` (`ticket_id`),
+  KEY `idx_logs_action_at` (`action_at`),
+  CONSTRAINT `fk_logs_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`ticket_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tickets_replies`
+--
+
+DROP TABLE IF EXISTS `tickets_replies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tickets_replies` (
+  `reply_id` int NOT NULL AUTO_INCREMENT,
+  `reply_to` int DEFAULT NULL,
+  `reply_by_type` enum('admin','agent','client') NOT NULL,
+  `reply_by_ui` int NOT NULL,
+  `reply_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `reply_content` text NOT NULL,
+  `reply_ticketid` int NOT NULL,
+  `reply_validated` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `is_internal` tinyint(1) NOT NULL DEFAULT '0',
+  `validated_by_ui` int DEFAULT NULL,
+  `validated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`reply_id`),
+  KEY `idx_replies_ticket` (`reply_ticketid`),
+  KEY `idx_replies_validation` (`reply_validated`),
+  KEY `idx_replies_internal` (`is_internal`),
+  CONSTRAINT `fk_replies_ticket` FOREIGN KEY (`reply_ticketid`) REFERENCES `tickets` (`ticket_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tranzactii_bancare`
+--
+
+DROP TABLE IF EXISTS `tranzactii_bancare`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tranzactii_bancare` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `data_tranzactie` date DEFAULT NULL,
+  `tip` varchar(4) DEFAULT NULL,
+  `suma` decimal(18,2) DEFAULT NULL,
+  `moneda` varchar(10) DEFAULT NULL,
+  `iban_extras` varchar(34) DEFAULT NULL,
+  `iban` varchar(34) DEFAULT NULL,
+  `detalii` text,
+  `referinta` varchar(100) DEFAULT NULL,
+  `in_out` varchar(4) DEFAULT NULL,
+  `import_timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `utilizatori_adrese`
+--
+
+DROP TABLE IF EXISTS `utilizatori_adrese`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `utilizatori_adrese` (
+  `adresa_ID` int NOT NULL,
+  `adresa_utilizator_ID` int DEFAULT NULL,
+  `adresa_completa` varchar(445) DEFAULT NULL,
+  `adresa_observatii` varchar(255) DEFAULT NULL,
+  `adresa_oras` varchar(145) DEFAULT NULL,
+  `adresa_judet` varchar(45) DEFAULT NULL,
+  `adresa_codpostal` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`adresa_ID`),
+  KEY `adresa_utilizator_ID` (`adresa_utilizator_ID`),
+  CONSTRAINT `utilizatori_adrese_ibfk_1` FOREIGN KEY (`adresa_utilizator_ID`) REFERENCES `date_utilizatori` (`utilizator_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `utilizatori_companii`
+--
+
+DROP TABLE IF EXISTS `utilizatori_companii`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `utilizatori_companii` (
+  `companie_ID` int NOT NULL AUTO_INCREMENT,
+  `companie_nume` varchar(255) DEFAULT NULL,
+  `companie_TVA` varchar(45) DEFAULT NULL,
+  `companie_RC` varchar(45) DEFAULT NULL,
+  `companie_adresa` varchar(255) DEFAULT NULL,
+  `copmpanie_banca` varchar(45) DEFAULT NULL,
+  `companie_IBAN` varchar(45) DEFAULT NULL,
+  `companie_utilizator_ID` int DEFAULT NULL,
+  PRIMARY KEY (`companie_ID`),
+  KEY `companie_utilizator_ID` (`companie_utilizator_ID`),
+  CONSTRAINT `utilizatori_companii_ibfk_1` FOREIGN KEY (`companie_utilizator_ID`) REFERENCES `date_utilizatori` (`utilizator_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `utilizatori_profil`
+--
+
+DROP TABLE IF EXISTS `utilizatori_profil`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `utilizatori_profil` (
+  `profil_ID` int NOT NULL,
+  `profil_utilizator_ID` int DEFAULT NULL,
+  `profil_descriere` varchar(1000) DEFAULT NULL,
+  `profil_avatar` varchar(145) DEFAULT NULL,
+  PRIMARY KEY (`profil_ID`),
+  KEY `profil_utilizator_ID` (`profil_utilizator_ID`),
+  CONSTRAINT `utilizatori_profil_ibfk_1` FOREIGN KEY (`profil_utilizator_ID`) REFERENCES `date_utilizatori` (`utilizator_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-02-01 14:31:38
