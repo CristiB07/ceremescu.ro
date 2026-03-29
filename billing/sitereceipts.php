@@ -98,11 +98,16 @@ if (!checkdate((int)$dateParts[1], (int)$dateParts[2], (int)$dateParts[0])) {
 }
 $dataincasarii = $_POST["data_incasarii"];
 
-// Validate amount
-if (!isset($_POST["chitanta_suma_incasata"]) || !is_numeric($_POST["chitanta_suma_incasata"])) {
+// Validate amount (accept Romanian decimal format)
+if (!isset($_POST["chitanta_suma_incasata"])) {
     die("Invalid amount");
 }
-$suma = $_POST["chitanta_suma_incasata"];
+$suma_raw = $_POST["chitanta_suma_incasata"];
+$suma_norm = parseRomanianNumber($suma_raw);
+if (!is_numeric($suma_norm)) {
+    die("Invalid amount");
+}
+$suma = (float)$suma_norm;
 
 // Validate description
 if (!isset($_POST["chitanta_descriere"])) {
@@ -111,7 +116,7 @@ if (!isset($_POST["chitanta_descriere"])) {
 $descriere = $_POST["chitanta_descriere"];
 
 $stmt = mysqli_prepare($conn, "UPDATE facturare_chitante SET chitanta_factura_ID = ?, chitanta_data_incasarii = ?, chitanta_suma_incasata = ?, chitanta_inchisa = ?, chitanta_descriere = ? WHERE chitanta_ID = ?");
-mysqli_stmt_bind_param($stmt, "sssisi", $facturi, $dataincasarii, $suma, $inchisa, $descriere, $cID);
+mysqli_stmt_bind_param($stmt, "ssdisi", $facturi, $dataincasarii, $suma, $inchisa, $descriere, $cID);
 if (!mysqli_stmt_execute($stmt)) {
   die('Error: ' . mysqli_error($conn));
 }
@@ -123,29 +128,69 @@ mysqli_stmt_execute($stmt);
 mysqli_stmt_close($stmt);
 
 // Update invoices
-for ($i = 0; $i < sizeof($validIDs); $i++) 
-{
-    $value = $validIDs[$i];
-    
-	$stmt1 = mysqli_prepare($conn, "SELECT factura_data_emiterii FROM facturare_facturi WHERE factura_ID = ?");
-	mysqli_stmt_bind_param($stmt1, "i", $value);
-	mysqli_stmt_execute($stmt1);
-	$result1 = mysqli_stmt_get_result($stmt1);
-	$row1 = mysqli_fetch_assoc($result1);
-	mysqli_stmt_close($stmt1);
-	
-	if ($row1) {
-		$dataemiterii=strtotime($row1["factura_data_emiterii"]);
-		$incasare=strtotime($dataincasarii);
-		$datediff=$incasare-$dataemiterii;
-		$zile=round($datediff / (60 * 60 * 24));
-		
-		$usql_stmt = mysqli_prepare($conn, "UPDATE facturare_facturi SET factura_client_achitat='1', factura_client_data_achitat = ?, factura_client_zile_achitat = ?, factura_client_achitat_prin='0' WHERE factura_ID = ?");
-		mysqli_stmt_bind_param($usql_stmt, "sii", $dataincasarii, $zile, $value);
-		mysqli_stmt_execute($usql_stmt);
-		mysqli_stmt_close($usql_stmt);
-	}
+// Distribuim suma plătită pe facturile selectate (ordonează după vechime)
+$payment_remaining = (float)$suma; // suma din formular
+// Pregătim SELECT pentru facturile selectate ordonate după dată emiterii
+$placeholders = implode(',', array_fill(0, count($validIDs), '?'));
+$types = str_repeat('i', count($validIDs));
+$stmt_sel = mysqli_prepare($conn, "SELECT factura_ID, factura_data_emiterii, factura_client_valoare_totala, IFNULL(factura_suma_partiala,0) AS suma_partiala, factura_numar FROM facturare_facturi WHERE factura_ID IN ($placeholders) ORDER BY factura_data_emiterii ASC");
+$refs = [];
+for ($i = 0; $i < count($validIDs); $i++) {
+    $refs[$i] = &$validIDs[$i];
 }
+call_user_func_array('mysqli_stmt_bind_param', array_merge([$stmt_sel, $types], $refs));
+mysqli_stmt_execute($stmt_sel);
+$result_sel = mysqli_stmt_get_result($stmt_sel);
+
+while ($row1 = ezpub_fetch_array($result_sel)) {
+    $factura_ID = (int)$row1['factura_ID'];
+    $dataemiterii = strtotime($row1['factura_data_emiterii']);
+    $total_fact = (float)$row1['factura_client_valoare_totala'];
+    $already_partial = (float)$row1['suma_partiala'];
+    $outstanding = $total_fact - $already_partial;
+    if ($outstanding < 0) $outstanding = 0.0;
+
+    if ($payment_remaining <= 0) break;
+
+    $apply = min($outstanding, $payment_remaining);
+    if ($apply <= 0) continue;
+
+    // Inserăm rând în plăți parțiale pentru suma aplicată
+    $stmt_pp = mysqli_prepare($conn, "INSERT INTO facturare_plati_partiale (plata_factura_id, plata_factura_suma, plata_data) VALUES (?, ?, ?)");
+    mysqli_stmt_bind_param($stmt_pp, "ids", $factura_ID, $apply, $dataincasarii);
+    mysqli_stmt_execute($stmt_pp);
+    mysqli_stmt_close($stmt_pp);
+
+    // Actualizăm suma parțială
+    $new_partial = $already_partial + $apply;
+    $is_fully_paid = ($new_partial + 0.0001) >= $total_fact;
+
+    if ($is_fully_paid) {
+        // Curățăm câmpurile de plată parțială dacă factura e complet achitată
+        $stmt_up = mysqli_prepare($conn, "UPDATE facturare_facturi SET factura_suma_partiala = NULL, factura_plata_partiala = NULL, factura_data_partiala = NULL WHERE factura_ID = ?");
+        mysqli_stmt_bind_param($stmt_up, "i", $factura_ID);
+        mysqli_stmt_execute($stmt_up);
+        mysqli_stmt_close($stmt_up);
+
+        $incasare = strtotime($dataincasarii);
+        $datediff = $incasare - $dataemiterii;
+        $zile = round($datediff / (60 * 60 * 24));
+        $usql_stmt = mysqli_prepare($conn, "UPDATE facturare_facturi SET factura_client_achitat='1', factura_client_data_achitat = ?, factura_client_zile_achitat = ?, factura_client_achitat_prin='0' WHERE factura_ID = ?");
+        mysqli_stmt_bind_param($usql_stmt, "sii", $dataincasarii, $zile, $factura_ID);
+        mysqli_stmt_execute($usql_stmt);
+        mysqli_stmt_close($usql_stmt);
+    } else {
+        // Rămâne parțial plătită
+        $stmt_up = mysqli_prepare($conn, "UPDATE facturare_facturi SET factura_suma_partiala = ?, factura_plata_partiala = 1, factura_data_partiala = ? WHERE factura_ID = ?");
+        mysqli_stmt_bind_param($stmt_up, "dsi", $new_partial, $dataincasarii, $factura_ID);
+        mysqli_stmt_execute($stmt_up);
+        mysqli_stmt_close($stmt_up);
+    }
+
+    $payment_remaining -= $apply;
+}
+
+mysqli_stmt_close($stmt_sel);
 
 echo "<div class=\"callout success\"><p>$strRecordAdded</p>";
 echo"			    <div class=\"grid-x grid-margin-x\">
@@ -192,11 +237,16 @@ if (!isset($_POST["chitanta_factura_ID"]) || !filter_var($_POST["chitanta_factur
 }
 $facturaID = (int)$_POST["chitanta_factura_ID"];
 
-// Validate amount
-if (!isset($_POST["chitanta_suma_incasata"]) || !is_numeric($_POST["chitanta_suma_incasata"])) {
+// Validate amount (accept Romanian decimal format)
+if (!isset($_POST["chitanta_suma_incasata"])) {
     die("Invalid amount");
 }
-$suma = $_POST["chitanta_suma_incasata"];
+$suma_raw = $_POST["chitanta_suma_incasata"];
+$suma_norm = parseRomanianNumber($suma_raw);
+if (!is_numeric($suma_norm)) {
+    die("Invalid amount");
+}
+$suma = (float)$suma_norm;
 
 // Validate description
 if (!isset($_POST["chitanta_descriere"])) {
@@ -205,7 +255,7 @@ if (!isset($_POST["chitanta_descriere"])) {
 $descriere = $_POST["chitanta_descriere"];
 
 $stmt = mysqli_prepare($conn, "UPDATE facturare_chitante SET chitanta_factura_ID = ?, chitanta_data_incasarii = ?, chitanta_suma_incasata = ?, chitanta_descriere = ? WHERE chitanta_ID = ?");
-mysqli_stmt_bind_param($stmt, "isssi", $facturaID, $dataincasarii, $suma, $descriere, $cID);
+mysqli_stmt_bind_param($stmt, "isdsi", $facturaID, $dataincasarii, $suma, $descriere, $cID);
 if (!mysqli_stmt_execute($stmt))
   {
   die('Error: ' . mysqli_error($conn));
@@ -242,30 +292,46 @@ die;
 }
 else {
 ?>
-        <script src="<?php echo $strSiteURL ?>/js/foundation/jquery.js"></script>
+        <!-- vanilla JS version of the change handler (no jQuery required) -->
         <script>
-        $(document).ready(function() {
-            $('select[id="chitanta_factura_ID"]').change(function() {
-                var selectedValues = $('#chitanta_factura_ID').val(); // Array cu valorile selectate
+        document.addEventListener('DOMContentLoaded', function() {
+            var select = document.getElementById('chitanta_factura_ID');
+            if (!select) return;
+            select.addEventListener('change', function() {
+                // collect selected options values (works for single or multiple selects)
+                var selectedValues = Array.from(select.selectedOptions).map(function(opt) {
+                    return opt.value;
+                });
 
-                $.ajax({
-                    url: "receiptsum.php",
-                    dataType: "json",
-                    data: {
-                        factura_ID: selectedValues
-                    },
-                    type: "POST",
-                    success: function(data) {
-                        try {
-                            $("#chitanta_suma_incasata").val(data["suma"]);
-                            $("#chitanta_descriere").val(data["factura"]);
-                        } catch (err) {
-                            document.getElementById("response").innerHTML = err.message;
-                        }
-                    },
-                    error: function() {
-                        alert('Some error occurred!');
+                // construct form data with repeated factura_ID[] entries
+                var params = new URLSearchParams();
+                selectedValues.forEach(function(val) {
+                    params.append('factura_ID[]', val);
+                });
+                fetch('receiptsum.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    // receiptsum.php may return { error: '...' } on invalid input
+                    if (data && data.error) {
+                        alert(data.error);
+                        return;
                     }
+                    var sumaEl = document.getElementById('chitanta_suma_incasata');
+                    if (sumaEl && data && data.hasOwnProperty('suma')) {
+                        sumaEl.value = data['suma'];
+                    }
+                    var descEl = document.getElementById('chitanta_descriere');
+                    if (descEl && data && data.hasOwnProperty('factura')) {
+                        descEl.value = data['factura'];
+                    }
+                })
+                .catch(function(err) {
+                    console.error('fetch error', err);
+                    alert('Some error occurred!');
                 });
             });
         });
@@ -295,7 +361,7 @@ else{
 ?>
         <form method="post"  action="sitereceipts.php?mode=new&cID=<?php echo urlencode($receiptID)?>">
             <div class="grid-x grid-padding-x ">
-                <div class="large-3 medium-3 small-12 cell">
+                <div class="large-5 medium-5 small-12 cell">
                     <label> <?php echo $strInvoice?>
                         <select name="chitanta_factura_ID[]" id="chitanta_factura_ID" size="10" multiple required>
                             <option value="" selected>--</option>
@@ -312,12 +378,12 @@ $result=ezpub_query($conn,$query);
 }?>
                         </select></label>
                 </div>
-                <div class="large-2 medium-2 small-12 cell">
+                <div class="large-1 medium-1 small-12 cell">
                     <label> <?php echo $strDate?>
                         <input type="date" name="data_incasarii" required value="<?php echo date('Y-m-d')?>" />
                     </label>
                 </div>
-                <div class="large-2 medium-2 small-12 cell">
+                <div class="large-1 medium-1 small-12 cell">
                     <label><?php echo $strNumber?>
                         <input name="chitanta_numar" id="chitanta_numar" type="text" size="50" class="required"
                             value="CNS0000<?php echo $numarfactura?>" />
@@ -369,7 +435,7 @@ if (!$row) {
         </div>
         <form method="post"  action="sitereceipts.php?mode=edit&cID=<?php echo urlencode($row['chitanta_ID'])?>">
             <div class="grid-x grid-padding-x ">
-                <div class="large-3 medium-3 small-12 cell">
+                <div class="large-5 medium-5 small-12 cell">
                     <label> <?php echo $strInvoice?>
                         <select name="chitanta_factura_ID" required>
                             <option value="" selected>--</option>
@@ -387,12 +453,12 @@ $result=ezpub_query($conn,$query);
 }?>
                         </select></label>
                 </div>
-                <div class="large-2 medium-2 small-12 cell">
+                <div class="large-1 medium-1 small-12 cell">
                     <label> <?php echo $strDate?>
                         <input type="date" name="data_incasarii" required value="<?php echo date('Y-m-d', strtotime($row['chitanta_data_incasarii']))?>" />
                     </label>
                 </div>
-                <div class="large-2 medium-2 small-12 cell">
+                <div class="large-1 medium-1 small-12 cell">
                     <label><?php echo $strNumber?>
                     <?php $codenumarfactura=str_pad($row["chitanta_numar"], 8, '0', STR_PAD_LEFT);
                     $receiptnumber=$siteInvoicingCode . $codenumarfactura;?>

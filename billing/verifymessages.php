@@ -12,6 +12,30 @@ if (!isSet($_SESSION['userlogedin']))
 }
 include '../dashboard/header.php';
 
+// Safe recursive delete: only removes directories inside $hddpath
+function rrmdir_safe($dir, $base) {
+	$dirr = realpath($dir);
+	$baser = realpath($base);
+	if ($dirr === false || $baser === false) return false;
+	// ensure $dir is inside base
+	if (strpos($dirr, $baser) !== 0) return false;
+	// avoid deleting base itself
+	if ($dirr === $baser) return false;
+	// require a simple folder name at the end (safety)
+	$bn = basename($dirr);
+	if (strspn($bn, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-') !== strlen($bn)) return false;
+	$it = new RecursiveDirectoryIterator($dirr, FilesystemIterator::SKIP_DOTS);
+	$files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+	foreach ($files as $file) {
+		if ($file->isDir()) {
+			@rmdir($file->getRealPath());
+		} else {
+			@unlink($file->getRealPath());
+		}
+	}
+	return @rmdir($dirr);
+}
+
 $d = date("d-m-Y ");
 $dataincarcarii = date("Y-m-d H:i:s");
 //$s = date('d-m-Y', strtotime($d . ' +10 day'));
@@ -43,47 +67,292 @@ if ($_GET["mode"]=='verify')
                     <a href="verifymessages.php?mode=verify&display=FP" class="paginate"><i class="fas fa-file-import"></i> <?php echo $strReceivedInvoices?></a>
                     <a href="verifymessages.php?mode=verify&display=ER" class="paginate"><i class="fas fa-exclamation-circle"></i> <?php echo $strErrors?></a>
                     <a href="verifymessages.php?mode=verify&display=FT" class="paginate"><i class="fas fa-file-export"></i> <?php echo $strSentInvoices?></a>
+                    <a href="verifymessages.php?mode=verify&display=NP" class="paginate"><i class="fas fa-clock"></i> Neprocesate</a>
                 </div>
             </div>
         </div>
         <?php
 		$retval=array();
+		// pagination state
+		$pagination_mode = false;
+		$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 		$messages_url=$messages_url.$siteCIF;
 		$headr = array();
 		$headr[] = 'Authorization: Bearer '.$site_client_token;
 		$headr[] = 'Content-Type: text/plain';
+
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,$messages_url);
 		curl_setopt($ch, CURLOPT_POST, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
+
 		$response = curl_exec($ch);
+		$curl_errno = curl_errno($ch);
+		$curl_error = curl_error($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+
+
 	    if (PHP_VERSION_ID < 80500) { curl_close($ch); }
-	$obj = json_decode($response, true);
 
-if (isset ($obj['eroare']))
-{ echo "<div class=\"callout alert\">$strNoRecordsFound</div>" ;}
-else {
-$mesaje=$obj['mesaje'];
+	if ($response === false) {
+	    echo "<div class=\"callout alert\">Curl failed: " . htmlspecialchars($curl_error) . "</div>";
+	    $obj = array('eroare' => 'curl');
+	} else {
+	    $obj = json_decode($response, true);
+	    if ($obj === null && json_last_error() !== JSON_ERROR_NONE) {
+	        echo "<div class=\"callout alert\">Invalid JSON response (code " . json_last_error() . ")</div>";
+	        $obj = array('eroare' => 'json');
+	    }
+	}
 
-if (!isset($_GET['display']))
-{$result=$mesaje;}
-else
-{
-// Validate display parameter
-if (!in_array($_GET['display'], ['FP', 'ER', 'FT'])) {
-    die("Invalid display parameter");
+// handle possible error from API
+if (isset($obj['eroare'])) {
+    // check if error message indicates too many items and suggests pagination
+    if (strpos($obj['eroare'], 'mai mare') !== false && strpos($obj['eroare'], 'paginatie') !== false) {
+        // pagination required
+        if (empty($messages_paged)) {
+            echo '<div class="callout alert">Endpoint paginare neconfigurat.</div>';
+            exit;
+        }
+        $pagination_mode = true;
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+
+        // Match the time window from the initial $messages_url (zile= parameter).
+        // Override via ?days= if needed for testing.
+        $defaultDays = 60;
+        if (preg_match('/zile=(\d+)/', $messages_url, $zm)) {
+            $defaultDays = intval($zm[1]);
+        }
+
+        // build interval: endTime = now, startTime = $defaultDays ago (in ms)
+        $endTime   = round(microtime(true) * 1000);
+        $startTime = $endTime - ($defaultDays * 24 * 60 * 60 * 1000);
+
+        // allow overrides via query params for testing
+        if (isset($_GET['days'])) {
+            $days = intval($_GET['days']);
+            $startTime = $endTime - ($days * 24 * 60 * 60 * 1000);
+        }
+        if (isset($_GET['start'])) {
+            $startTime = intval($_GET['start']);
+        }
+        if (isset($_GET['end'])) {
+            $endTime = intval($_GET['end']);
+        }
+        // if the bounds are accidentally inverted, swap them
+        if ($startTime > $endTime) {
+            $tmp = $startTime;
+            $startTime = $endTime;
+            $endTime = $tmp;
+            echo '<div class="callout warning">Intervalul a fost inversat, am permutat capetele.</div>';
+        }
+
+        $humanStart = date('Y-m-d H:i:s', $startTime / 1000);
+        $humanEnd   = date('Y-m-d H:i:s', $endTime / 1000);
+       
+        // ── Fetch ALL pages sequentially (1-based: 1 .. numar_total_pagini) ──
+        // ANAF API uses 1-based pagination: pagina=0 is treated as pagina=1,
+        // so we must start from 1 to avoid fetching the first page twice.
+        $mesaje = [];
+        $seen = [];
+        $totalExpected = null;
+        $totalPages = null;
+        $currentPage = 1;
+        $maxPages = 50; // safety limit
+
+        while ($currentPage <= $maxPages) {
+            $pagedUrl = $messages_paged . 'startTime=' . $startTime . '&endTime=' . $endTime . '&cif=' . $siteCIF . '&pagina=' . $currentPage;
+
+            $chP = curl_init();
+            curl_setopt($chP, CURLOPT_URL, $pagedUrl);
+            curl_setopt($chP, CURLOPT_POST, 0);
+            curl_setopt($chP, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($chP, CURLOPT_HTTPHEADER, $headr);
+            $respP = curl_exec($chP);
+            $errP = curl_error($chP);
+            $codeP = curl_getinfo($chP, CURLINFO_HTTP_CODE);
+            if (PHP_VERSION_ID < 80500) { curl_close($chP); }
+
+            if ($respP === false) {
+                break;
+            }
+
+            $objP = json_decode($respP, true);
+            if ($objP === null && json_last_error() !== JSON_ERROR_NONE) {
+                break;
+            }
+
+            // read metadata from first page
+            if ($currentPage === 1) {
+                if (isset($objP['numar_total_inregistrari'])) {
+                    $totalExpected = intval($objP['numar_total_inregistrari']);
+                }
+                if (isset($objP['numar_total_pagini'])) {
+                    $totalPages = intval($objP['numar_total_pagini']);
+                }
+            }
+
+            // collect messages with dedup
+            $pageTotal = 0;
+            $pageNew = 0;
+            if (isset($objP['mesaje']) && is_array($objP['mesaje'])) {
+                $pageTotal = count($objP['mesaje']);
+                foreach ($objP['mesaje'] as $m) {
+                    if (!isset($seen[$m['id']])) {
+                        $mesaje[] = $m;
+                        $seen[$m['id']] = true;
+                        $pageNew++;
+                    }
+                }
+            }
+
+            $currentPage++;
+
+            // stop conditions (1-based: pages go from 1 to totalPages)
+            if ($totalPages !== null && $currentPage > $totalPages) {
+                break; // passed the last declared page
+            }
+            if ($pageTotal === 0) {
+                break; // empty page = no more data
+            }
+            if ($totalExpected !== null && count($mesaje) >= $totalExpected) {
+                break; // collected everything
+            }
+        }
+
+        // sort descending by date
+        usort($mesaje, function($a, $b) {
+            return strtotime($b['data_creare']) - strtotime($a['data_creare']);
+        });
+
+        // summary
+        $uniqueCount = count($mesaje);
+        
+        // pagination_mode messages are collected; slicing is done after display filter below
+
+    } else {
+        echo "<div class=\"callout alert\">$strNoRecordsFound</div>" ;
+        exit;
+    }
+} else {
+    $mesaje = $obj['mesaje'];
 }
-$filtru=$_GET['display'];
-if ($filtru=='FP') {$cautare='FACTURA PRIMITA';}
-elseif ($filtru=='ER') {$cautare='ERORI FACTURA';}
-else {$cautare="FACTURA TRIMISA";}
 
-$result = array_filter($mesaje, function($element) use ($cautare) {
-    return $element['tip'] == $cautare;
-});
+// apply display filter on the full $mesaje array
+if (!isset($_GET['display'])) {
+    $allFiltered = $mesaje;
+} else {
+    // Validate display parameter
+    if (!in_array($_GET['display'], ['FP', 'ER', 'FT', 'NP'])) {
+        die("Invalid display parameter");
+    }
+    $filtru = $_GET['display'];
+
+    if ($filtru === 'NP') {
+        // Neprocesate: messages not yet downloaded in any of the 3 tables.
+        // Collect IDs per type then do one query per type (avoids N+1).
+        $idsFP = []; $idsFT = []; $idsER = [];
+        foreach ($mesaje as $m) {
+            if ($m['tip'] === 'FACTURA PRIMITA')  $idsFP[] = $m['id'];
+            elseif ($m['tip'] === 'FACTURA TRIMISA') $idsFT[] = $m['id'];
+            elseif ($m['tip'] === 'ERORI FACTURA')  $idsER[] = $m['id'];
+        }
+        // Build sets of already-downloaded IDs from DB
+        $downloadedFP = [];
+        if (!empty($idsFP)) {
+            $ph = implode(',', array_fill(0, count($idsFP), '?'));
+            $stNP = mysqli_prepare($conn, "SELECT efactura_primita_index FROM efactura_primite WHERE efactura_primita_index IN ($ph)");
+            mysqli_stmt_bind_param($stNP, str_repeat('s', count($idsFP)), ...$idsFP);
+            mysqli_stmt_execute($stNP);
+            $rNP = mysqli_stmt_get_result($stNP);
+            while ($rowNP = mysqli_fetch_row($rNP)) $downloadedFP[$rowNP[0]] = true;
+            mysqli_stmt_close($stNP);
+        }
+        $downloadedFT = [];
+        if (!empty($idsFT)) {
+            $ph = implode(',', array_fill(0, count($idsFT), '?'));
+            $stNP = mysqli_prepare($conn, "SELECT factura_index_descarcare FROM efactura WHERE factura_index_descarcare IN ($ph)");
+            mysqli_stmt_bind_param($stNP, str_repeat('s', count($idsFT)), ...$idsFT);
+            mysqli_stmt_execute($stNP);
+            $rNP = mysqli_stmt_get_result($stNP);
+            while ($rowNP = mysqli_fetch_row($rNP)) $downloadedFT[$rowNP[0]] = true;
+            mysqli_stmt_close($stNP);
+        }
+        $downloadedER = [];
+        if (!empty($idsER)) {
+            $ph = implode(',', array_fill(0, count($idsER), '?'));
+            $stNP = mysqli_prepare($conn, "SELECT index_descarcare FROM efactura_erori WHERE index_descarcare IN ($ph)");
+            mysqli_stmt_bind_param($stNP, str_repeat('s', count($idsER)), ...$idsER);
+            mysqli_stmt_execute($stNP);
+            $rNP = mysqli_stmt_get_result($stNP);
+            while ($rowNP = mysqli_fetch_row($rNP)) $downloadedER[$rowNP[0]] = true;
+            mysqli_stmt_close($stNP);
+        }
+        $allFiltered = array_filter($mesaje, function($m) use ($downloadedFP, $downloadedFT, $downloadedER) {
+            if ($m['tip'] === 'FACTURA PRIMITA')  return !isset($downloadedFP[$m['id']]);
+            if ($m['tip'] === 'FACTURA TRIMISA')  return !isset($downloadedFT[$m['id']]);
+            if ($m['tip'] === 'ERORI FACTURA')    return !isset($downloadedER[$m['id']]);
+            return true;
+        });
+    } elseif ($filtru=='FP') {
+        $cautare='FACTURA PRIMITA';
+        $allFiltered = array_filter($mesaje, function($element) use ($cautare) {
+            return $element['tip'] == $cautare;
+        });
+    } elseif ($filtru=='ER') {
+        $cautare='ERORI FACTURA';
+        $allFiltered = array_filter($mesaje, function($element) use ($cautare) {
+            return $element['tip'] == $cautare;
+        });
+    } else {
+        $cautare='FACTURA TRIMISA';
+        $allFiltered = array_filter($mesaje, function($element) use ($cautare) {
+            return $element['tip'] == $cautare;
+        });
+    }
 }
-array_multisort(array_column($result, 'data_creare'), SORT_DESC, $result);
+$allFiltered = array_values($allFiltered);
+array_multisort(array_column($allFiltered, 'data_creare'), SORT_DESC, $allFiltered);
+
+// client-side paging: 50 items per page, applies to ALL results
+$pageSize = 50;
+$totalFiltered = count($allFiltered);
+$totalDisplayPages = max(1, ceil($totalFiltered / $pageSize));
+$page = isset($_GET['page']) ? max(1, min(intval($_GET['page']), $totalDisplayPages)) : 1;
+$startIndex = ($page - 1) * $pageSize;
+$result = array_slice($allFiltered, $startIndex, $pageSize);
+
+// build pagination HTML for reuse above and below the table
+$paginationHtml = '';
+if ($totalDisplayPages > 1) {
+    $baseUrl = 'verifymessages.php?mode=verify';
+    if (isset($_GET['display'])) {
+        $baseUrl .= '&display=' . urlencode($_GET['display']);
+    }
+    if (isset($_GET['days'])) {
+        $baseUrl .= '&days=' . intval($_GET['days']);
+    }
+    if (isset($_GET['start'])) {
+        $baseUrl .= '&start=' . urlencode($_GET['start']);
+    }
+    if (isset($_GET['end'])) {
+        $baseUrl .= '&end=' . urlencode($_GET['end']);
+    }
+    $paginationHtml .= '<div class="paginate">';
+    if ($page > 1) {
+        $paginationHtml .= '<a href="' . $baseUrl . '&page=' . ($page - 1) . '" >&#8249; Prev</a> ';
+    }
+    $paginationHtml .= '<span>Pagina ' . $page . ' / ' . $totalDisplayPages . ' (' . $totalFiltered . ' mesaje)</span>';
+    if ($page < $totalDisplayPages) {
+        $paginationHtml .= ' <a href="' . $baseUrl . '&page=' . ($page + 1) . '" >Next &#8250;</a>';
+    }
+    $paginationHtml .= '</div>';
+}
+
+// show pagination above the table
+echo $paginationHtml;
 
 
 echo "<table class=\"hover\">
@@ -100,21 +369,21 @@ echo "<table class=\"hover\">
 </tr>
 </thead>
 <tbody>";
- foreach($result as $index => $value) {
-		 if ($value['tip']=='FACTURA PRIMITA') {$tip='FP';}
-	 if ($value['tip']=='FACTURA TRIMISA') {$tip='FT';}
-	 if ($value['tip']=='ERORI FACTURA') {$tip='ER';}
-	 if ($tip=='FP') {$tipicon='<i class="fas fa-file-import fa-xl"></i>';}
-	 elseif ($tip=='FT') {$tipicon='<i class="fas fa-file-export fa-xl"></i>';}
-	 elseif ($tip=='ER') {$tipicon='<i class="fas fa-exclamation-circle fa-xl"></i>';}
-	 $pieces = explode(" ", $value['detalii']);
-	 if ($value['tip']=='FACTURA PRIMITA' OR $value['tip']=='FACTURA TRIMISA')
-	 { $indexdexincarcare=$pieces[2];}
+ foreach($result as $index => $value):
+         if ($value['tip']=='FACTURA PRIMITA') {$tip='FP';}
+     if ($value['tip']=='FACTURA TRIMISA') {$tip='FT';}
+     if ($value['tip']=='ERORI FACTURA') {$tip='ER';}
+     if ($tip=='FP') {$tipicon='<i class="fas fa-file-import fa-xl"></i>';}
+     elseif ($tip=='FT') {$tipicon='<i class="fas fa-file-export fa-xl"></i>';}
+     elseif ($tip=='ER') {$tipicon='<i class="fas fa-exclamation-circle fa-xl"></i>';}
+     $pieces = explode(" ", $value['detalii']);
+     if ($value['tip']=='FACTURA PRIMITA' OR $value['tip']=='FACTURA TRIMISA')
+     { $indexdexincarcare=$pieces[2];}
  elseif($value['tip']=='ERORI FACTURA')
  { $indexdexincarcare=$pieces[8];}
-	 $indexi=substr($indexdexincarcare, strpos($indexdexincarcare, "=") + 1);
-	 if ($value['tip']=='FACTURA PRIMITA')
-	 {	 $cifemitent=$pieces[5];}
+     $indexi=substr($indexdexincarcare, strpos($indexdexincarcare, "=") + 1);
+     if ($value['tip']=='FACTURA PRIMITA')
+     {	 $cifemitent=$pieces[5];}
  elseif ($value['tip']=='FACTURA TRIMISA')
  {	 $cifemitent=$pieces[7];}
  elseif ($value['tip']=='ERORI FACTURA')
@@ -129,63 +398,63 @@ $RS = mysqli_fetch_assoc($result);
 mysqli_stmt_close($stmt);
 if (!isSet($RS))
 {
-	$stmt = mysqli_prepare($conn, "INSERT INTO efactura_mesaje(message_datacreare, message_cif, message_id_solicitare, message_detalii, message_tip, message_downloadid) VALUES (?, ?, ?, ?, ?, ?)");
-	mysqli_stmt_bind_param($stmt, "ssssss", $value['data_creare'], $value['cif'], $value['id_solicitare'], $value['detalii'], $value['tip'], $value['id']);
-	if (!mysqli_stmt_execute($stmt)) {
-		die('Error: ' . mysqli_error($conn));
-	}
-	mysqli_stmt_close($stmt);
+    $stmt = mysqli_prepare($conn, "INSERT INTO efactura_mesaje(message_datacreare, message_cif, message_id_solicitare, message_detalii, message_tip, message_downloadid) VALUES (?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "ssssss", $value['data_creare'], $value['cif'], $value['id_solicitare'], $value['detalii'], $value['tip'], $value['id']);
+    if (!mysqli_stmt_execute($stmt)) {
+        die('Error: ' . mysqli_error($conn));
+    }
+    mysqli_stmt_close($stmt);
 }
 
-			if ($value['tip']=='FACTURA PRIMITA') {
-			$stmt = mysqli_prepare($conn, "SELECT * FROM efactura_primite WHERE efactura_primita_CUI = ? AND efactura_primita_index = ?");
-			mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
-		} elseif ($value['tip']=='FACTURA TRIMISA') {
-			$stmt = mysqli_prepare($conn, "SELECT * FROM efactura WHERE factura_CIF = ? AND factura_index_descarcare = ?");
-			mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
-		} elseif ($value['tip']=='ERORI FACTURA') {
-			$stmt = mysqli_prepare($conn, "SELECT * FROM efactura_erori WHERE index_incarcare = ? AND index_descarcare = ?");
-			mysqli_stmt_bind_param($stmt, "ss", $indexi, $value['id']);
-		}
-		mysqli_stmt_execute($stmt);
-		$result = mysqli_stmt_get_result($stmt);
-		$row = mysqli_fetch_assoc($result);
-		mysqli_stmt_close($stmt);
-		if (!$row) 
+            if ($value['tip']=='FACTURA PRIMITA') {
+            $stmt = mysqli_prepare($conn, "SELECT * FROM efactura_primite WHERE efactura_primita_CUI = ? AND efactura_primita_index = ?");
+            mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
+        } elseif ($value['tip']=='FACTURA TRIMISA') {
+            $stmt = mysqli_prepare($conn, "SELECT * FROM efactura WHERE factura_CIF = ? AND factura_index_descarcare = ?");
+            mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
+        } elseif ($value['tip']=='ERORI FACTURA') {
+            $stmt = mysqli_prepare($conn, "SELECT * FROM efactura_erori WHERE index_incarcare = ? AND index_descarcare = ?");
+            mysqli_stmt_bind_param($stmt, "ss", $indexi, $value['id']);
+        }
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        mysqli_stmt_close($stmt);
+        if (!$row) 
 {
-	 echo "<tr class=\"notdownloaded\">";
+     echo "<tr class=\"notdownloaded\">";
 }
 else
 { echo "<tr class=\"downloaded\">";}
 print "<td>"  . date("d.m.Y H:m", strtotime($value['data_creare']))."</td>";
-if (!$row)
-{print "<td><strong><a href=\"verifysupplier.php?cui=".urlencode($whatIWant)."\">".htmlspecialchars($whatIWant, ENT_QUOTES, 'UTF-8')."</strong></a></td>";}
-else
-{
-			if ($value['tip']=='FACTURA PRIMITA') {
-            $stmt = mysqli_prepare($conn, "SELECT * FROM facturare_facturi_primite WHERE REGEXP_REPLACE(fp_CUI_furnizor, '[^0-9]', '') = ? AND fp_index_download = ?");
-            mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
-            mysqli_stmt_execute($stmt);
-            $fpresult = mysqli_stmt_get_result($stmt);
-            $fprow = mysqli_fetch_assoc($fpresult);
-            mysqli_stmt_close($stmt);
-print"<td>".$fprow["fp_nume_furnizor"]."</td>";
-		} 
-		elseif 
-		($value['tip']=='FACTURA TRIMISA') {
-			$stmt = mysqli_prepare($conn, "SELECT facturare_facturi.factura_ID, facturare_facturi.factura_client_denumire, facturare_facturi.factura_client_CIF, efactura.factura_CIF, efactura.factura_index_descarcare FROM facturare_facturi, efactura  WHERE efactura.factura_CIF = ? AND efactura.factura_index_descarcare = ? 
-			AND facturare_facturi.factura_ID = efactura.factura_ID AND facturare_facturi.factura_client_CIF = efactura.factura_CIF");
-			mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
-			mysqli_stmt_execute($stmt);
-			$ftresult = mysqli_stmt_get_result($stmt);
-			$ftrow = mysqli_fetch_assoc($ftresult);
-			mysqli_stmt_close($stmt);
-print"<td>".$ftrow["factura_client_denumire"]."</td>";
-}
-elseif 
-		($value['tip']=='ERORI FACTURA') {
-print"<td>00000000</td>";
-}
+if (!$row) {
+    // no local information yet – show raw CIF as link
+    print "<td><strong><a href=\"verifysupplier.php?cui=" . urlencode($whatIWant) . "\">" .
+          htmlspecialchars($whatIWant, ENT_QUOTES, 'UTF-8') . "</strong></a></td>";
+} else {
+    // we have a record; resolve name based on message type
+    $companyName = '';
+    if ($value['tip']=='FACTURA PRIMITA') {
+        $stmt = mysqli_prepare($conn, "SELECT * FROM facturare_facturi_primite WHERE REGEXP_REPLACE(fp_CUI_furnizor, '[^0-9]', '') = ? AND fp_index_download = ?");
+        mysqli_stmt_bind_param($stmt, "ss", $whatIWant, $value['id']);
+        mysqli_stmt_execute($stmt);
+        $fpresult = mysqli_stmt_get_result($stmt);
+        $fprow = mysqli_fetch_assoc($fpresult);
+        mysqli_stmt_close($stmt);
+        $companyName = $fprow['fp_nume_furnizor'] ?? '';
+    } elseif ($value['tip']=='FACTURA TRIMISA') {
+        $stmt = mysqli_prepare($conn, "SELECT factura_client_denumire FROM facturare_facturi WHERE factura_client_CIF = ? LIMIT 1");
+        mysqli_stmt_bind_param($stmt, "s", $whatIWant);
+        mysqli_stmt_execute($stmt);
+        $tmpres = mysqli_stmt_get_result($stmt);
+        $tmprow = mysqli_fetch_assoc($tmpres);
+        mysqli_stmt_close($stmt);
+        $companyName = $tmprow['factura_client_denumire'] ?? '';
+    }
+    if ($companyName === '') {
+        $companyName = $whatIWant;
+    }
+    print "<td>" . htmlspecialchars($companyName, ENT_QUOTES, 'UTF-8') . "</td>";
 }
 print "<td>".htmlspecialchars($value['detalii'], ENT_QUOTES, 'UTF-8')."</td>";
 print "<td align=\"center\">".$tipicon."</td>";
@@ -202,25 +471,25 @@ print "
 }
 else
 {
-	if ($value['tip']=='FACTURA PRIMITA')
-	{$datadescarcarii=date("d.m.Y H:m", strtotime($row['efactura_primita_datad'] ?? ''));}
-	elseif ($value['tip']=='FACTURA TRIMISA')
-	{if (!$row['factura_data_descarcarii'])
-		{		$datadescarcarii='';}
-	else
-		{		$datadescarcarii=date("d.m.Y H:m", strtotime($row['factura_data_descarcarii']) ?? '');}
-		}
-	elseif ($value['tip']=='ERORI FACTURA')
+    if ($value['tip']=='FACTURA PRIMITA')
+    {$datadescarcarii=date("d.m.Y H:m", strtotime($row['efactura_primita_datad'] ?? ''));}
+    elseif ($value['tip']=='FACTURA TRIMISA')
+    {if (!$row['factura_data_descarcarii'])
+        {		$datadescarcarii='';}
+    else
+        {		$datadescarcarii=date("d.m.Y H:m", strtotime($row['factura_data_descarcarii']) ?? '');}
+        }
+    elseif ($value['tip']=='ERORI FACTURA')
 
-	{
-		{if (!$row['data_descarcare'])
-		{		$datadescarcarii='';}
-	else
-		{		$datadescarcarii=date("d.m.Y H:m", strtotime($row['data_descarcare']) ?? '');}
-		}
-	}
-	print "<td>$datadescarcarii</td>";
-print "<td align=\"center\"><i class=\"fa-xl far fa-file-archive\" title=\"$strArchived\"></i></td>";
+    {
+        {if (!$row['data_descarcare'])
+        {		$datadescarcarii='';}
+    else
+        {		$datadescarcarii=date("d.m.Y H:m", strtotime($row['data_descarcare']) ?? '');}
+        }
+    }
+    print "<td>$datadescarcarii</td>";
+print "<td align=\"center\"><a href=\"downloadzip.php?tip=".$tip."&cid=".$value['id']."\"><i class=\"fa-xl far fa-file-archive\" title=\"$strDownloadArchive\"></i></a></td>";
 
 }
 if ($value['tip']=='FACTURA PRIMITA')
@@ -233,8 +502,8 @@ if ($value['tip']=='FACTURA PRIMITA')
         <td align="center"><i class="fa-xl fas fa-search" title="<?php echo $strView?>" data-open="exampleModal1_<?php echo $value['id']?>"></i></td>
         <?php }
 elseif ($value['tip']=='FACTURA TRIMISA')
-				{
-					$query="SELECT * FROM efactura WHERE factura_CIF='$whatIWant' AND factura_index_descarcare='$value[id]'";
+                {
+                    $query="SELECT * FROM efactura WHERE factura_CIF='$whatIWant' AND factura_index_descarcare='$value[id]'";
 $result=ezpub_query($conn,$query);
 $row=ezpub_fetch_array($result);
 ?>
@@ -244,9 +513,9 @@ $row=ezpub_fetch_array($result);
         </div>
         <td align="center"><i class="fa-xl fas fa-search" title="<?php echo $strView?>" data-open="exampleModal3_<?php echo $value['id']?>"></i></td>
         <?php
-				}
+                }
 elseif ($value['tip']=='ERORI FACTURA')
-				{
+                {
 ?>
         <div class="full reveal" id="exampleModal2_<?php echo htmlspecialchars($value['id'], ENT_QUOTES, 'UTF-8')?>" data-reveal>
             <iframe src="einvoiceerrors.php?cID=<?php echo urlencode($value['id'])?>" frameborder="0" style="border:0" Width="100%" height="1000"></iframe>
@@ -254,24 +523,33 @@ elseif ($value['tip']=='ERORI FACTURA')
         </div>
         <td align="center"><i class="fa-xl fas fa-search" title="<?php echo $strView?>" data-open="exampleModal2_<?php echo $value['id']?>"></i></td>
         <?php 
-				}
-print "</tr>";}
+                }
+print "</tr>";
+endforeach;
 print "</tbody><tfoot><tr><td></td><td  colspan=\"6\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
-curl_close ($ch);
-}}
-else
+
+
+// show pagination below the table
+echo $paginationHtml;
+
+if (!empty($pagination_mode)) {
+	curl_close ($ch);
+}
+
+} // end mode=verify
+elseif ($_GET["mode"]=='dowload')
 {
 // Validate all download parameters
 if (!isset($_GET['type']) || !in_array($_GET['type'], ['FP', 'FT', 'ER'])) {
     die("Invalid type parameter");
 }
-if (!isset($_GET['cid']) || !preg_match('/^[a-zA-Z0-9_-]+$/', $_GET['cid'])) {
+if (!isset($_GET['cid']) || strspn($_GET['cid'], 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-') !== strlen($_GET['cid'])) {
     die("Invalid cid parameter");
 }
-if (!isset($_GET['cif']) || !preg_match('/^[0-9]+$/', $_GET['cif'])) {
+if (!isset($_GET['cif']) || !ctype_digit($_GET['cif'])) {
     die("Invalid cif parameter");
 }
-if (!isset($_GET['idi']) || !preg_match('/^[a-zA-Z0-9_-]+$/', $_GET['idi'])) {
+if (!isset($_GET['idi']) || strspn($_GET['idi'], 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-') !== strlen($_GET['idi'])) {
     die("Invalid idi parameter");
 }
 if (!isset($_GET['datap']) || !strtotime($_GET['datap'])) {
@@ -296,6 +574,9 @@ $datad=date("Y-m-d H:m");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
 		$server_output = curl_exec($ch);
+		$dl_errno = curl_errno($ch);
+		$dl_error = curl_error($ch);
+		$dl_http  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close ($ch);
 		$datafile=$server_output;
 		if ($type=='FP')
@@ -305,7 +586,7 @@ $datad=date("Y-m-d H:m");
 		elseif ($type=='ER')
 		{$fp = fopen($hddpath .'/' . $error_folder .'/'.$iddescarcare.'.zip', 'w');}	
 	
-fwrite($fp, $datafile);
+	$fwrite_result = fwrite($fp, $datafile);
 
 		if ($type=='FP')
 	{
@@ -516,7 +797,8 @@ $stmt = mysqli_prepare($conn, "SELECT * FROM facturare_facturi_primite WHERE fp_
 mysqli_stmt_bind_param($stmt, "s", $indexdownload);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
-if (mysqli_num_rows($result)>0)
+$dup_count = mysqli_num_rows($result);
+if ($dup_count>0)
 {
 echo "<div class=\"callout alert\">$strReceivedInvoiceAlreadyRegistered</div></div></div>" ;
 }
@@ -746,8 +1028,15 @@ $invoicename='Factura_'. sanitarization($invoiceID)."_" . sanitarization($custom
 echo "<div class=\"callout success\">Factura_". $invoiceID."_" .sanitarization($customerCIF)  .".pdf a fost generată. <a href=\"../common/opendoc.php?type=3&docID=$invoicename\" target=\"_blank\" rel=\"noopener noreferrer\"><i class=\"far fa-file-pdf\"></i></a></div>";
 
 echo "</div></div>";
+// remove extracted folder for received invoices (keep the .zip)
+$ziplocation_fp = rtrim($hddpath, '/\\') . '/' . trim($efacturareceived_folder, '/\\') . '/' . $iddescarcare . '/';
+if (is_dir($ziplocation_fp)) {
+    @rrmdir_safe($ziplocation_fp, $hddpath);
+}
 
 }
+
+
 	if ($type=='ER')
 	{
 		$stmt = mysqli_prepare($conn, "INSERT INTO efactura_erori(data_erorii, index_incarcare, index_descarcare, status, data_descarcare) VALUES (?, ?, ?, 'DA', ?)");
@@ -820,8 +1109,14 @@ if ($index_incarcare && isset($result['header'])) {
     list_error_messages($result['header'], $index_incarcare);
 }
 
+	// remove extracted folder for error zips (keep the zip)
+	$ziplocation_er = rtrim($hddpath, '/\\') . '/' . trim($error_folder, '/\\') . '/' . $iddescarcare . '/';
+	if (is_dir($ziplocation_er)) {
+		@rrmdir_safe($ziplocation_er, $hddpath);
 	}
-elseif ($type=='FT')
+
+	}
+	elseif ($type=='FT')
 {
 	$stmt = mysqli_prepare($conn, "UPDATE efactura SET factura_status='OK', factura_descarcata='DA', factura_index_descarcare = ?, factura_data_descarcarii = ? WHERE factura_index_incarcare = ?");
 	mysqli_stmt_bind_param($stmt, "sss", $iddescarcare, $datad, $index);

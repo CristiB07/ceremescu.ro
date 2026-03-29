@@ -65,17 +65,13 @@ if (!isset($_POST['data_plata']) || empty($_POST['data_plata'])) {
     die("<div class=\"callout alert\">Data plății este obligatorie</div>");
 }
 
-// Validare format dată (YYYY-MM-DD)
+// Validare format și valoare dată (YYYY-MM-DD) — fără PCRE
 $dataplata = $_POST['data_plata'];
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataplata)) {
+$dt = DateTime::createFromFormat('Y-m-d', $dataplata);
+$dtErrors = DateTime::getLastErrors();
+if (!$dt || $dt->format('Y-m-d') !== $dataplata || $dtErrors['warning_count'] > 0 || $dtErrors['error_count'] > 0) {
     die("<div class=\"callout alert\">Format dată invalid</div>");
-}
-
-// Validare că data este validă
-$date_parts = explode('-', $dataplata);
-if (!checkdate($date_parts[1], $date_parts[2], $date_parts[0])) {
-    die("<div class=\"callout alert\">Dată invalidă</div>");
-}
+} 
 
 // SELECT cash_banca la început
 $sql2 = "SELECT * FROM cash_banca";

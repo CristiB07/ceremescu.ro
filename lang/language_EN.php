@@ -354,3 +354,4 @@ $strYouHaveAMessageFrom="You have a message from";
     $translation['copy_failed']                 = 'Error copying file on the server. copy() failed.';
     $translation['reading_failed']              = 'Error reading the file.';
 	$strFrontPageText="Diamonds, the most precious crystals on Terra, have been the source of inspiration in creating the DIAMANT 3K® products. Driven by the wish to provide the skin with the extraordinary benefits of diamond particles in a synergistic formula that incorporates natural plant extracts, hyaluronic acid, collagen and vitamins A, B5 (Panthenol), C, E and F, we have created the DIAMANT 3K products for those who want to use TODAY the products of tomorrow.";
+	$strRemaining = "Outstanding balance";

@@ -37,19 +37,21 @@ for ($i = 0; $i < sizeof($array); $i++) {
 // Procesare cu prepared statement
 for ($i = 0; $i < sizeof($validated_ids); $i++) {
     $value = $validated_ids[$i];
-    
-    // SELECT cu prepared statement
-    $stmt = mysqli_prepare($conn, "SELECT factura_client_valoare_totala, factura_data_emiterii, factura_numar FROM facturare_facturi WHERE factura_ID=?");
+
+    // SELECT cu prepared statement (include and use any existing partial payment)
+    $stmt = mysqli_prepare($conn, "SELECT factura_client_valoare_totala, IFNULL(factura_suma_partiala,0) AS suma_partiala, factura_data_emiterii, factura_numar FROM facturare_facturi WHERE factura_ID=?");
     mysqli_stmt_bind_param($stmt, "i", $value);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $row = ezpub_fetch_array($result);
     mysqli_stmt_close($stmt);
-    
+
     if ($row) {
-        $codenumarfactura=str_pad($row["factura_numar"], 8, '0', STR_PAD_LEFT);
-        $mesaj = $mesaj . "Contravaloare factură " . $siteInvoicingCode . $codenumarfactura . "/" . date('d.m.Y', strtotime($row["factura_data_emiterii"])) . "; ";
-        $valoare = $valoare + $row["factura_client_valoare_totala"];
+        $codenumarfactura = str_pad($row["factura_numar"], 8, '0', STR_PAD_LEFT);
+        $outstanding = (float)$row["factura_client_valoare_totala"] - (float)$row["suma_partiala"];
+        if ($outstanding < 0) $outstanding = 0.0;
+        $mesaj .= "Contravaloare factură " . $siteInvoicingCode . $codenumarfactura . " (" . date('d.m.Y', strtotime($row["factura_data_emiterii"])) . ") - " . number_format($outstanding, 2, '.', ',') . " lei; ";
+        $valoare += $outstanding;
     }
 }
 $formresult=json_encode([

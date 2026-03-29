@@ -89,14 +89,17 @@ if (!isset($_POST['fp_zi'], $_POST['fp_numar'], $_POST['fp_plecare'], $_POST['fp
     die('<div class="callout alert">All fields are required</div>');
 }
 
-// Sanitize and validate inputs
+// Sanitize and validate inputs (accept Romanian decimal format for km)
 $fp_zi = intval($_POST["fp_zi"]);
 $fp_numar = trim($_POST["fp_numar"]);
 $fp_plecare = trim($_POST["fp_plecare"]);
 $fp_sosire = trim($_POST["fp_sosire"]);
-$fp_km = floatval($_POST["fp_km"]);
-$fp_km_init = floatval($_POST["fp_km_init"]);
-$fp_km_final = floatval($_POST["fp_km_final"]);
+$fp_km_norm = parseRomanianNumber($_POST["fp_km"]);
+$fp_km = is_numeric($fp_km_norm) ? (float)$fp_km_norm : 0.0;
+$fp_km_init_norm = parseRomanianNumber($_POST["fp_km_init"]);
+$fp_km_init = is_numeric($fp_km_init_norm) ? (float)$fp_km_init_norm : 0.0;
+$fp_km_final_norm = parseRomanianNumber($_POST["fp_km_final"]);
+$fp_km_final = is_numeric($fp_km_final_norm) ? (float)$fp_km_final_norm : 0.0;
 $fp_detalii = trim($_POST["fp_detalii"]);
 
 // Use prepared statement
@@ -150,13 +153,16 @@ if (!isset($_POST['fp_detalii'], $_POST['fp_plecare'], $_POST['fp_sosire'],
     die('<div class="callout alert">All fields are required</div>');
 }
 
-// Sanitize inputs
+// Sanitize inputs (accept Romanian decimal format for km)
 $fp_detalii = trim($_POST["fp_detalii"]);
 $fp_plecare = trim($_POST["fp_plecare"]);
 $fp_sosire = trim($_POST["fp_sosire"]);
-$fp_km = floatval($_POST["fp_km"]);
-$fp_km_final = floatval($_POST["fp_km_final"]);
-$fp_km_init = floatval($_POST["fp_km_init"]);
+$fp_km_norm = parseRomanianNumber($_POST["fp_km"]);
+$fp_km = is_numeric($fp_km_norm) ? (float)$fp_km_norm : 0.0;
+$fp_km_final_norm = parseRomanianNumber($_POST["fp_km_final"]);
+$fp_km_final = is_numeric($fp_km_final_norm) ? (float)$fp_km_final_norm : 0.0;
+$fp_km_init_norm = parseRomanianNumber($_POST["fp_km_init"]);
+$fp_km_init = is_numeric($fp_km_init_norm) ? (float)$fp_km_init_norm : 0.0;
 
 // Use prepared statement
 $stmt = $conn->prepare("UPDATE administrative_foi_parcurs SET fp_detalii=?, fp_plecare=?, fp_sosire=?, fp_km=?, fp_km_final=?, fp_km_init=? WHERE fp_ID=?");

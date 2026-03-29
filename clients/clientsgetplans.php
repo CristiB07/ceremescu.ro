@@ -44,6 +44,9 @@ while ($row = ezpub_fetch_array($res)) {
         'extendedProps' => [
             'client' => $row['programare_client'],
             'zona' => $row['programare_zona'] ?? null,
+            'zona_place_id' => $row['programare_zone_place_id'] ?? null,
+            'zona_lat' => $row['programare_zone_lat'] ?? null,
+            'zona_lng' => $row['programare_zone_lng'] ?? null,
         ]
     ];
 }

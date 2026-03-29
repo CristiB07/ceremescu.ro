@@ -34,7 +34,7 @@ If ($_GET['mode']=="new"){
 	$mSQL = $mSQL . "ambalaj_nume,";
 	$mSQL = $mSQL . "ambalaj_cod)";
 
-	$mSQL = $mSQL . "Values(";
+	$mSQL = $mSQL . "values(";
 	$mSQL = $mSQL . "'" .$_POST["ambalaj_nume"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["ambalaj_cod"] . "') ";
 				
@@ -92,7 +92,7 @@ if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 			  <p><a href="sitepackages.php" class="button"><?php echo $strBack?></a></p>
 </div>
 </div>
-<form method="post" id="users" action="sitepackages.php?mode=new" >
+<form method="post"  action="sitepackages.php?mode=new" >
 			    <div class="grid-x grid-margin-x">
 			  <div class="large-8 medium-8 small-8 cell">
 			  <label><?php echo $strTitle?></label>
@@ -104,7 +104,7 @@ if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 	  </div>
 	  </div>
  <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
+     <div class="large-12 medium-12 small-12 cell"> <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
 	</div>
 	</div>
   </form>
@@ -120,7 +120,7 @@ $row=ezpub_fetch_array($result);
 			  <p><a href="sitepackages.php" class="button"><?php echo $strBack?></a></p>
 </div>
 </div>
-<form method="post" id="users" action="sitepackages.php?mode=edit&cID=<?php echo $row['ambalaj_id']?>" >
+<form method="post"  action="sitepackages.php?mode=edit&cID=<?php echo $row['ambalaj_id']?>" >
 			    <div class="grid-x grid-margin-x">
 			  <div class="large-12 medium-12 small-12 cell">
 			  <label><?php echo $strTitle?></label></TD>
@@ -132,7 +132,7 @@ $row=ezpub_fetch_array($result);
 </div>
 </div>
  <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
+     <div class="large-12 medium-12 small-12 cell"> <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
 	</div>
 	</div>
   </form>

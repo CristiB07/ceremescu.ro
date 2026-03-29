@@ -206,6 +206,78 @@ if (isset($_SESSION['message'])) {
     unset($_SESSION['message']);
 }
 ?>
+<?php
+// If view mode requested, show only the document and exit (no list)
+if (isset($_GET['mode']) && $_GET['mode'] == "view") {
+	$cID = intval($_GET['cID']);
+	$stmt = $conn->prepare("SELECT * FROM documente WHERE document_id = ?");
+	$stmt->bind_param("i", $cID);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	$row = $result->fetch_assoc();
+	$stmt->close();
+	if ($row) {
+		?>
+		<div class="grid-x grid-margin-x">
+			<div class="large-12 medium-12 small-12 cell">
+				<h2><?php echo htmlspecialchars($row['document_titlu'], ENT_QUOTES, 'UTF-8'); ?></h2>
+				<p><strong>Tip:</strong> <?php echo htmlspecialchars($row['document_tip'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p><strong>Categorie:</strong> <?php echo htmlspecialchars($row['document_categorie'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p><strong>Cod:</strong> <?php echo htmlspecialchars($row['document_cod'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p><strong>Versiune:</strong> <?php echo htmlspecialchars($row['document_versiune'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p><strong>Ultima actualizare:</strong> <?php echo $row['document_lastupdated']; ?></p>
+				<div><?php echo $row['document_continut']; ?></div>
+				<?php if ($row['document_atasamente']): 
+					$attachments = unserialize($row['document_atasamente']);
+					if (!empty($attachments)): ?>
+				<div>
+					<strong>Atașamente:</strong>
+					<ul>
+						<?php foreach ($attachments as $file): ?>
+						<li><a href="<?php echo $strSiteURL ?>/download.php?file=<?php echo urlencode($documents_folder . '/' . $file); ?>" target="_blank"><?php echo htmlspecialchars($file, ENT_QUOTES, 'UTF-8'); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+				<?php endif; ?>
+				<?php endif; ?>
+				<a href="sitedocuments.php" class="button"><?php echo $strBack; ?></a>
+			</div>
+		</div>
+		<?php
+		// Show signed users for ADMIN when viewing the exact document version
+		if ($is_admin) {
+			if (!empty($row['document_id']) && isset($row['document_lastupdated'])) {
+				$stmt2 = $conn->prepare("SELECT ds.utilizator_ID, ds.data_semnare, u.utilizator_Prenume, u.utilizator_Nume FROM documente_semnaturi ds LEFT JOIN date_utilizatori u ON ds.utilizator_ID = u.utilizator_ID WHERE ds.document_id = ? AND ds.document_lastupdated = ? ORDER BY ds.data_semnare ASC");
+				$stmt2->bind_param("is", $cID, $row['document_lastupdated']);
+				$stmt2->execute();
+				$res2 = $stmt2->get_result();
+				if ($res2 && $res2->num_rows > 0) {
+					echo '<div class="callout">';
+					echo '<h5>Acest document a fost semnat de:</h5>';
+					echo '<table>';
+					echo '<thead><tr><th>Nume</th><th>Prenume</th><th>Data semnării</th></tr></thead><tbody>';
+					while ($s = $res2->fetch_assoc()) {
+						$nume = htmlspecialchars($s['utilizator_Nume'] ?? '', ENT_QUOTES, 'UTF-8');
+						$prenume = htmlspecialchars($s['utilizator_Prenume'] ?? '', ENT_QUOTES, 'UTF-8');
+						$datefmt = '';
+						if (!empty($s['data_semnare'])) {
+							$ts = strtotime($s['data_semnare']);
+							if ($ts !== false) {
+								$datefmt = date("d.m.Y, H:i", $ts);
+							}
+						}
+						echo '<tr><td>' . $nume . '</td><td>' . $prenume . '</td><td>' . $datefmt . '</td></tr>';
+					}
+					echo '</tbody></table></div>';
+				}
+				if ($stmt2) $stmt2->close();
+			}
+		}
+		include '../bottom.php';
+		exit();
+	}
+}
+?>
 <div class="grid-x grid-margin-x">
     <div class="large-12 medium-12 small-12 cell">
         <h1><?php echo $strPageTitle; ?></h1>
@@ -380,46 +452,6 @@ if (isset($_GET['mode']) && ($_GET['mode'] == "new" || $_GET['mode'] == "edit") 
     </div>
 </div>
 <?php
-}
-
-// Handle view mode
-if (isset($_GET['mode']) && $_GET['mode'] == "view") {
-	$cID = intval($_GET['cID']);
-	$stmt = $conn->prepare("SELECT * FROM documente WHERE document_id = ?");
-	$stmt->bind_param("i", $cID);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	$row = $result->fetch_assoc();
-	$stmt->close();
-	if ($row) {
-?>
-<div class="grid-x grid-margin-x">
-    <div class="large-12 medium-12 small-12 cell">
-        <h2><?php echo htmlspecialchars($row['document_titlu'], ENT_QUOTES, 'UTF-8'); ?></h2>
-        <p><strong>Tip:</strong> <?php echo htmlspecialchars($row['document_tip'], ENT_QUOTES, 'UTF-8'); ?></p>
-        <p><strong>Categorie:</strong> <?php echo htmlspecialchars($row['document_categorie'], ENT_QUOTES, 'UTF-8'); ?></p>
-        <p><strong>Cod:</strong> <?php echo htmlspecialchars($row['document_cod'], ENT_QUOTES, 'UTF-8'); ?></p>
-        <p><strong>Versiune:</strong> <?php echo htmlspecialchars($row['document_versiune'], ENT_QUOTES, 'UTF-8'); ?></p>
-        <p><strong>Ultima actualizare:</strong> <?php echo $row['document_lastupdated']; ?></p>
-        <div><?php echo $row['document_continut']; ?></div>
-        <?php if ($row['document_atasamente']): 
-            $attachments = unserialize($row['document_atasamente']);
-            if (!empty($attachments)): ?>
-        <div>
-            <strong>Atașamente:</strong>
-            <ul>
-                <?php foreach ($attachments as $file): ?>
-                <li><a href="<?php echo $strSiteURL ?>/download.php?file=<?php echo urlencode($documents_folder . '/' . $file); ?>" target="_blank"><?php echo htmlspecialchars($file, ENT_QUOTES, 'UTF-8'); ?></a></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php endif; ?>
-        <?php endif; ?>
-        <a href="sitedocuments.php" class="button"><?php echo $strBack; ?></a>
-    </div>
-</div>
-<?php
-	}
 }
 ?>
 <?php include '../bottom.php'; ?>

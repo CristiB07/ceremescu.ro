@@ -107,7 +107,8 @@ function parse_mt940_ing($filePath, $conn) {
         if (preg_match('/:61:(\d{6})(\d{4})?([CDN])([\d,]+)[A-Z]*[^\/]*\/\/([A-Z0-9\-]*)/', $raw_61, $m)) {
             $data = $m[1]; // AA MM ZZ
             $tip = $m[3];
-            $suma = str_replace(',', '.', $m[4]);
+            // Normalizează formatul românesc pentru sume (ex: "726,00" sau "1.234,56")
+            $suma = (float) parseRomanianNumber($m[4]);
             $referinta = $m[5];
         } else {
             // Data din primele 6 caractere după :61:
@@ -119,9 +120,9 @@ function parse_mt940_ing($filePath, $conn) {
             $tip = $suma = $referinta = '';
             // Fallback: extrage suma și tipul din :86: dacă există ~20AMT SNT/RCD RON suma
             if (!empty($raw_86)) {
-                if (preg_match('/~20AMT (SNT|RCD) RON ([\d,.]+)/i', $raw_86, $m2)) {
+                if (preg_match('/~20AMT (SNT|RCD) RON ([\d,.\s]+)/i', $raw_86, $m2)) {
                     $tip = ($m2[1] === 'SNT') ? 'D' : 'C';
-                    $suma = str_replace([',', ' '], ['.', ''], $m2[2]);
+                    $suma = (float) parseRomanianNumber($m2[2]);
                 }
             }
         }
@@ -230,7 +231,7 @@ function parse_mt940_bt($filePath, $conn) {
                 if (preg_match('/:61:(\d{6})(\d{4})?([CDN])([\d,]+)[A-Z]*[^\/]*\/\/([A-Z0-9\-]*)/', $raw_61, $m)) {
                     $data = $m[1];
                     $tip = $m[3];
-                    $suma = str_replace(',', '.', $m[4]);
+                    $suma = (float) parseRomanianNumber($m[4]);
                     $referinta = $m[5];
                 } else {
                     $data = $tip = $suma = $referinta = '';

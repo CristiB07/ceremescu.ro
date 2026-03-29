@@ -1,7 +1,6 @@
 <?php
 //site function
 $sitefunction='CRM';
-
 //folders
 $invoice_folder='facturi';
 $receipts_folder='chitante';
@@ -26,7 +25,19 @@ $projects_folder='proiecte';
 $documents_folder='documente';
 $elearning_folder='elearning';
 
+
+//e-factura
+$authorize_url='https://logincert.anaf.ro/anaf-oauth2/v1/authorize';
+$token_url='https://logincert.anaf.ro/anaf-oauth2/v1/token';
+$redirect_uri='https://crm.consaltis.ro/admin/managetoken.php';
+$status_url='https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=';
+$download_url='https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=';
+$upload_url='https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=';
+$messages_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=60&cif=';
+$messages_paged='https://api.anaf.ro/prod/FCTEL/rest/listaMesajePaginatieFactura?';
+
 //freedays
+$legalholydays=21;
 $holidays=array(
 "2026-01-1", //Anul nou / fix
 "2026-01-2",  //Anul nou/fix

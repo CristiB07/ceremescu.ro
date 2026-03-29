@@ -207,8 +207,7 @@ echo "<a href=\"sitepages.php\" class=\"button\">$strBack &nbsp;<i class=\"fas f
                         <!-- Trigger/Open The Modal -->
                         <div class="full reveal" id="myModal" data-reveal>
                             <!-- Modal content -->
-                            <iframe src="<?php echo $strSiteURL?>/common/image.php?directory=pages&field=image"
-                                frameborder="0" style="border:0" Width="100%" height="750"></iframe>
+                            <iframe src="<?php echo $strSiteURL?>/common/image.php?directory=pages&field=image" frameborder="0" style="border:0" Width="100%" height="750"></iframe>
                             <button class="close-button" data-close aria-label="Close reveal" type="button">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -218,8 +217,7 @@ echo "<a href=\"sitepages.php\" class=\"button\">$strBack &nbsp;<i class=\"fas f
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strCategory?>
-                        <input type="text" name="pagina_categorie" type="text"
-                            placeholder="<?php echo $strCategory?>" />
+                        <input type="text" name="pagina_categorie" type="text" placeholder="<?php echo $strCategory?>" />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
@@ -232,7 +230,7 @@ echo "<a href=\"sitepages.php\" class=\"button\">$strBack &nbsp;<i class=\"fas f
                 <div class="large-6 medium-6 small-6 cell">
                     <label><?php echo $strPageKeywords?>
                         <input type="text" name="pagina_keywords" type="text"
-                            placeholder="<?php echo $strPageKeywords?>" required />
+placeholder="<?php echo $strPageKeywords?>" required />
                     </label>
                 </div>
                 <div class="large-2 medium-2 small-2 cell">

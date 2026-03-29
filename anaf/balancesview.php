@@ -92,8 +92,13 @@ if ($cui_selectat) {
             'datorii' => 'DATORII'
         ];
         echo '<table border="1" cellpadding="5" cellspacing="0"><thead><tr><th>An</th>';
+        $money_fields = ['cifra_afaceri_net','venituri_totale','venituri_in_avans','cheltuieli_totale','cheltuieli_in_avans','profit_pierdere_brut','profit_pierdere_net','provizioane','capitaluri_total','capital_subscris','patrimoniu_regie','active_imobilizate','active_circulante','stocuri','creante','casa_banci','datorii'];
         foreach ($cols as $col => $den) {
-            echo '<th>'.htmlspecialchars($den).'</th>';
+            if (in_array($col, $money_fields)) {
+                echo '<th style="text-align:right">'.htmlspecialchars($den).'</th>';
+            } else {
+                echo '<th>'.htmlspecialchars($den).'</th>';
+            }
         }
         echo '</tr></thead><tbody>';
         foreach ($bilanturi as $row) {
@@ -101,25 +106,25 @@ if ($cui_selectat) {
             echo '<td>'.htmlspecialchars((string)$row['an']).'</td>';
             // Unificare profit/pierdere brută
             $valoare_brut = 0; $style_brut = 'text-align:right;'; $valoare_fmt_brut = '';
-            if ($row['profit_brut'] > 0) {
+                if (!empty($row['profit_brut']) && $row['profit_brut'] > 0) {
                 $valoare_brut = $row['profit_brut'];
                 $style_brut = 'color:green;font-weight:bold;text-align:right;';
-                $valoare_fmt_brut = number_format($valoare_brut, 0, ',', '.');
-            } elseif ($row['pierdere_bruta'] > 0) {
+                $valoare_fmt_brut = romanize_int($valoare_brut);
+            } elseif (!empty($row['pierdere_bruta']) && $row['pierdere_bruta'] > 0) {
                 $valoare_brut = -$row['pierdere_bruta'];
                 $style_brut = 'color:red;font-weight:bold;text-align:right;';
-                $valoare_fmt_brut = '-'.number_format($row['pierdere_bruta'], 0, ',', '.');
+                $valoare_fmt_brut = '-'.romanize_int($row['pierdere_bruta']);
             }
             // Unificare profit/pierdere netă
             $valoare_net = 0; $style_net = 'text-align:right;'; $valoare_fmt_net = '';
-            if ($row['profit_net'] > 0) {
+            if (!empty($row['profit_net']) && $row['profit_net'] > 0) {
                 $valoare_net = $row['profit_net'];
                 $style_net = 'color:green;font-weight:bold;text-align:right;';
-                $valoare_fmt_net = number_format($valoare_net, 0, ',', '.');
-            } elseif ($row['pierdere_neta'] > 0) {
+                $valoare_fmt_net = romanize_int($valoare_net);
+            } elseif (!empty($row['pierdere_neta']) && $row['pierdere_neta'] > 0) {
                 $valoare_net = -$row['pierdere_neta'];
                 $style_net = 'color:red;font-weight:bold;text-align:right;';
-                $valoare_fmt_net = '-'.number_format($row['pierdere_neta'], 0, ',', '.');
+                $valoare_fmt_net = '-'.romanize_int($row['pierdere_neta']);
             }
             foreach ($cols as $col => $den) {
                 if ($col == 'profit_pierdere_brut') {
@@ -130,8 +135,17 @@ if ($cui_selectat) {
                     $valoare = $row[$col];
                     $style = 'text-align:right;';
                     $valoare_fmt = '';
-                    if (is_numeric($valoare) && $valoare != 0) {
-                        $valoare_fmt = number_format($valoare, 0, ',', '.');
+                    if (in_array($col, $money_fields)) {
+                        if (is_numeric($valoare) && $valoare != 0) {
+                            $valoare_fmt = romanize_int($valoare);
+                        }
+                    } else {
+                        // non-monetary (e.g., numar_salariati)
+                        if (is_numeric($valoare) && $valoare != 0) {
+                            $valoare_fmt = number_format($valoare, 0, ',', '.');
+                        } else {
+                            $valoare_fmt = htmlspecialchars((string)$valoare);
+                        }
                     }
                     echo '<td style="'.$style.'">'.$valoare_fmt.'</td>';
                 }
@@ -187,7 +201,7 @@ if ($cui_selectat) {
                 }
                 $vals[] = $v;
             }
-            foreach ($vals as $i => $v) {
+                foreach ($vals as $i => $v) {
                 $style = 'text-align:right;';
                 $arrow = '';
                 $pct = '';
@@ -202,7 +216,12 @@ if ($cui_selectat) {
                         $pct = ' <span style="color:red">('.$pctval.'%)</span>';
                     }
                 }
-                $v_fmt = number_format($v, 0, ',', '.');
+                // Format values: monetary fields use romanize_int, numar_salariati uses integer formatting
+                if ($col === 'numar_salariati') {
+                    $v_fmt = number_format($v, 0, ',', '.');
+                } else {
+                    $v_fmt = is_numeric($v) ? romanize_int($v) : htmlspecialchars((string)$v);
+                }
                 echo '<td style="'.$style.'">'.$v_fmt.$arrow.$pct.'</td>';
             }
             echo '</tr>';

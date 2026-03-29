@@ -13,6 +13,10 @@ echo "<div class=\"callout alert\">$strThereWasAnError</div>" ;
                 {
                     include 'login/index.php';
                 }
+                elseif ($sitefunction=='bi')
+                {
+                    include 'account/index.php';
+                }
                     else 
                 {
             	//he just try to get here directly or something is wrong
@@ -21,4 +25,4 @@ echo "<div class=\"callout alert\">$strThereWasAnError</div>" ;
 ?>
 <hr />
 <!-- Ends content-->
-<?php include 'bottom.php'?>
+<?php include_once 'bottom.php'?>

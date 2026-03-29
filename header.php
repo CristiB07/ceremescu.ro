@@ -14,7 +14,8 @@
     <meta name="copyright" content="<?php echo $strSiteOwner ?>. Copyright (c) <?php echo date("Y") ?>" />
     <title><?php echo $strSiteName ?>: <?php echo $strPageTitle ?></title>
     <meta property="og:image" content="<?php echo $strSiteURL ?>/img/<?php echo $siteOGImage?>" />
-    <link rel="canonical" href="<?php echo $strSiteURL."/".$pageurl ?>" />
+    <?php if (!isset($pageurl)) $pageurl = ''; ?>
+    <link rel="canonical" href="<?php echo $strSiteURL . '/' . $pageurl ?>" />
     <?php if ($blog==1) {?>
     <link rel="alternate" type="application/rss+xml" title="<?php echo $strSiteName ?>; Flux" href="<?php echo $strSiteURL ?>/blog/rss.php" />
     <?php }?>
@@ -82,7 +83,7 @@ setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1
 			 if($shop==1) {?>
                 <li><a href="<?php echo $strSiteURL ?>/shop/"><?php echo $strOnlineShop?></a></li>
                 <?php }
-		 
+		 if($shop==1) {
 		$pagequery="SELECT * FROM cms_pagini WHERE pagina_tip=0 AND pagina_limba='$lang' AND pagina_status=0 ORDER BY pagina_numar ASC";
 		$pageresult=ezpub_query($conn, $pagequery);
 		While ($pagerow=ezpub_fetch_array($pageresult))
@@ -100,14 +101,16 @@ setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1
 		}
 		echo "</ul></li>";
 		}}
-
+         }
 			 if($elearning==1) {?>
                 <li><a href="<?php echo $strSiteURL ?>/elearning/"><?php echo $strCourses?></a></li>
                 <?php }
 			 if($blog==1) {?>
                 <li><a href="<?php echo $strSiteURL ?>/blog/"><?php echo $strBlog?></a></li>
                 <?php }?>
-
+                <?php if($faq==1) { ?>
+                <li><a href="<?php echo $strSiteURL ?>/faq/">FAQ</a></li>
+                <?php } ?>
                 <li><a href="<?php echo $strSiteURL ?>/contact.php"><?php echo $strContact?></a></li>
                 <?php  ?>
             </ul>

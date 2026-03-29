@@ -4,7 +4,7 @@
  * Logs user activity and PHP/MySQL errors
  * Note: getRealIpAddr() is defined in common.php
  */
-
+include_once 'common.php';
 if(!isset($_SESSION)) { 
     session_start(); 
 }

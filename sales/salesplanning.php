@@ -41,7 +41,7 @@ $uid = $_SESSION['uid'];
             <input type="text" id="eventObjective" name="eventObjective" required>
         </label>
         <label>Client:
-            <select id="eventClient" name="eventClient">
+            <select id="eventClient" name="eventClient" required>
                 <option value="">Selectează client</option>
                 <?php
                 $clientsQuery = "SELECT prospect_ID, prospect_denumire FROM sales_prospecti ORDER BY prospect_denumire";
@@ -53,7 +53,15 @@ $uid = $_SESSION['uid'];
             </select>
         </label>
         <label>Zonă:
-            <input type="text" id="eventZone" name="eventZone">
+            <input type="text" id="eventZone" name="eventZone" placeholder="Caută adresă (ex. Mall Vitan)">
+            <input type="hidden" id="eventZonePlaceId" name="eventZonePlaceId">
+            <input type="hidden" id="eventZoneLat" name="eventZoneLat">
+            <input type="hidden" id="eventZoneLng" name="eventZoneLng">
+            <small class="help-text">Introduceți o adresă; se va putea folosi pe telefon pentru direcții.</small>
+            <div><a id="openMapsLink" href="#" target="_blank" style="display:none;" class="button small">Deschide în hărți</a></div>
+            <?php if (empty($google_maps_api_key)) { ?>
+            <div class="callout warning" role="status">Google Maps Autocomplete este <strong>dezactivat</strong>. Adaugă <code>$google_maps_api_key</code> în <code>_site/settings.local.php</code> și activează Google Places API pentru a folosi sugestiile de adresă.</div>
+            <?php } ?>
         </label>
         <label>Tip vizită:
             <select id="eventTipVizita" name="eventTipVizita">
@@ -123,6 +131,24 @@ $uid = $_SESSION['uid'];
 .fc-daygrid-event-dot {
     display: none !important;
 }
+/* Ensure Google Places dropdown is above modals and visible */
+.pac-container {
+    z-index: 100000 !important;
+    position: fixed !important;
+    max-height: 40vh; overflow-y: auto;
+}
+/* Custom fallback predictions dropdown */
+.custom-predictions {
+    z-index: 120000 !important;
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 40vh;
+    overflow: auto;
+    width: calc(100% - 2px);
+}
+.custom-pred-item { padding: 8px; cursor: pointer; }
+.custom-pred-item.active, .custom-pred-item:hover { background: #eee; }
 </style>
 
 <script>
@@ -292,6 +318,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('eventObjective').value = '';
             document.getElementById('eventClient').value = '';
             document.getElementById('eventZone').value = '';
+            if (document.getElementById('eventZonePlaceId')) document.getElementById('eventZonePlaceId').value = '';
+            if (document.getElementById('eventZoneLat')) document.getElementById('eventZoneLat').value = '';
+            if (document.getElementById('eventZoneLng')) document.getElementById('eventZoneLng').value = '';
+            if (document.getElementById('openMapsLink')) document.getElementById('openMapsLink').style.display = 'none';
             if (document.getElementById('eventTipVizita')) document.getElementById('eventTipVizita').value = '';
             if (document.getElementById('eventDetalii')) document.getElementById('eventDetalii').value = '';
             if (document.getElementById('sendInvite')) document.getElementById('sendInvite').checked = false;
@@ -320,7 +350,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('eventClient').value = data.programare_client || '';
-                    document.getElementById('eventZone').value = data.programare_zona || '';
+                            document.getElementById('eventZone').value = data.programare_zona || '';
+                    // populate hidden place fields if present
+                    if (document.getElementById('eventZonePlaceId')) document.getElementById('eventZonePlaceId').value = data.programare_zone_place_id || data.programare_place_id || '';
+                    if (document.getElementById('eventZoneLat')) document.getElementById('eventZoneLat').value = data.programare_zone_lat || data.programare_lat || '';
+                    if (document.getElementById('eventZoneLng')) document.getElementById('eventZoneLng').value = data.programare_zone_lng || data.programare_lng || '';
+                    // update maps link from loaded data
+                    var mapsLink = document.getElementById('openMapsLink');
+                    if (mapsLink) {
+                        var lat = data.programare_zone_lat || data.programare_lat || '';
+                        var lng = data.programare_zone_lng || data.programare_lng || '';
+                        var pid = data.programare_zone_place_id || data.programare_place_id || '';
+                        if (lat && lng) { mapsLink.href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(lat + ',' + lng); mapsLink.style.display = 'inline-block'; }
+                        else if (pid) { mapsLink.href = 'https://www.google.com/maps/search/?api=1&query=place_id:' + encodeURIComponent(pid); mapsLink.style.display = 'inline-block'; }
+                        else { mapsLink.href = '#'; mapsLink.style.display = 'none'; }
+                    }
                     document.getElementById('eventFinalized').checked = data.programare_finalizata == 1;
                     // New fields
                     if (document.getElementById('eventTipVizita')) document.getElementById('eventTipVizita').value = data.programare_tipvizita || '';
@@ -343,6 +387,285 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     calendar.render();
+
+    // Initialize Google Places Autocomplete for the zone input
+    window.initPlaceAutocomplete = function() {
+        try {
+            var input = document.getElementById('eventZone');
+            if (!input) return;
+            // Use new PlaceAutocompleteElement when available (recommended), otherwise fallback to legacy Autocomplete
+            window.handlePlace = function(place) {
+                if (!place) return;
+                if (place.formatted_address) input.value = place.formatted_address;
+                var pid = place.place_id || '';
+                var lat = '';
+                var lng = '';
+                if (place.geometry && place.geometry.location) {
+                    lat = place.geometry.location.lat();
+                    lng = place.geometry.location.lng();
+                }
+                if (document.getElementById('eventZonePlaceId')) document.getElementById('eventZonePlaceId').value = pid;
+                if (document.getElementById('eventZoneLat')) document.getElementById('eventZoneLat').value = lat;
+                if (document.getElementById('eventZoneLng')) document.getElementById('eventZoneLng').value = lng;
+                var link = document.getElementById('openMapsLink');
+                if (link) {
+                    if (lat !== '' && lng !== '') { link.href = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(lat + ',' + lng); link.style.display = 'inline-block'; }
+                    else if (pid !== '') { link.href = 'https://www.google.com/maps/search/?api=1&query=place_id:' + encodeURIComponent(pid); link.style.display = 'inline-block'; }
+                    else { link.href = '#'; link.style.display = 'none'; }
+                }
+            }
+
+            try {
+                if (google.maps.places && google.maps.places.PlaceAutocompleteElement) {
+                    // new preferred element (don't pass unknown 'fields' option)
+                    var pae = null;
+                    try {
+                        pae = new google.maps.places.PlaceAutocompleteElement({ inputElement: input, componentRestrictions: { country: 'RO' } });
+                    } catch (e) {
+                        console.warn('PlaceAutocompleteElement constructor threw, falling back', e);
+                        pae = null;
+                    }
+
+                    // If pae not available, fallback to legacy Autocomplete immediately
+                    if (!pae) {
+                        try {
+                            var autocompleteFallback = new google.maps.places.Autocomplete(input, { types: ['geocode'], componentRestrictions: { country: 'RO' } });
+                            autocompleteFallback.setFields(['place_id','formatted_address','geometry']);
+                            autocompleteFallback.addListener('place_changed', function() { var place = autocompleteFallback.getPlace(); window.handlePlace && window.handlePlace(place); });
+                            console.warn('Falling back to legacy Autocomplete (constructor absence)');
+                        } catch (e2) {
+                            console.error('Legacy Autocomplete also failed', e2);
+                        }
+                    } else {
+                        try {
+                            if (typeof pae.addListener === 'function') {
+                                pae.addListener('place_changed', function() { onPaePlaceChanged(pae); });
+                            } else if (typeof pae.addEventListener === 'function') {
+                                pae.addEventListener('place_changed', function() { onPaePlaceChanged(pae); });
+                            } else if (typeof pae.on === 'function') {
+                                pae.on('place_changed', function() { onPaePlaceChanged(pae); });
+                            } else {
+                                var lastVal = '';
+                                input.addEventListener('input', function(){ if (input.value === lastVal) return; lastVal = input.value; setTimeout(function(){ try { var p = pae.getPlace && pae.getPlace(); if (p) onPaePlaceChanged(pae); } catch(e){} }, 300); });
+                                console.warn('PlaceAutocompleteElement: event binding fallback active');
+                            }
+                        } catch (e) {
+                            console.warn('PlaceAutocompleteElement binding failed, falling back to legacy Autocomplete', e);
+                            try {
+                                var autocompleteFallback2 = new google.maps.places.Autocomplete(input, { types: ['geocode'], componentRestrictions: { country: 'RO' } });
+                                autocompleteFallback2.setFields(['place_id','formatted_address','geometry']);
+                                autocompleteFallback2.addListener('place_changed', function() { var place = autocompleteFallback2.getPlace(); window.handlePlace && window.handlePlace(place); });
+                            } catch (e3) {
+                                console.error('Legacy Autocomplete also failed (bind path)', e3);
+                            }
+                        }
+                    }
+
+                    function onPaePlaceChanged(source) {
+                        var place = (typeof source.getPlace === 'function') ? source.getPlace() : source;
+                        if (place && place.formatted_address && place.geometry) {
+                            window.handlePlace && window.handlePlace(place);
+                        } else if (place && place.place_id) {
+                            var ps = new google.maps.places.PlacesService(document.createElement('div'));
+                            ps.getDetails({ placeId: place.place_id, fields: ['place_id','formatted_address','geometry'] }, function(detail, status) {
+                                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                    window.handlePlace && window.handlePlace(detail);
+                                } else {
+                                    console.warn('Place details failed', status);
+                                }
+                            });
+                        } else {
+                            console.warn('PlaceAutocompleteElement returned no usable place', place);
+                        }
+                    }
+                    console.log('Using PlaceAutocompleteElement (RO)');
+                } else if (google.maps.places && google.maps.places.Autocomplete) {
+                    var autocomplete = new google.maps.places.Autocomplete(input, { types: ['geocode'], componentRestrictions: { country: 'RO' } });
+                    autocomplete.setFields(['place_id','formatted_address','geometry']);
+                    autocomplete.addListener('place_changed', function() { var place = autocomplete.getPlace(); window.handlePlace && window.handlePlace(place); });
+                    console.log('Using legacy Autocomplete (RO)');
+                } else {
+                    // No element available; use AutocompleteService fallback to fetch predictions and show a simple dropdown
+                    var dbg = document.getElementById('mapsDebug'); if (dbg) { dbg.textContent = (dbg.textContent?dbg.textContent + ' | ':'') + 'Places API loaded but Autocomplete not available — using AutocompleteService fallback'; dbg.style.display='block'; dbg.className='callout warning'; }
+                    // Setup fallback UI
+                    var fallbackContainer = null;
+                    function ensureFallbackContainer() {
+                        if (fallbackContainer) return fallbackContainer;
+                        fallbackContainer = document.createElement('div');
+                        fallbackContainer.className = 'custom-predictions';
+                        fallbackContainer.style.display = 'none';
+                        var parent = input.parentNode; if (parent && getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
+                        parent.appendChild(fallbackContainer);
+                        return fallbackContainer;
+                    }
+                    function hideFallback() { if (fallbackContainer) fallbackContainer.style.display = 'none'; }
+                    function setActive(node) { if (!fallbackContainer) return; var prev = fallbackContainer.querySelector('.active'); if (prev) prev.classList.remove('active'); if (node) node.classList.add('active'); }
+                    // Try to get place details using the new Place API if available, otherwise fallback to PlacesService
+                    function getPlaceDetailsById(pid, cb) {
+                        // Validate pid first
+                        if (!pid || typeof pid !== 'string' || pid.trim() === '') {
+                            cb(null, 'INVALID_ID');
+                            return;
+                        }
+                        try {
+                            if (google && google.maps && google.maps.places && typeof google.maps.places.Place === 'function') {
+                                try {
+                                    var placeObj = new google.maps.places.Place({ placeId: pid, fields: ['place_id','formatted_address','geometry'] });
+                                    if (typeof placeObj.get === 'function') { placeObj.get(function(detail, status){ cb(detail, status); }); return; }
+                                    if (typeof placeObj.fetch === 'function') { placeObj.fetch().then(function(detail){ cb(detail, google.maps.places.PlacesServiceStatus.OK); }).catch(function(err){ console.warn('Place.fetch failed', err); cb(null,'ERROR'); }); return; }
+                                } catch (e) { console.warn('Place constructor/fetch not supported or threw', e); }
+                            }
+                        } catch(e){ console.warn('Place API feature detect error', e); }
+                        try {
+                            if (google && google.maps && google.maps.places) {
+                                var ps = new google.maps.places.PlacesService(document.createElement('div'));
+                                ps.getDetails({ placeId: pid, fields: ['place_id','formatted_address','geometry'] }, cb);
+                                return;
+                            }
+                        } catch (e) { console.error('PlacesService.getDetails failed', e); }
+                        cb(null, 'ERROR');
+                    }
+
+                    function activateItem(node) {
+                        if (!node) return;
+                        var pid = node.getAttribute('data-placeid');
+                        var text = (node.textContent || node.innerText || '').trim();
+                        if (pid && typeof pid === 'string' && pid.trim() !== '') {
+                            getPlaceDetailsById(pid, function(detail, status){
+                                if ((typeof google !== 'undefined' && google.maps && google.maps.places && (status === google.maps.places.PlacesServiceStatus.OK || status === google.maps.places.PlacesServiceStatus.UNKNOWN)) || (detail && detail.place_id) ) {
+                                    window.handlePlace && window.handlePlace(detail);
+                                    hideFallback();
+                                } else {
+                                    console.warn('getPlaceDetailsById did not return OK status', status, detail);
+                                    // try geocode fallback
+                                    geocodeTextFallback(text);
+                                }
+                            });
+                        } else {
+                            // no place id available, use geocoder fallback
+                            geocodeTextFallback(text);
+                        }
+                    }
+
+                    function geocodeTextFallback(text) {
+                        if (!text || !google || !google.maps || !google.maps.Geocoder) { console.warn('Geocode fallback not available for', text); return; }
+                        var ge = new google.maps.Geocoder();
+                        ge.geocode({ address: text }, function(results, status) {
+                            if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+                                var r = results[0];
+                                var detail = { place_id: r.place_id || '', formatted_address: r.formatted_address || (r.formattedAddress || ''), geometry: r.geometry };
+                                window.handlePlace && window.handlePlace(detail);
+                                hideFallback();
+                            } else {
+                                console.warn('Geocode fallback failed', status);
+                            }
+                        });
+                    }
+
+                    function renderFallback(predictions) {
+                        var c = ensureFallbackContainer(); c.innerHTML = '';
+                        predictions.forEach(function(p){ var div = document.createElement('div'); div.className = 'custom-pred-item'; div.textContent = p.description; div.setAttribute('data-placeid', p.place_id); div.addEventListener('click', function(){ activateItem(div); }); div.addEventListener('mouseover', function(){ setActive(div); }); c.appendChild(div); });
+                        c.style.display = 'block';
+                    }
+                    function fetchPredictionsFallback(q) {
+                        try {
+                            // Prefer new AutocompleteSuggestion API when available
+                            if (google && google.maps && google.maps.places && typeof google.maps.places.AutocompleteSuggestion === 'function') {
+                                try {
+                                    var sug = new google.maps.places.AutocompleteSuggestion();
+                                    if (typeof sug.getSuggestions === 'function') {
+                                        sug.getSuggestions({ input: q, componentRestrictions: { country: 'RO' }, types: ['establishment','geocode'] }, function(predictions, status){ if (predictions && predictions.length) { console.log('Using AutocompleteSuggestion'); renderFallback(predictions); } else hideFallback(); });
+                                        return;
+                                    }
+                                    if (typeof sug.getPlacePredictions === 'function') {
+                                        sug.getPlacePredictions({ input: q, componentRestrictions: { country: 'RO' }, types: ['establishment','geocode'] }, function(predictions, status){ if (predictions && predictions.length) { console.log('Using AutocompleteSuggestion (placePredictions)'); renderFallback(predictions); } else hideFallback(); });
+                                        return;
+                                    }
+                                } catch (e) { console.warn('AutocompleteSuggestion call failed, falling back', e); }
+                            }
+
+                            // Fallback to server-side REST Autocomplete (avoid AutocompleteService to prevent deprecation warnings)
+                            (function(){
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('GET', '/common/places_autocomplete.php?q=' + encodeURIComponent(q), true);
+                                xhr.timeout = 5000;
+                                xhr.onreadystatechange = function(){
+                                    if (xhr.readyState !== 4) return;
+                                    if (xhr.status === 200) {
+                                        try {
+                                            var resp = JSON.parse(xhr.responseText);
+                                            if (resp && resp.predictions && resp.predictions.length) {
+                                                console.log('Using server REST Autocomplete');
+                                                renderFallback(resp.predictions);
+                                                return;
+                                            }
+                                        } catch (e) { console.warn('REST autocomplete parse error', e); }
+                                    }
+                                    // If REST fails, attempt to use legacy AutocompleteService as last resort
+                                    try {
+                                        if (google && google.maps && google.maps.places && typeof google.maps.places.AutocompleteService === 'function') {
+                                            var svc = new google.maps.places.AutocompleteService();
+                                            svc.getPlacePredictions({ input: q, componentRestrictions: { country: 'RO' }, types: ['establishment','geocode'] }, function(predictions, status){
+                                                if (status === google.maps.places.PlacesServiceStatus.OK && predictions && predictions.length) { renderFallback(predictions); }
+                                                else { hideFallback(); }
+                                            });
+                                            return;
+                                        }
+                                    } catch (e) { console.warn('Legacy AutocompleteService also failed', e); }
+
+                                    console.warn('No suitable Autocomplete API available'); hideFallback();
+                                };
+                                xhr.ontimeout = function(){
+                                    // try legacy service if server request times out
+                                    try {
+                                        if (google && google.maps && google.maps.places && typeof google.maps.places.AutocompleteService === 'function') {
+                                            var svc2 = new google.maps.places.AutocompleteService();
+                                            svc2.getPlacePredictions({ input: q, componentRestrictions: { country: 'RO' }, types: ['establishment','geocode'] }, function(predictions, status){
+                                                if (status === google.maps.places.PlacesServiceStatus.OK && predictions && predictions.length) { renderFallback(predictions); }
+                                                else { hideFallback(); }
+                                            });
+                                            return;
+                                        }
+                                    } catch (e) { console.warn('Legacy AutocompleteService also failed on timeout', e); }
+                                    hideFallback();
+                                };
+                                xhr.send();
+                            })();
+                        } catch (e) { console.error('fetchPredictionsFallback error', e); hideFallback(); }
+                    }
+                    // wire input to use fallback when needed
+                    if (input) {
+                        input.addEventListener('input', function(){ var val = input.value.trim(); clearTimeout(input._predDeb); if (val.length<2) { hideFallback(); return;} input._predDeb = setTimeout(function(){ var pacHasItems = !!(document.querySelector('.pac-container .pac-item')); if (!document.querySelector('.pac-container') || !pacHasItems) fetchPredictionsFallback(val); else hideFallback(); }, 250); });
+                        input.addEventListener('keydown', function(ev){ var list = document.querySelector('.custom-predictions'); if (!list || list.style.display==='none') return; var active = list.querySelector('.active'); if (ev.key === 'ArrowDown') { ev.preventDefault(); var next = active ? (active.nextElementSibling || list.firstElementChild) : list.firstElementChild; setActive(next); } if (ev.key === 'ArrowUp') { ev.preventDefault(); var prev = active ? (active.previousElementSibling || list.lastElementChild) : list.lastElementChild; setActive(prev); } if (ev.key === 'Enter') { ev.preventDefault(); if (active) activateItem(active); } if (ev.key === 'Escape') { hideFallback(); } }); document.addEventListener('click', function(ev){ if (!fallbackContainer) return; if (!fallbackContainer.contains(ev.target) && ev.target !== input) hideFallback(); });
+                    }
+                }
+            } catch (e) { console.error('Place init error', e); }
+        } catch (err) { console.error('initPlaceAutocomplete error', err); }
+    };
+
+    (function loadGooglePlacesAsync(){
+        var key = '<?php echo isset($google_maps_api_key)?addslashes($google_maps_api_key):""; ?>';
+        if (!key) {
+            console.warn('Google Maps API key not set. Add $google_maps_api_key in _site/settings.local.php');
+            return;
+        }
+        if (window.google && window.google.maps && window.google.maps.places) { window.initPlaceAutocomplete(); return; }
+        var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true; s.defer = true;
+        s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&libraries=places&callback=initPlaceAutocomplete&language=ro&region=RO&loading=async&v=weekly';
+        s.onerror = function() {
+            console.error('Google Maps script failed to load');
+            var d = document.getElementById('mapsDebug'); if (d) { d.textContent = 'Eroare la încărcarea Google Maps script: verifică cheia API sau restricțiile referer din Google Cloud.'; d.style.display='block'; d.className='callout warning'; }
+        };
+        s.onload = function() { console.log('Google Maps script loaded'); };
+        document.head.appendChild(s);
+    })();
+    var origInit = window.initPlaceAutocomplete;
+    window.initPlaceAutocomplete = function() { try { if (origInit) origInit(); console.log('initPlaceAutocomplete executed'); } catch(e){ console.error('initPlaceAutocomplete wrapper error', e); } };
+    } catch (e) {
+        console.error('salesplanning error', e);
+        alert('A apărut o eroare Javascript: ' + e.message + '\nVerifică consola pentru detalii.');
+    }
+
     } catch (e) {
         console.error('salesplanning error', e);
         alert('A apărut o eroare Javascript: ' + e.message + '\nVerifică consola pentru detalii.');
@@ -357,6 +680,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form submit pentru salvare
     document.getElementById('eventForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // Ensure client selected (required)
+        var clientSelect = document.getElementById('eventClient');
+        if (clientSelect && (clientSelect.value === '' || clientSelect.value === null)) {
+            alert('Vă rugăm selectați un client.');
+            clientSelect.focus();
+            return;
+        }
 
         // Validare adrese multiple: separate prin virgula sau ;
         var sendInvite = document.getElementById('sendInvite').checked;

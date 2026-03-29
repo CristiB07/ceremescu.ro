@@ -445,10 +445,10 @@ While ($row = $result->fetch_assoc()){
 			<td>".htmlspecialchars($row['articol_titlu'], ENT_QUOTES, 'UTF-8')."</td>
 			<td>".htmlspecialchars($row['articol_descriere'], ENT_QUOTES, 'UTF-8')."</td>
             <td>";
-            if ($row['articol_status']==1){
+            // Use articol_tip (0=draft, 1=published). defensive check to avoid undefined index warnings
+            if (!empty($row['articol_tip']) && $row['articol_tip'] == 1) {
                 echo htmlspecialchars($strPublished, ENT_QUOTES, 'UTF-8');
-            }
-            else {
+            } else {
                 echo htmlspecialchars($strDraft, ENT_QUOTES, 'UTF-8');
             }
             echo"</td>

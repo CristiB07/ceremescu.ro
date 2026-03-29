@@ -1,10 +1,67 @@
 <?php
-include '../settings.php';
-include '../classes/common.php';
+//update 16.07.2025
+include_once  __DIR__ .'/../settings.php';
+include_once  __DIR__ . '/../classes/common.php';
 $strPageTitle="Intrare cont";
-include '../header.php';
+$strKeywords="Accesare cont site " .$strSiteName;
+$strDescription="Pagina de accesare cont pe" .$strSiteName;
+$strPageTitle="Accesare cont pe " .$strSiteName;
 
+
+if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+	}
+		
+if (!isSet($_SESSION['$lang'])) {
+	$_SESSION['$lang']="RO";
+	$lang=$_SESSION['$lang'];
+}
+else
+{
+	$lang=$_SESSION['$lang'];
+}
+if ($lang=="RO") {
+include __DIR__ .'../../lang/language_RO.php';
+}
+else
+{
+	include __DIR__ . '../../lang/language_EN.php';
+}
+if (empty($_SESSION['_token'])) {
+  $_SESSION['_token'] = bin2hex(random_bytes(32));
+$_SESSION["token_expire"] = time() + 1800; // 30 minutes = 1800 secs
+}
+$csrf_error = "";
+$token = $_SESSION['_token'];
+$token_expire = $_SESSION["token_expire"];
 ?>
+<!doctype html>
+
+<head>
+    <!--Start Header-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title><?php echo $strSiteName ?>: <?php echo $strPageTitle ?></title>
+    <meta name="rating" content="General" />
+    <meta name="author" content="Consaltis Consultanţă şi Audit" />
+    <meta name="language" content="romanian, RO" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="robots" content="noindex">
+    <meta http-equiv="expires" content="never" />
+    <link rel="shortcut icon" type="image/favicon" href="<?php echo $strSiteURL ?>/favicon.ico" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Insert this within your head tag and after foundation.css -->
+    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/all.css" />
+    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/foundation.css" />
+    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/<?php echo $cssname?>.css" />
+    <link rel="shortcut icon" type="image/favicon" href="favicon.ico" />
+
+    <!-- IE Fix for HTML5 Tags -->
+    <!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
 <div class="grid-x grid-margin-x">
     <div class="large-12 medium-12 small-12 cell text-center">
         <form method="POST" action="validate.php">

@@ -239,34 +239,29 @@ mysqli_stmt_close($stmt);
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strName?>
-                        <input name="contact_nume" type="text" class="required"
-                            value="<?php echo $row["contact_nume"]?>" />
+                        <input name="contact_nume" type="text" class="required" value="<?php echo $row["contact_nume"]?>" />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strFirstName?>
-                        <input name="contact_prenume" type="text" class="required"
-                            value="<?php echo $row["contact_prenume"]?>" />
+                        <input name="contact_prenume" type="text" class="required" value="<?php echo $row["contact_prenume"]?>" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strPhone?>
-                        <input name="contact_telefon" type="text" class="required"
-                            value="<?php echo $row["contact_telefon"]?>" />
+                        <input name="contact_telefon" type="text" class="required" value="<?php echo $row["contact_telefon"]?>" />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strEmail?>
-                        <input name="contact_email" type="text" class="required"
-                            value="<?php echo $row["contact_email"]?>" />
+                        <input name="contact_email" type="text" class="required" value="<?php echo $row["contact_email"]?>" />
                     </label>
                 </div>
                 <div class="large-4 medium-4 small-4 cell">
                     <label><?php echo $strFunction?>
-                        <input name="contact_tip" type="text" class="required"
-                            value="<?php echo $row["contact_tip"]?>" />
+                        <input name="contact_tip" type="text" class="required" value="<?php echo $row["contact_tip"]?>" />
                     </label>
                 </div>
             </div>

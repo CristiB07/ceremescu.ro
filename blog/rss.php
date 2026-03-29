@@ -53,10 +53,11 @@ $stimedate=date('m/d/Y h:i:s', time());
         <ttl>20</ttl>
         <?php
 	// Use prepared statement to prevent SQL injection
-	$stmt = $conn->prepare("SELECT articol_id, articol_titlu, articol_tip, articol_imaginetitlu, articol_url, articol_continut, articol_data_publicarii 
+	// column name uses `articol_ID` in the DB (normalized)
+	$stmt = $conn->prepare("SELECT articol_ID, articol_titlu, articol_tip, articol_imaginetitlu, articol_url, articol_continut, articol_data_publicarii 
 	                        FROM blog_articole 
 	                        WHERE articol_tip = '1' 
-	                        ORDER BY articol_id DESC 
+	                        ORDER BY articol_ID DESC 
 	                        LIMIT 10");
 	$stmt->execute();
 	$result3 = $stmt->get_result();

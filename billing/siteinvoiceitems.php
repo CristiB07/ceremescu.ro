@@ -120,18 +120,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             die("Missing required parameters");
         }
         
-        // Validate numeric fields
-        $articol_bucati = filter_var($_POST['articol_bucati'], FILTER_VALIDATE_FLOAT);
-        $articol_pret = filter_var($_POST['articol_pret'], FILTER_VALIDATE_FLOAT);
-        $articol_valoare = filter_var($_POST['articol_valoare'], FILTER_VALIDATE_FLOAT);
-        $articol_procent_TVA = filter_var($_POST['articol_procent_TVA'], FILTER_VALIDATE_FLOAT);
-        $articol_total = filter_var($_POST['articol_total'], FILTER_VALIDATE_FLOAT);
-        $articol_TVA = filter_var($_POST['articol_TVA'], FILTER_VALIDATE_FLOAT);
-        
-        if ($articol_bucati === false || $articol_pret === false || $articol_valoare === false || 
-            $articol_procent_TVA === false || $articol_total === false || $articol_TVA === false) {
+        // Validate numeric fields (accept format like "1.234,56" or "0,18")
+        $articol_bucati_raw = $_POST['articol_bucati'];
+        $articol_pret_raw = $_POST['articol_pret'];
+        $articol_valoare_raw = $_POST['articol_valoare'];
+        $articol_procent_TVA_raw = $_POST['articol_procent_TVA'];
+        $articol_total_raw = $_POST['articol_total'];
+        $articol_TVA_raw = $_POST['articol_TVA'];
+
+        $articol_bucati_norm = parseRomanianNumber($articol_bucati_raw);
+        $articol_pret_norm = parseRomanianNumber($articol_pret_raw);
+        $articol_valoare_norm = parseRomanianNumber($articol_valoare_raw);
+        $articol_procent_TVA_norm = parseRomanianNumber($articol_procent_TVA_raw);
+        $articol_total_norm = parseRomanianNumber($articol_total_raw);
+        $articol_TVA_norm = parseRomanianNumber($articol_TVA_raw);
+
+        if (!is_numeric($articol_bucati_norm) || !is_numeric($articol_pret_norm) || !is_numeric($articol_valoare_norm) ||
+            !is_numeric($articol_procent_TVA_norm) || !is_numeric($articol_total_norm) || !is_numeric($articol_TVA_norm)) {
             die("Invalid numeric values");
         }
+
+        $articol_bucati = (float)$articol_bucati_norm;
+        $articol_pret = (float)$articol_pret_norm;
+        $articol_valoare = (float)$articol_valoare_norm;
+        $articol_procent_TVA = (float)$articol_procent_TVA_norm;
+        $articol_total = (float)$articol_total_norm;
+        $articol_TVA = (float)$articol_TVA_norm;
         
         $articol_descriere = $_POST['articol_descriere'];
         $articol_unitate = $_POST['articol_unitate'];
@@ -185,18 +199,32 @@ function delayer(){
             die("Missing required parameters");
         }
         
-        // Validate numeric fields
-        $articol_bucati = filter_var($_POST['articol_bucati'], FILTER_VALIDATE_FLOAT);
-        $articol_pret = filter_var($_POST['articol_pret'], FILTER_VALIDATE_FLOAT);
-        $articol_valoare = filter_var($_POST['articol_valoare'], FILTER_VALIDATE_FLOAT);
-        $articol_procent_TVA = filter_var($_POST['articol_procent_TVA'], FILTER_VALIDATE_FLOAT);
-        $articol_total = filter_var($_POST['articol_total'], FILTER_VALIDATE_FLOAT);
-        $articol_TVA = filter_var($_POST['articol_TVA'], FILTER_VALIDATE_FLOAT);
-        
-        if ($articol_bucati === false || $articol_pret === false || $articol_valoare === false || 
-            $articol_procent_TVA === false || $articol_total === false || $articol_TVA === false) {
+        // Validate numeric fields (accept format like "1.234,56" or "0,18")
+        $articol_bucati_raw = $_POST['articol_bucati'];
+        $articol_pret_raw = $_POST['articol_pret'];
+        $articol_valoare_raw = $_POST['articol_valoare'];
+        $articol_procent_TVA_raw = $_POST['articol_procent_TVA'];
+        $articol_total_raw = $_POST['articol_total'];
+        $articol_TVA_raw = $_POST['articol_TVA'];
+
+        $articol_bucati_norm = parseRomanianNumber($articol_bucati_raw);
+        $articol_pret_norm = parseRomanianNumber($articol_pret_raw);
+        $articol_valoare_norm = parseRomanianNumber($articol_valoare_raw);
+        $articol_procent_TVA_norm = parseRomanianNumber($articol_procent_TVA_raw);
+        $articol_total_norm = parseRomanianNumber($articol_total_raw);
+        $articol_TVA_norm = parseRomanianNumber($articol_TVA_raw);
+
+        if (!is_numeric($articol_bucati_norm) || !is_numeric($articol_pret_norm) || !is_numeric($articol_valoare_norm) ||
+            !is_numeric($articol_procent_TVA_norm) || !is_numeric($articol_total_norm) || !is_numeric($articol_TVA_norm)) {
             die("Invalid numeric values");
         }
+
+        $articol_bucati = (float)$articol_bucati_norm;
+        $articol_pret = (float)$articol_pret_norm;
+        $articol_valoare = (float)$articol_valoare_norm;
+        $articol_procent_TVA = (float)$articol_procent_TVA_norm;
+        $articol_total = (float)$articol_total_norm;
+        $articol_TVA = (float)$articol_TVA_norm;
         
         $articol_descriere = $_POST['articol_descriere'];
         $articol_unitate = $_POST['articol_unitate'];
@@ -304,17 +332,12 @@ else {
                 <tr>
                     <td><input name="articol_descriere" type="text" id="obiect"></td>
                     <td><input name="articol_unitate" type="text" size="4" value="" /></td>
-                    <td><input name="articol_bucati" id="articol_bucati_0" type="text" size="4" value=""
-                            oninput="calculate(0)" /></td>
-                    <td><input name="articol_pret" id="articol_pret_0" type="text" size="10" value=""
-                            oninput="calculate(0)" /></td>
+                    <td><input name="articol_bucati" id="articol_bucati_0" type="text" size="4" value="" oninput="calculate(0)" /></td>
+                    <td><input name="articol_pret" id="articol_pret_0" type="text" size="10" value="" oninput="calculate(0)" /></td>
                     <td><input name="articol_valoare" id="articol_valoare_0" type="text" size="10" value="" /></td>
-                    <td><input name="articol_procent_TVA" id="articol_procent_TVA_0" type="text" size="2" value="" />
-                    </td>
-                    <td><input name="articol_TVA" type="text" id="articol_TVA_0" size="10" value=""
-                            onfocus="calculateTVA(0)" /></td>
-                    <td><input name="articol_total" type="text" id="articol_total_0" size="10" value=""
-                            onfocus="calculateTotal(0)" /></td>
+                    <td><input name="articol_procent_TVA" id="articol_procent_TVA_0" type="text" size="2" value="" /></td>
+                    <td><input name="articol_TVA" type="text" id="articol_TVA_0" size="10" value=""onfocus="calculateTVA(0)" /></td>
+                    <td><input name="articol_total" type="text" id="articol_total_0" size="10" value="" onfocus="calculateTotal(0)" /></td>
                     <td><input type="submit" value="<?php echo $strAdd?>" class="button" name="Submit"></td>
                     <td>
                         <p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></p>
@@ -347,24 +370,14 @@ $i=$i+1;
                         value="<?php echo htmlspecialchars($row["articol_descriere"], ENT_QUOTES, 'UTF-8')?>"></td>
                 <td><input name="articol_unitate" type="text" size="4" value="<?php echo htmlspecialchars($row["articol_unitate"], ENT_QUOTES, 'UTF-8')?>" />
                 </td>
-                <td><input name="articol_bucati" type="text" id="articol_bucati_<?php echo $i?>" size="4"
-                        value="<?php echo htmlspecialchars($row["articol_bucati"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo $i?>)" /></td>
-                <td><input name="articol_pret" type="text" id="articol_pret_<?php echo $i?>" size="10"
-                        value="<?php echo htmlspecialchars($row["articol_pret"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo $i?>)" /></td>
-                <td><input name="articol_valoare" type="text" id="articol_valoare_<?php echo $i?>" size="10"
-                        value="<?php echo htmlspecialchars($row["articol_valoare"], ENT_QUOTES, 'UTF-8')?>" /></td>
-                <td><input name="articol_procent_TVA" type="text" id="articol_procent_TVA_<?php echo $i?>" size="2"
-                        value="<?php echo htmlspecialchars($row["articol_procent_TVA"], ENT_QUOTES, 'UTF-8')?>" /></td>
-                <td><input name="articol_TVA" type="text" id="articol_TVA_<?php echo $i?>" size="10"
-                        value="<?php echo htmlspecialchars($row["articol_TVA"], ENT_QUOTES, 'UTF-8')?>" onfocus="calculateTVA(<?php echo $i?>)" /></td>
-                <td><input name="articol_total" type="text" id="articol_total_<?php echo $i?>" size="10"
-                        value="<?php echo htmlspecialchars($row["articol_total"], ENT_QUOTES, 'UTF-8')?>" onfocus="calculateTotal(<?php echo $i?>)" /></td>
+                <td><input name="articol_bucati" type="text" id="articol_bucati_<?php echo $i?>" size="4" value="<?php echo htmlspecialchars($row["articol_bucati"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo $i?>)" /></td>
+                <td><input name="articol_pret" type="text" id="articol_pret_<?php echo $i?>" size="10" value="<?php echo htmlspecialchars($row["articol_pret"], ENT_QUOTES, 'UTF-8')?>" oninput="calculate(<?php echo $i?>)" /></td>
+                <td><input name="articol_valoare" type="text" id="articol_valoare_<?php echo $i?>" size="10" value="<?php echo htmlspecialchars($row["articol_valoare"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                <td><input name="articol_procent_TVA" type="text" id="articol_procent_TVA_<?php echo $i?>" size="2" value="<?php echo htmlspecialchars($row["articol_procent_TVA"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                <td><input name="articol_TVA" type="text" id="articol_TVA_<?php echo $i?>" size="10" value="<?php echo htmlspecialchars($row["articol_TVA"], ENT_QUOTES, 'UTF-8')?>" onfocus="calculateTVA(<?php echo $i?>)" /></td>
+                <td><input name="articol_total" type="text" id="articol_total_<?php echo $i?>" size="10" value="<?php echo htmlspecialchars($row["articol_total"], ENT_QUOTES, 'UTF-8')?>" onfocus="calculateTotal(<?php echo $i?>)" /></td>
                 <td><input type="submit" value="<?php echo $strModify?>" name="Submit" class="button"></td>
-                <td>
-                    <a href="siteinvoiceitems.php?mode=delete&aID=<?php echo htmlspecialchars($row["articol_ID"], ENT_QUOTES, 'UTF-8')?>&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>"
-                        class="button" OnClick="return confirm('<?php echo $strConfirmDelete?>');">
-                        <i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></a>
-                </td>
+                <td><a href="siteinvoiceitems.php?mode=delete&aID=<?php echo htmlspecialchars($row["articol_ID"], ENT_QUOTES, 'UTF-8')?>&cID=<?php echo htmlspecialchars($cID, ENT_QUOTES, 'UTF-8')?>" class="button" OnClick="return confirm('<?php echo $strConfirmDelete?>');"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></a> </td>
             </tr>
         </form>
         <?php 
@@ -375,16 +388,12 @@ $i=$i+1;
             <tr>
                 <td><input name="articol_descriere" type="text" id="obiect" value=""></td>
                 <td><input name="articol_unitate" type="text" size="4" value="" /></td>
-                <td><input name="articol_bucati" id="articol_bucati_0" type="text" size="4" value=""
-                        oninput="calculate(0)" /></td>
-                <td><input name="articol_pret" id="articol_pret_0" type="text" size="10" value=""
-                        oninput="calculate(0)" /></td>
+                <td><input name="articol_bucati" id="articol_bucati_0" type="text" size="4" value="" oninput="calculate(0)" /></td>
+                <td><input name="articol_pret" id="articol_pret_0" type="text" size="10" value="" oninput="calculate(0)" /></td>
                 <td><input name="articol_valoare" id="articol_valoare_0" type="text" size="10" value="" /></td>
                 <td><input name="articol_procent_TVA" id="articol_procent_TVA_0" type="text" size="2" value="" /></td>
-                <td><input name="articol_TVA" type="text" id="articol_TVA_0" size="10" value=""
-                        onfocus="calculateTVA(0)" /></td>
-                <td><input name="articol_total" type="text" id="articol_total_0" size="10" value=""
-                        onfocus="calculateTotal(0)" /></td>
+                <td><input name="articol_TVA" type="text" id="articol_TVA_0" size="10" value=""  onfocus="calculateTVA(0)" /></td>
+                <td><input name="articol_total" type="text" id="articol_total_0" size="10" value="" onfocus="calculateTotal(0)" /></td>
                 <td><input type="submit" value="<?php echo $strAdd?>" class="button" name="Submit"></td>
                 <td>
                     <p class="button"><i class="fa fa-eraser fa-xl" title="<?php echo $strDelete?>"></i></p>

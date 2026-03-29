@@ -2,7 +2,7 @@
 
 $url = strtok($url, '?');
 // Use prepared statement to prevent SQL injection
-$stmt = $conn->prepare("SELECT * FROM cms_pagini WHERE pagina_url=?");
+$stmt = $conn->prepare("SELECT * FROM cms_pagini WHERE pagina_status=0 AND pagina_url=?");
 $stmt->bind_param("s", $url);
 $stmt->execute();
 $result = $stmt->get_result();

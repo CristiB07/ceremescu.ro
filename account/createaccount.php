@@ -1,7 +1,8 @@
 ﻿<?php
 //update 16.07.2025
-include '../settings.php';
-include '../classes/common.php';
+include_once  __DIR__ .'/../settings.php';
+include_once  __DIR__ . '/../classes/common.php';
+
 $strKeywords="Creare cont site " .$strSiteName;
 $strDescription="Pagina de creare cont pe" .$strSiteName;
 $strPageTitle="Creare cont pe " .$strSiteName;
@@ -10,7 +11,82 @@ use PHPMailer\PHPMailer\SMTP;
 
 require '../vendor/autoload.php';
 
-include '../header.php';
+
+
+if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+	}
+		
+if (!isSet($_SESSION['$lang'])) {
+	$_SESSION['$lang']="RO";
+	$lang=$_SESSION['$lang'];
+}
+else
+{
+	$lang=$_SESSION['$lang'];
+}
+if ($lang=="RO") {
+include __DIR__ .'../../lang/language_RO.php';
+}
+else
+{
+	include __DIR__ . '../../lang/language_EN.php';
+}
+if (empty($_SESSION['_token'])) {
+  $_SESSION['_token'] = bin2hex(random_bytes(32));
+$_SESSION["token_expire"] = time() + 1800; // 30 minutes = 1800 secs
+}
+$csrf_error = "";
+$token = $_SESSION['_token'];
+$token_expire = $_SESSION["token_expire"];
+?>
+<!doctype html>
+
+<head>
+    <!--Start Header-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title><?php echo $strSiteName ?>: <?php echo $strPageTitle ?></title>
+    <meta name="rating" content="General" />
+    <meta name="author" content="Consaltis Consultanţă şi Audit" />
+    <meta name="language" content="romanian, RO" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="robots" content="noindex">
+    <meta http-equiv="expires" content="never" />
+    <link rel="shortcut icon" type="image/favicon" href="<?php echo $strSiteURL ?>/favicon.ico" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Insert this within your head tag and after foundation.css -->
+    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/all.css" />
+    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/foundation.css" />
+    <link rel="stylesheet" href="<?php echo $strSiteURL ?>/css/<?php echo $cssname?>.css" />
+    <link rel="shortcut icon" type="image/favicon" href="favicon.ico" />
+
+    <!-- IE Fix for HTML5 Tags -->
+    <!--[if lt IE 9]>
+<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
+
+<body>
+    <div class="grid-container">
+        <div class="grid-x grid-margin-x">
+            <div class="large-12 cell text-center">
+                <?php
+
+If ((isSet($_GET['message'])) AND $_GET['message']=="WP"){
+echo "<div class=\"callout alert\">$strWrongCredentials</div>" ;
+}
+If ((isSet($_GET['message'])) AND $_GET['message']=="MLF"){
+echo "<div class=\"callout alert\">$strMustLoginFirst</div>" ;
+}
+If ((isSet($_GET['message'])) AND $_GET['message']=="NL"){
+echo "<div class=\"callout alert\">$strNotLogedIn</div>" ;}
+
+If ((isSet($_GET['message'])) AND $_GET['message']=="ER"){
+echo "<div class=\"callout alert\">$strThereWasAnError</div>" ;
+}
+
 $i = date('d');
 $m = date('m');
 $yn = date('Y');
@@ -150,8 +226,8 @@ $cumparator=$cumparator . "IBAN: ".htmlspecialchars($company_IBAN, ENT_QUOTES, '
 }
 $emailbody="<html>";
 $emailbody=$emailbody . "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />";
-$emailbody=$emailbody . "<link href='".$siteCompanyWebsite."/fonts/open-sans-condensed-v21-latin-ext_latin-300.woff' rel='stylesheet' type='text/css'>";
-$emailbody=$emailbody . "<link href='".$siteCompanyWebsite."/fonts/open-sans-v27-latin-ext_latin-regular.woff' rel='stylesheet' type='text/css'>";
+$emailbody=$emailbody . "<link href='".$strSiteURL."/fonts/open-sans-condensed-v21-latin-ext_latin-300.woff' rel='stylesheet' type='text/css'>";
+$emailbody=$emailbody . "<link href='".$strSiteURL."/fonts/open-sans-v27-latin-ext_latin-regular.woff' rel='stylesheet' type='text/css'>";
 $emailbody=$emailbody . "<style>body {margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; font-size: 1.1em; font-family: 'Open Sans',sans-serif; padding: 0px; color: " . $color ."}";
 $emailbody=$emailbody . "h1,h2,h3,h4,h5 {font-family:'Open Sans',sans-serif; font-weight: bold; color: " . $color .";}";
 $emailbody=$emailbody . "td {font-size: 1em; font-family: 'Open Sans',sans-serif; color: " . $color ."; padding: 3px;  font-weight: normal; border-collapse:collapse; border: 1px solid " . $color .";}";
@@ -160,11 +236,11 @@ $emailbody=$emailbody . "table {border-collapse:collapse; border: 1px solid " . 
 $emailbody=$emailbody . ".button {background-color: " . $color . "; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; }";
 $emailbody=$emailbody . "</style>";
 $emailbody=$emailbody . "</head><body>";
-$emailbody=$emailbody . "<a href=\"$siteCompanyWebsite\"><img src=\"".$siteCompanyWebsite."/img/logo.png\" title=\"$strSiteOwner\" width=\"150\" height=\"auto\"/></a>";
+$emailbody=$emailbody . "<a href=\"$strSiteURL\"><img src=\"".$strSiteURL."/img/logo.png\" title=\"$strSiteOwner\" width=\"150\" height=\"auto\"/></a>";
 $emailbody=$emailbody . "<p>Stimate " .htmlspecialchars($first_name, ENT_QUOTES, 'UTF-8'). " ".htmlspecialchars($last_name, ENT_QUOTES, 'UTF-8'). ",<br>";
-$emailbody=$emailbody . "Acesta este un mesaj de confirmare a înscrierii făcute de dumneavoastră pe site-ul ". $siteCompanyWebsite.". După activarea înscrierii, veți putea modifica informațiile din contul dumneavoastră. </p>";
+$emailbody=$emailbody . "Acesta este un mesaj de confirmare a înscrierii făcute de dumneavoastră pe site-ul ". $strSiteURL.". După activarea înscrierii, veți putea modifica informațiile din contul dumneavoastră. </p>";
 $emailbody=$emailbody . "<p><strong>Pentru a activa contul, vă rugăm să accesați următorul link:</strong><br />
-<a href=\"" . $siteCompanyWebsite . "/account/activate.php?hash=" . $secret . "\" class=\"button\">" . $strClickToActivate . "</a></p>";
+<a href=\"" . $strSiteURL . "/account/activate.php?hash=" . $secret . "\" class=\"button\">" . $strClickToActivate . "</a></p>";
 $emailbody=$emailbody . "<p>
 Vă mulțumim,<br />
 <strong>$siteCompanyLegalName</strong><br />
@@ -206,7 +282,7 @@ $mail->addReplyTo($SmtpUser, $strSiteOwner);
 $mail->addAddress($emailto, $emailtoname);
 $mail->addAddress($SmtpUser, $strSiteOwner);
 //Set the subject line
-$mail->Subject = 'Înscriere pe site-ul ' . $siteCompanyWebsite;
+$mail->Subject = 'Înscriere pe site-ul ' . $siteName;
 //Read an HTML message body from an external file, convert referenced images to embedded,
 //convert HTML into a basic plain-text alternative body
     $mail->isHTML(true);                                  // Set email format to HTML
@@ -264,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function setValueById(id, value) {
     const el = document.getElementById(id);
     if (!el) {
-      console.warn(`[WARN] Element cu id="#${id}" nu a fost găsit în DOM.`);
+      console.warn('[WARN] Element cu id="#' + id + '" nu a fost găsit în DOM.');
       return;
     }
     // Pentru input/textarea
@@ -274,6 +350,12 @@ document.addEventListener('DOMContentLoaded', function () {
       // fallback pentru elemente non-input
       el.textContent = value;
     }
+  }
+
+  // Dacă butonul există, atașăm handlerul; altfel logăm și continuăm
+  if (!btn) {
+    console.warn('[WARN] Butonul #btn1 nu a fost găsit — skip company lookup.');
+    return;
   }
 
   // Dacă butonul e într-un <form>, prevenim trimiterea
@@ -299,9 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
       body
     })
     .then(async (r) => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      // În unele cazuri serverul nu setează corect Content-Type-ul.
-      // Încercăm să parsăm JSON, dacă eșuează, afișăm textul primit.
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       const text = await r.text();
       let data;
       try {
@@ -622,8 +702,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-        <form method="post" id="form1" action="createaccount.php">
-
+<div class="callout secondary">
+        <form method="post" id="form1" action="<?php echo $strSiteURL ?>/account/createaccount.php">
+            <fieldset>
+                <legend>
+                    <h2><?php echo $strCreateAccount ?></h2>
+                </legend>
             <div class="grid-x grid-padding-x">
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo $strFirstName?>
@@ -647,15 +731,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo $strCity?>
-                        <input type="text" name="account_city" id="search-box" placeholder="<?php echo $strCity?>"
-                            required />
+                        <input type="text" name="account_city" id="search-box" placeholder="<?php echo $strCity?>"  required />
                         <div id="suggesstion-box" class="suggesstion-box"></div>
                     </label>
                 </div>
                 <div class="large-2 medium-2 small-2 cell">
                     <label><?php echo $strCounty?>
-                        <input type="text" name="account_county" id="judet" placeholder="<?php echo $strCounty?>"
-                            required />
+                        <input type="text" name="account_county" id="judet" placeholder="<?php echo $strCounty?>" required />
                     </label>
                 </div>
             </div>
@@ -687,12 +769,8 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="grid-x grid-padding-x">
                 <div class="large-12 cell">
 
-                    <label><input type="radio" name="account_company" class="button1" value="1"
-                            onclick='document.getElementById("iframe1").style.display="none";'> Facturare pe persoană
-                        fizică</label>
-                    <label><input type="radio" name="account_company" class="button1" value="0"
-                            onclick='document.getElementById("iframe1").style.display="block";'>Facturare pe persoană
-                        juridică</label>
+                    <label><input type="radio" name="account_company" class="button1" value="1" onclick='document.getElementById("iframe1").style.display="none";'> Facturare pe persoană fizică</label>
+                    <label><input type="radio" name="account_company" class="button1" value="0" onclick='document.getElementById("iframe1").style.display="block";'>Facturare pe persoană juridică</label>
                     <div id="iframe1" style="display:none">
 
                         <div class="grid-x grid-padding-x">
@@ -703,8 +781,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <input class="input-group-field" type="text" name="Cui" id="Cui"
                                         placeholder="<?php echo $strEnterVATNumber?>">
                                     <div class="input-group-button">
-                                        <button id="btn1" class="button success"><i
-                                                class="fas fa-search"></i>&nbsp;<?php echo $strCheck ?></button>
+                                        <button id="btn1" class="button success"><i class="fas fa-search"></i>&nbsp;<?php echo $strCheck ?></button>
                                     </div>
                                 </div>
                             </div>
@@ -764,19 +841,39 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="grid-x grid-margin-x">
                         <div class="large-12 medium-12 small-12 cell">
 
-                            Am citit şi sunt de acord cu <a href="termeni.php"
-                                title="Termeni şi condiţii de utilizare">Termenii şi condiţiile de utilizare</a>
-                            <input type="checkbox" id="strAcord"
-                                onclick="javascript:document.getElementById('btn_submit').style.display='block'; javascript:document.getElementById('strAcord').style.display='none';" />
-                            <p align="center"><input type="submit" class="button" id="btn_submit" style="display:none;"
-                                    value="Trimite" /></p>
+                            Am citit şi sunt de acord cu <a href="termeni.php"  title="Termeni şi condiţii de utilizare">Termenii şi condiţiile de utilizare</a>
+                            <input type="checkbox" id="strAcord" onclick="javascript:document.getElementById('btn_submit').style.display='block'; javascript:document.getElementById('strAcord').style.display='none';" />
+                            <p align="center"><input type="submit" class="button" id="btn_submit" style="display:none;" value="Trimite" /></p>
                         </div>
                     </div>
         </form>
+</fieldset>
+    </div>
     </div>
 </div>
 <?php
 }
  }
+?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('form1');
+  const btnSubmit = document.getElementById('btn_submit');
+  if (!form || !btnSubmit) return;
+  // Ensure the visible submit always triggers a real submit (defensive)
+  btnSubmit.addEventListener('click', function (e) {
+    // If some other script prevented default, force submit now
+    try {
+      // small timeout to let any other handlers run first
+      setTimeout(function () { form.submit(); }, 10);
+    } catch (err) {
+      console.error('Error forcing form submit:', err);
+    }
+  });
+});
+</script>
+
+<?php
 include '../bottom.php';
 ?>

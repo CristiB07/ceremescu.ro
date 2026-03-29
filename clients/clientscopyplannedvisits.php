@@ -8,7 +8,11 @@ if (!isset($_SESSION['userlogedin']) || $_SESSION['userlogedin'] != 'Yes') {
 }
 $from = isset($_POST['copyFromDate']) ? $_POST['copyFromDate'] : '';
 $to = isset($_POST['copyToDate']) ? $_POST['copyToDate'] : '';
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) {
+$fromDt = DateTime::createFromFormat('Y-m-d', $from);
+$toDt = DateTime::createFromFormat('Y-m-d', $to);
+$fromErr = DateTime::getLastErrors();
+$toErr = DateTime::getLastErrors();
+if (!$fromDt || $fromDt->format('Y-m-d') !== $from || $fromErr['warning_count'] > 0 || $fromErr['error_count'] > 0 || !$toDt || $toDt->format('Y-m-d') !== $to || $toErr['warning_count'] > 0 || $toErr['error_count'] > 0) {
     echo json_encode(['success'=>false,'message'=>'Invalid dates']); exit;
 }
 

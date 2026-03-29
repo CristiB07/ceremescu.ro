@@ -6,10 +6,10 @@ $lang = isset($_SESSION['$lang']) && in_array($_SESSION['$lang'], ['RO', 'EN']) 
 
 // Validare categorie
 $category = isset($category) ? trim($category) : '';
-if (empty($category) || !preg_match('/^[a-zA-Z0-9_-]+$/', $category)) {
+if (empty($category) || strspn($category, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-') !== strlen($category)) {
     header("Location: $strSiteURL/shop/?message=INVALID_CATEGORY");
     exit;
-}
+} 
 
 $strPageTitle=htmlspecialchars($category, ENT_QUOTES, 'UTF-8');
 include 'header.php';

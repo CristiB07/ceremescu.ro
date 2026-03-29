@@ -4,10 +4,10 @@ include_once 'classes/common.php';
 include_once 'classes/paginator.class.php';
 
 $url = strtok($url, '?');
-$stmt = $conn->prepare("SELECT * FROM blog_articole WHERE articol_url=?");
-$stmt->bind_param("s", $url);
-$stmt->execute();
-$result = $stmt->get_result();
+$article_stmt = $conn->prepare("SELECT * FROM blog_articole WHERE articol_url=?");
+$article_stmt->bind_param("s", $url);
+$article_stmt->execute();
+$result = $article_stmt->get_result();
 if ($row = $result->fetch_assoc()) {
 $strKeywords=$row['articol_keywords'];
 $strDescription=$row['articol_descriere'];
@@ -49,7 +49,7 @@ function displayArticleNavigation($conn, $current_article_id) {
     }
     
     // Get previous article (older)
-    $prev_stmt = $conn->prepare("SELECT articol_id, articol_titlu, articol_url FROM blog_articole WHERE articol_id < ? AND articol_tip='1' ORDER BY articol_id DESC LIMIT 1");
+    $prev_stmt = $conn->prepare("SELECT articol_ID, articol_titlu, articol_url FROM blog_articole WHERE articol_ID < ? AND articol_tip='1' ORDER BY articol_ID DESC LIMIT 1");
     $prev_stmt->bind_param("i", $current_article_id);
     $prev_stmt->execute();
     $prev_result = $prev_stmt->get_result();
@@ -57,7 +57,7 @@ function displayArticleNavigation($conn, $current_article_id) {
     $prev_stmt->close();
     
     // Get next article (newer)
-    $next_stmt = $conn->prepare("SELECT articol_id, articol_titlu, articol_url FROM blog_articole WHERE articol_id > ? AND articol_tip='1' ORDER BY articol_id ASC LIMIT 1");
+    $next_stmt = $conn->prepare("SELECT articol_ID, articol_titlu, articol_url FROM blog_articole WHERE articol_ID > ? AND articol_tip='1' ORDER BY articol_ID ASC LIMIT 1");
     $next_stmt->bind_param("i", $current_article_id);
     $next_stmt->execute();
     $next_result = $next_stmt->get_result();
@@ -93,7 +93,7 @@ function displayArticleNavigation($conn, $current_article_id) {
 }
 
 // Display navigation
-displayArticleNavigation($conn, $row['articol_id']);
+displayArticleNavigation($conn, $row['articol_ID']);
 ?>
 <?php
 echo "
@@ -110,7 +110,7 @@ Echo "<h1>".htmlspecialchars($strPageTitle, ENT_QUOTES, 'UTF-8')."</h1>
 </div>";
  ?>
 <?php
-$stmt->close();
+$article_stmt->close();
 }
 else
 {

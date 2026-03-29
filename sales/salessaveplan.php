@@ -36,7 +36,19 @@ if (!empty($inviteEmailRaw)) {
     foreach ($parts as $p) {
         $p = trim($p);
         if ($p === '') continue;
-        if (filter_var($p, FILTER_VALIDATE_EMAIL)) $inviteEmailsArray[] = $p;
+        // Use suppressed filter_var and fallback to a lightweight check to avoid PCRE JIT allocation warnings
+        $isEmail = false;
+        $validated = @filter_var($p, FILTER_VALIDATE_EMAIL);
+        if ($validated !== false && $validated !== null) {
+            $isEmail = true;
+        } else {
+            // Simple fallback: must contain @ and a dot after the @
+            $at = strpos($p, '@');
+            if ($at !== false && strpos($p, '.', $at) !== false) {
+                $isEmail = true;
+            }
+        }
+        if ($isEmail) $inviteEmailsArray[] = $p;
     }
     $inviteEmailsArray = array_values(array_unique($inviteEmailsArray));
     $inviteEmailsClean = implode(',', $inviteEmailsArray);
@@ -119,6 +131,11 @@ try {
 }
 
 $clientInt = $eventClient ? intval($eventClient) : 0;
+// Enforce client mandatory server-side
+if (empty($clientInt)) {
+    echo json_encode(['success' => false, 'message' => 'Clientul este obligatoriu.']);
+    exit;
+}
 if ($eventId) {
     // Editare — build update dynamically depending on available columns
     $fields = array();
@@ -328,6 +345,36 @@ if ($exstmt) {
 if (mysqli_stmt_execute($stmt)) {
     // If inserted, get the id (for invites)
     $insertedId = mysqli_insert_id($conn);
+
+    // ensure programare_invite column exists & set according to checkbox for inserts/updates
+    $colCheckInv = mysqli_query($conn, "SHOW COLUMNS FROM sales_programari LIKE 'programare_invite'");
+    if ($colCheckInv && mysqli_num_rows($colCheckInv) == 0) {
+        @mysqli_query($conn, "ALTER TABLE sales_programari ADD COLUMN programare_invite TINYINT(1) DEFAULT 0");
+    }
+    $idToUpdateForInvite = $insertedId ? $insertedId : intval($eventId);
+    $updInviteFlag = mysqli_prepare($conn, "UPDATE sales_programari SET programare_invite = ? WHERE programare_id = ?");
+    if ($updInviteFlag) { mysqli_stmt_bind_param($updInviteFlag, 'ii', $sendInvite, $idToUpdateForInvite); mysqli_stmt_execute($updInviteFlag); mysqli_stmt_close($updInviteFlag); }
+
+    // Save Google Place metadata (place_id, lat, lng) if provided
+    $placeId = isset($_POST['eventZonePlaceId']) ? trim($_POST['eventZonePlaceId']) : '';
+    $placeLat = isset($_POST['eventZoneLat']) ? trim($_POST['eventZoneLat']) : '';
+    $placeLng = isset($_POST['eventZoneLng']) ? trim($_POST['eventZoneLng']) : '';
+    if ($placeId !== '' || $placeLat !== '' || $placeLng !== '') {
+        $colCheck1 = mysqli_query($conn, "SHOW COLUMNS FROM sales_programari LIKE 'programare_zone_place_id'");
+        if ($colCheck1 && mysqli_num_rows($colCheck1) == 0) {@mysqli_query($conn, "ALTER TABLE sales_programari ADD COLUMN programare_zone_place_id VARCHAR(255) NULL"); }
+        $colCheck2 = mysqli_query($conn, "SHOW COLUMNS FROM sales_programari LIKE 'programare_zone_lat'");
+        if ($colCheck2 && mysqli_num_rows($colCheck2) == 0) {@mysqli_query($conn, "ALTER TABLE sales_programari ADD COLUMN programare_zone_lat DECIMAL(10,7) NULL"); }
+        $colCheck3 = mysqli_query($conn, "SHOW COLUMNS FROM sales_programari LIKE 'programare_zone_lng'");
+        if ($colCheck3 && mysqli_num_rows($colCheck3) == 0) {@mysqli_query($conn, "ALTER TABLE sales_programari ADD COLUMN programare_zone_lng DECIMAL(10,7) NULL"); }
+        $upPlace = mysqli_prepare($conn, "UPDATE sales_programari SET programare_zone_place_id = ?, programare_zone_lat = ?, programare_zone_lng = ? WHERE programare_id = ?");
+        if ($upPlace) {
+            $pl_lat = ($placeLat !== '' ? floatval($placeLat) : null);
+            $pl_lng = ($placeLng !== '' ? floatval($placeLng) : null);
+            mysqli_stmt_bind_param($upPlace, 'sddi', $placeId, $pl_lat, $pl_lng, $idToUpdateForInvite);
+            mysqli_stmt_execute($upPlace);
+            mysqli_stmt_close($upPlace);
+        }
+    }
 
     // Handle sending .ics invite if requested (for new records or edits)
     if ($sendInvite) {

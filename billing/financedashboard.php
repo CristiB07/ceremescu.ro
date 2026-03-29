@@ -254,6 +254,66 @@ echo "<tr style=\"background-color:#F87C63;color:#ffffff;\"><td><strong>$strTota
 echo "</tbody><tfoot><tr><td></td><td  colspan=\"7\"><em></em></td><td>&nbsp;</td></tr></tfoot></table>";
 }
 ?>
+            <!-- Alte cheltuieli (sub facturi de platit) -->
+            <div class="grid-x grid-padding-x " style="margin-top:20px;">
+                <div class="large-12 medium-12 small-12 cell">
+                    <?php
+                    // Afisam cheltuieli pentru luna curenta
+                    $query_ch = "SELECT * FROM facturare_alte_cheltuieli WHERE MONTH(cheltuiala_termen)='$month' AND YEAR(cheltuiala_termen)='$year' ORDER BY cheltuiala_termen ASC";
+                    $res_ch = ezpub_query($conn,$query_ch);
+                    $nrch = ezpub_num_rows($res_ch,$query_ch);
+                    if ($nrch==0){
+                        echo '<div class="callout secondary">Nu există cheltuieli înregistrate pentru luna curentă.</div>';
+                    } else {
+                        echo '<h3>Alte cheltuieli - '.date('m.Y', strtotime($year.'-'.$month.'-01')).'</h3>';
+                        echo '<table width="100%" class="unstriped"><thead><tr><th>ID</th><th>Data</th><th>Observații</th><th>Suma</th><th>Achitat</th></tr></thead><tbody>';
+                        $sumOther = 0;
+                        while ($r = ezpub_fetch_array($res_ch)){
+                            echo '<tr>';
+                            echo '<td>'.(int)$r['cheltuiala_id'].'</td>';
+                            echo '<td>'.date('d.m.Y', strtotime($r['cheltuiala_termen'])).'</td>';
+                            echo '<td>'.htmlspecialchars($r['cheltuiala_observatii'], ENT_QUOTES, 'UTF-8').'</td>';
+                            echo '<td align="right">'.romanize($r['cheltuiala_suma']).'</td>';
+                            echo '<td>'.($r['cheltuiala_achitat']?'<span class="paid">Da</span>':'<span class="notpaid">Nu</span>').'</td>';
+                            echo '</tr>';
+                            if (!$r['cheltuiala_achitat']) $sumOther += $r['cheltuiala_suma'];
+                        }
+                        echo "<tr style=\"background-color:#f3f3f3;font-weight:bold;\"><td><strong>Total</strong></td><td colspan=\"2\"></td><td align=\"right\">".romanize($sumOther)."</td><td></td></tr>";
+                        echo '</tbody></table>';
+                    }
+
+                    // Calcul totals row: Cash in banca (already computed $totalinbanca), Facturi de plătit (current month), Alte cheltuieli (current month), diff
+                    $q_month_invoices = "SELECT COALESCE(SUM(fp_valoare_totala),0) AS month_invoices FROM facturare_facturi_primite WHERE MONTH(fp_data_scadenta)='$month' AND YEAR(fp_data_scadenta)='$year' AND fp_achitat='0'";
+                    $rmi = ezpub_query($conn,$q_month_invoices);
+                    $rmirow = ezpub_fetch_array($rmi);
+                    $monthInvoices = $rmirow['month_invoices'];
+
+                    $q_other_sum = "SELECT COALESCE(SUM(cheltuiala_suma),0) AS other_sum FROM facturare_alte_cheltuieli WHERE MONTH(cheltuiala_termen)='$month' AND YEAR(cheltuiala_termen)='$year' AND cheltuiala_achitat=0";
+                    $ros = ezpub_query($conn,$q_other_sum);
+                    $rosr = ezpub_fetch_array($ros);
+                    $monthOther = $rosr['other_sum'];
+
+                    $diff = $totalinbanca - ($monthInvoices + $monthOther);
+                    ?>
+                    <div style="margin-top:10px;">
+                        <table class="unstriped" style="width:100%;margin-top:10px;">
+                            <tr>
+                                <td><strong>Cash în bancă</strong></td>
+                                <td align="right"><?php echo romanize($totalinbanca)?> lei</td>
+                                <td><strong>Facturi de plătit (luna curentă)</strong></td>
+                                <td align="right"><?php echo romanize($monthInvoices)?> lei</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alte cheltuieli (luna curentă)</strong></td>
+                                <td align="right"><?php echo romanize($monthOther)?> lei</td>
+                                <td><strong>Diferență</strong></td>
+                                <td align="right"><strong class="<?php echo ($diff>=0)?'profit':'loss'?>"><?php echo ($diff<0?'-':'').romanize(abs($diff))?> lei</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- sfârșit alte cheltuieli -->
                 </div>
             </div>
   

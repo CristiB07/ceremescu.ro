@@ -1,6 +1,4 @@
 <?php
-//update 8.01.2025
-//error_reporting(E_ALL);
 // *****************************************************************
 // Converteste suma din cifre in litere
 // $No - numarul de convertit
@@ -15,11 +13,50 @@ if (!is_numeric($No) && !is_string($No)) {
     return "zero lei";
 }
 
-// If it's a string, parse it to float
+$origInput = null;
+// If it's a string, normalize separators for numeric conversion but keep original for debugging
 if (is_string($No)) {
-    $No = str_replace($pct, '.', $No);
-    $No = str_replace($sp, '', $No);
-    $No = floatval($No);
+    $origInput = $No;
+    // keep only digits, separators and sign
+    $s = trim($No);
+    $s = preg_replace('/[^0-9.,\-]/u', '', $s);
+
+    // decide which character is decimal vs thousands
+    if (strpos($s, '.') !== false && strpos($s, ',') !== false) {
+        $lastDot = strrpos($s, '.');
+        $lastComma = strrpos($s, ',');
+        if ($lastComma > $lastDot) {
+            // comma is decimal, dot is thousands
+            $s = str_replace('.', '', $s);
+            $s = str_replace(',', '.', $s);
+        } else {
+            // dot is decimal, comma is thousands
+            $s = str_replace(',', '', $s);
+        }
+    } elseif (strpos($s, ',') !== false) {
+        // only comma present -> comma is decimal
+        $s = str_replace('.', '', $s);
+        $s = str_replace(',', '.', $s);
+    } elseif (strpos($s, '.') !== false) {
+        // only dot present -> use heuristic
+        if (substr_count($s, '.') > 1) {
+            // multiple dots -> thousands separators
+            $s = str_replace('.', '', $s);
+        } else {
+            $parts = explode('.', $s);
+            $fracLen = isset($parts[1]) ? strlen($parts[1]) : 0;
+            // treat single dot as thousands separator only when fractional part is exactly 3 digits
+            if ($fracLen === 3) {
+                $s = str_replace('.', '', $s);
+            } else {
+                // dot is decimal
+                $s = str_replace(',', '', $s);
+            }
+        }
+    }
+
+    // normalize to dot decimal for float conversion
+    $No = floatval($s);
 }
 
 // Prevent negative numbers
@@ -53,12 +90,13 @@ $lg2 = array ("", "", "și",  "și", "și", "și", "și", "și", "și", "și" );
 $mon = array ("", " leu", " lei");
 $ban = array ("", " ban ", " bani ");
 
-//se elimina $sp din numar
-$sNo = (string) $No;
 // Sanitize delimiters to prevent injection
 $sp = substr($sp, 0, 1);
 $pct = substr($pct, 0, 1);
-$sNo = str_replace($sp,"",$sNo);
+// Build canonical string representation from the numeric value so separators match $sp/$pct
+$sNo = number_format($No, 2, $pct, $sp);
+// remove thousands separator from the string representation
+$sNo = str_replace($sp, "", $sNo);
 
 //extrag partea intreaga și o completez cu zerouri la stg.
 $NrI = sprintf("%012s",(string) strtok($sNo,$pct));
@@ -69,55 +107,109 @@ $Zec = substr($Zec . '00',0,2);
 
 // grupul 4 (miliarde)
 $Gr = substr($NrI,0,3);
-$n1 = (integer) $NrI[0];
-$n2 = (integer) $NrI[1];
-$n3 = (integer) $NrI[2];
-$Rez = $nc[$n1] . $ub[$n1];
-$Rez = ($n2 == 1)?$Rez . $nb[$n3] . $lg1[$n3] . $ua[$n2]:
-                $Rez . ($n2==6?$ex1:$nc[$n2]) . $ua[$n2] . $lg2[$n2] . ($Gr=="001"||$Gr=="002"?$nb[$n3]:$nd[$n3]);
-               
-$Rez = ($Gr == "000")?$Rez:(($Gr == "001")?($Rez . $ue[1]):($Rez . $ue[2]));
+$n1 = (int) $NrI[0];
+$n2 = (int) $NrI[1];
+$n3 = (int) $NrI[2];
+// build group text with spaces between hundred/multipliers; keep tens concatenated (ex: douăzeci)
+$group = trim($nc[$n1] . ' ' . $ub[$n1]);
+if ($n2 == 1) {
+    // teens (unsprezece etc.) remain concatenated
+    $group .= $nb[$n3] . $lg1[$n3] . $ua[$n2];
+} else {
+    $tens = ($n2==6 ? $ex1 : $nc[$n2]) . $ua[$n2];
+    if ($tens !== '') {
+        $group = trim($group . ($group !== '' ? ' ' . $tens : $tens));
+    }
+    $suffix = ($Gr=="001"||$Gr=="002") ? $nb[$n3] : $nd[$n3];
+    if ($suffix !== '') {
+        $group .= ' ' . $suffix;
+    }
+}
+$Rez = ($Gr == "000") ? '' : trim($group . ' ' . ($Gr == "001" ? $ue[1] : $ue[2]));
 
 // grupul 3 (milioane)
 $Gr = substr($NrI,3,3);
-$n1 = (integer) $NrI[3];
-$n2 = (integer) $NrI[4];
-$n3 = (integer) $NrI[5];
-$Rez = $Rez . $sp . $nc[$n1] . $ub[$n1];
-$Rez = ($n2 == 1)?$Rez . $nb[$n3] . $lg1[$n3] . $ua[$n2]:
-                $Rez . ($n2==6?$ex1:$nc[$n2]) . $ua[$n2] . $lg2[$n2] . ($Gr=="001"||$Gr=="002"?$nb[$n3]:$nd[$n3]);
-$Rez = ($Gr == "000")?$Rez:(($Gr == "001")?($Rez . $ud[1]):($Rez . $ud[2]));
+$n1 = (int) $NrI[3];
+$n2 = (int) $NrI[4];
+$n3 = (int) $NrI[5];
+$segment = trim($nc[$n1] . ' ' . $ub[$n1]);
+if ($segment !== '') { $Rez .= ($Rez !== '' ? ' ' : '') . $segment; }
+$append = '';
+if ($n2 == 1) {
+    $append = $nb[$n3] . $lg1[$n3] . $ua[$n2];
+} else {
+    $append = ($n2==6 ? $ex1 : $nc[$n2]) . $ua[$n2];
+    if ($lg2[$n2]) { $append .= ' ' . $lg2[$n2]; }
+    $suffix = ($Gr=="001"||$Gr=="002") ? $nb[$n3] : $nd[$n3];
+    if ($suffix) { $append .= ' ' . $suffix; }
+}
+if (trim($append) !== '') { $Rez .= ($Rez !== '' ? ' ' : '') . trim($append); }
+$Rez = ($Gr == "000") ? $Rez : ($Rez . ' ' . ($Gr == "001" ? $ud[1] : $ud[2]));
 
 // grupul 2 (mii)
 $Gr = substr($NrI,6,3);
-$n1 = (integer) $NrI[6];
-$n2 = (integer) $NrI[7];
-$n3 = (integer) $NrI[8];
-$Rez = $Rez . $sp . $nc[$n1] . $ub[$n1];
-$Rez = ($n2 == 1)?$Rez . $nb[$n3] . $lg1[$n3] . $ua[$n2]:
-                $Rez . ($n2==6?$ex1:$nc[$n2]) . $ua[$n2] . $lg2[$n2] . ($Gr=="001"||$Gr=="002"?$nc[$n3]:$nd[$n3]);
-$Rez = ($Gr == "000")?$Rez:(($Gr == "001")?($Rez . $uc[1]):($Rez . $uc[2]));
+$n1 = (int) $NrI[6];
+$n2 = (int) $NrI[7];
+$n3 = (int) $NrI[8];
+$segment = trim($nc[$n1] . ' ' . $ub[$n1]);
+if ($segment !== '') { $Rez .= ($Rez !== '' ? ' ' : '') . $segment; }
+$append = '';
+if ($n2 == 1) {
+    $append = $nb[$n3] . $lg1[$n3] . $ua[$n2];
+} else {
+    $append = ($n2==6 ? $ex1 : $nc[$n2]) . $ua[$n2];
+    if ($lg2[$n2]) { $append .= ' ' . $lg2[$n2]; }
+    $suffix = ($Gr=="001"||$Gr=="002") ? $nc[$n3] : $nd[$n3];
+    if ($suffix) { $append .= ' ' . $suffix; }
+}
+if (trim($append) !== '') { $Rez .= ($Rez !== '' ? ' ' : '') . trim($append); }
+$Rez = ($Gr == "000") ? $Rez : ($Rez . ' ' . ($Gr == "001" ? $uc[1] : $uc[2]));
 
  // grupul 1 (unitati)
 $Gr = substr($NrI,9,3);
-$n1 = (integer) $NrI[9];
-$n2 = (integer) $NrI[10];
-$n3 = (integer) $NrI[11];
-$Rez = $Rez . $sp . $nc[$n1] . $ub[$n1];
-$Rez = ($n2 == 1)?($Rez . $nb[$n3] . $lg1[$n3] . $ua[$n2].$mon[2]):($Rez . ($n2==6?$ex1:$nc[$n2]). $ua[$n2] .
-                ($n3>0?$lg2[$n2]:'') . ($NrI=="000000000001"?($nb[$n3] .$mon[1]):($na[$n3]). $mon[2]));
+$n1 = (int) $NrI[9];
+$n2 = (int) $NrI[10];
+$n3 = (int) $NrI[11];
+$segment = trim($nc[$n1] . ' ' . $ub[$n1]);
+if ($segment !== '') { $Rez .= ($Rez !== '' ? ' ' : '') . $segment; }
+$append = '';
+if ($n2 == 1) {
+    $append = $nb[$n3] . $lg1[$n3] . $ua[$n2] . $mon[2];
+} else {
+    $append = ($n2==6 ? $ex1 : $nc[$n2]) . $ua[$n2];
+    if ($n3 > 0 && $lg2[$n2]) { $append .= ' ' . $lg2[$n2]; }
+    $append .= ' ' . trim(($NrI=="000000000001" ? ($nb[$n3] . $mon[1]) : ($na[$n3] . $mon[2])));
+}
+if (trim($append) !== '') { $Rez .= ($Rez !== '' ? ' ' : '') . trim($append); }
 
-if ((integer) $NrI == 0) {$Rez = ""; }
+if ((int) $NrI == 0) {$Rez = ""; }
 
 // banii
-if ((integer) $Zec>0) 
+if ((int) $Zec>0) 
 {
- $n2 = (integer) substr($Zec,0,1);
- $n3 = (integer) substr($Zec,1,1);
+ $n2 = (int) substr($Zec,0,1);
+ $n3 = (int) substr($Zec,1,1);
  $Rez .= ' și ';
- $lg22 = ($n3=='0'?'':$lg2[$n2]);
- $Rez = ($n2 == 1)?($Rez . $nb[$n3] . $lg1[$n3] . $ua[$n2].$ban[2]):
-                ($Rez . ($n2==6?$ex1:$nc[$n2]) . $ua[$n2] . $lg22 . ($Zec=="01"?($nb[$n3] .$ban[1]):($na[$n3]). $ban[2]));
+ $parts = array();
+ if ($n2 == 1) {
+     // teens (unsprezece bani) - keep concatenated
+     $parts[] = trim($nb[$n3] . $lg1[$n3] . $ua[$n2]);
+     $parts[] = trim($ban[2]);
+ } else {
+     $tens = trim(($n2==6 ? $ex1 : $nc[$n2]) . $ua[$n2]);
+     if ($tens !== '') { $parts[] = $tens; }
+     if ($n3 > 0) {
+         if ($lg2[$n2]) { $parts[] = $lg2[$n2]; }
+         if ($Zec == "01") {
+             $parts[] = trim($nb[$n3]) . ' ' . trim($ban[1]);
+         } else {
+             $parts[] = trim($na[$n3]) . ' ' . trim($ban[2]);
+         }
+     } else {
+         $parts[] = trim($ban[2]);
+     }
+ }
+ $Rez .= implode(' ', array_filter($parts));
 }
 return $Rez;
 }

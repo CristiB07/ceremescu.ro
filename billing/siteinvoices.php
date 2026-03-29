@@ -2,6 +2,8 @@
 include '../settings.php';
 include '../classes/common.php';
 include '../classes/paginator.class.php';
+
+// SELECT Client with prepared statement
 if(!isset($_SESSION)) 
 { 
 	session_start(); 
@@ -110,8 +112,9 @@ If ($_GET['mode']=="new"){
 		if (!isset($_POST['factura_client_denumire'])) {
 		    die("Missing client name");
 		}
-		$stmt = mysqli_prepare($conn, "SELECT ID_Client FROM clienti_date WHERE Client_Denumire=?");
-		mysqli_stmt_bind_param($stmt, "s", $_POST['factura_client_denumire']);
+    $stmt = mysqli_prepare($conn, "SELECT ID_Client FROM clienti_date WHERE Client_Denumire=?");
+    $select_factura_client_denumire = $_POST['factura_client_denumire'];
+    mysqli_stmt_bind_param($stmt, "s", $select_factura_client_denumire);
 		mysqli_stmt_execute($stmt);
 		$result = mysqli_stmt_get_result($stmt);
 		$row = ezpub_fetch_array($result);
@@ -129,20 +132,32 @@ If ($_GET['mode']=="new"){
 			Client_RO, Client_CIF, Client_Localitate, Client_Tip, Client_Nr_Contract, Client_Judet
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		
-		mysqli_stmt_bind_param($stmt_client, "ssssssssssss",
-			$_POST["factura_client_denumire"],
-			$_POST["factura_client_adresa"],
-			$clientcui,
-			$_POST["factura_client_RC"],
-			$_POST["factura_client_banca"],
-			$_POST["factura_client_IBAN"],
-			$_POST["factura_client_RO"],
-			$_POST["factura_client_CIF"],
-			$_POST["factura_client_localitate"],
-			$client_tip = '1',
-			$_POST["factura_client_contract"],
-			$_POST["factura_client_judet"]
-		);
+    $ic_denumire = isset($_POST["factura_client_denumire"]) ? $_POST["factura_client_denumire"] : null;
+    $ic_adresa = isset($_POST["factura_client_adresa"]) ? $_POST["factura_client_adresa"] : null;
+    $ic_rc = isset($_POST["factura_client_RC"]) ? $_POST["factura_client_RC"] : null;
+    $ic_banca = isset($_POST["factura_client_banca"]) ? $_POST["factura_client_banca"] : null;
+    $ic_iban = isset($_POST["factura_client_IBAN"]) ? $_POST["factura_client_IBAN"] : null;
+    $ic_ro = isset($_POST["factura_client_RO"]) ? $_POST["factura_client_RO"] : null;
+    $ic_cif = isset($_POST["factura_client_CIF"]) ? $_POST["factura_client_CIF"] : null;
+    $ic_localitate = isset($_POST["factura_client_localitate"]) ? $_POST["factura_client_localitate"] : null;
+    $client_tip = '1';
+    $ic_contract = isset($_POST["factura_client_contract"]) ? $_POST["factura_client_contract"] : null;
+    $ic_judet = isset($_POST["factura_client_judet"]) ? $_POST["factura_client_judet"] : null;
+
+    mysqli_stmt_bind_param($stmt_client, "ssssssssssss",
+      $ic_denumire,
+      $ic_adresa,
+      $clientcui,
+      $ic_rc,
+      $ic_banca,
+      $ic_iban,
+      $ic_ro,
+      $ic_cif,
+      $ic_localitate,
+      $client_tip,
+      $ic_contract,
+      $ic_judet
+    );
 		
 		if (!mysqli_stmt_execute($stmt_client)) {
 			die('Error: ' . mysqli_stmt_error($stmt_client));
@@ -164,12 +179,11 @@ if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
 
 // Importă date fiscale ANAF dacă CUI numeric valid
 if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
-    // Import fiscal data by including the script directly (no output)
-    $_GET['cui'] = $cui_numeric;
-    ob_start();
-    include_once '../anaf/getfiscaldata.php';
-    ob_end_clean();
-    unset($_GET['cui']);
+    // Importăm direct librăria care conține funcția pentru a evita includerea unui script care ar putea lipsi
+    include_once '../anaf/getfiscaldata.lib.php';
+    // Apelăm funcția direct, trecând conexiunea la baza de date
+    $ok = getFiscalDataByCUI((string)$cui_numeric, $conn);
+    // Optional: puteți afișa un mesaj în funcție de $ok
 }
 //insert new invoice
 $dataemiterii = $_POST["data_emiterii"];
@@ -240,35 +254,53 @@ $stmt_upd_factura = mysqli_prepare($conn, "UPDATE facturare_facturi SET
 	factura_client_achitat=?, factura_client_inchisa=?, factura_client_anulat=?, factura_client_tip_activitate=?
 	WHERE factura_ID=?");
 
+$f_cliente_denumire = isset($_POST["factura_client_denumire"]) ? $_POST["factura_client_denumire"] : null;
+$f_cliente_RC = isset($_POST["factura_client_RC"]) ? $_POST["factura_client_RC"] : null;
+$f_cliente_RO = isset($_POST["factura_client_RO"]) ? $_POST["factura_client_RO"] : null;
+$f_cod_factura = isset($_POST["factura_cod_factura"]) ? $_POST["factura_cod_factura"] : null;
+$f_cliente_CIF = isset($_POST["factura_client_CIF"]) ? $_POST["factura_client_CIF"] : null;
+$f_cliente_adresa = isset($_POST["factura_client_adresa"]) ? $_POST["factura_client_adresa"] : null;
+$f_cliente_judet = isset($_POST["factura_client_judet"]) ? $_POST["factura_client_judet"] : null;
+$f_cliente_localitate = isset($_POST["factura_client_localitate"]) ? $_POST["factura_client_localitate"] : null;
+$f_cliente_IBAN = isset($_POST["factura_client_IBAN"]) ? $_POST["factura_client_IBAN"] : null;
+$f_cliente_banca = isset($_POST["factura_client_banca"]) ? $_POST["factura_client_banca"] : null;
+$f_cliente_alocat = isset($_POST["factura_client_alocat"]) ? $_POST["factura_client_alocat"] : null;
+$f_cliente_contract = isset($_POST["factura_client_contract"]) ? $_POST["factura_client_contract"] : null;
+$f_cliente_BU = isset($_POST["factura_client_BU"]) ? $_POST["factura_client_BU"] : null;
+$f_cliente_sales = isset($_POST["factura_client_sales"]) ? $_POST["factura_client_sales"] : null;
+$f_cliente_an = isset($_POST["factura_client_an"]) ? $_POST["factura_client_an"] : null;
+$f_cliente_achitat = isset($_POST["factura_client_achitat"]) ? $_POST["factura_client_achitat"] : null;
+$f_cliente_tip_activitate = isset($_POST["factura_client_tip_activitate"]) ? $_POST["factura_client_tip_activitate"] : null;
+
 mysqli_stmt_bind_param($stmt_upd_factura, "issssssssssssssssssddddsiisi",
-	$Client_ID,
-	$dataemiterii,
-	$_POST["factura_client_denumire"],
-	$clientcui,
-	$_POST["factura_client_RC"],
-	$_POST["factura_client_RO"],
-	$_POST["factura_cod_factura"],
-	$_POST["factura_client_CIF"],
-	$_POST["factura_client_adresa"],
-	$_POST["factura_client_judet"],
-	$_POST["factura_client_localitate"],
-	$_POST["factura_client_IBAN"],
-	$_POST["factura_client_banca"],
-	$_POST["factura_client_alocat"],
-	$_POST["factura_client_contract"],
-	$_POST["factura_client_BU"],
-	$_POST["factura_client_sales"],
-	$_POST["factura_client_an"],
-	$termenfactura,
-	$valoareproduse,
-	$valoareTVA,
-	$cursvalutar,
-	$grandtotal,
-	$_POST["factura_client_achitat"],
-	$closed,
-	$anulat,
-	$_POST["factura_client_tip_activitate"],
-	$cID
+  $Client_ID,
+  $dataemiterii,
+  $f_cliente_denumire,
+  $clientcui,
+  $f_cliente_RC,
+  $f_cliente_RO,
+  $f_cod_factura,
+  $f_cliente_CIF,
+  $f_cliente_adresa,
+  $f_cliente_judet,
+  $f_cliente_localitate,
+  $f_cliente_IBAN,
+  $f_cliente_banca,
+  $f_cliente_alocat,
+  $f_cliente_contract,
+  $f_cliente_BU,
+  $f_cliente_sales,
+  $f_cliente_an,
+  $termenfactura,
+  $valoareproduse,
+  $valoareTVA,
+  $cursvalutar,
+  $grandtotal,
+  $f_cliente_achitat,
+  $closed,
+  $anulat,
+  $f_cliente_tip_activitate,
+  $cID
 );
 
 if (!mysqli_stmt_execute($stmt_upd_factura)) {
@@ -315,13 +347,14 @@ $stmt_chit = mysqli_prepare($conn, "INSERT INTO facturare_chitante(
 	chitanta_inchisa, chitanta_descriere, chitanta_numar
 ) VALUES (?, ?, ?, ?, ?, ?)");
 
+$chitanta_inchisa = '1';
 mysqli_stmt_bind_param($stmt_chit, "sidssi",
-	$datachitantei,
-	$cID,
-	$sumaincasata,
-	$chitanta_inchisa = '1',
-	$descriere,
-	$numarchitanta
+  $datachitantei,
+  $cID,
+  $sumaincasata,
+  $chitanta_inchisa,
+  $descriere,
+  $numarchitanta
 );
 
 if (!mysqli_stmt_execute($stmt_chit)) {
@@ -384,10 +417,11 @@ mysqli_stmt_close($stmt3);
 
 // SELECT Client with prepared statement
 if (!isset($_POST['factura_client_denumire'])) {
-    die("Missing client name");
+  die("Missing client name");
 }
+$select_factura_client_denumire_edit = $_POST['factura_client_denumire'];
 $stmt_cl = mysqli_prepare($conn, "SELECT ID_Client FROM clienti_date WHERE Client_Denumire=?");
-mysqli_stmt_bind_param($stmt_cl, "s", $_POST['factura_client_denumire']);
+mysqli_stmt_bind_param($stmt_cl, "s", $select_factura_client_denumire_edit);
 mysqli_stmt_execute($stmt_cl);
 $result = mysqli_stmt_get_result($stmt_cl);
 $row = ezpub_fetch_array($result);
@@ -406,31 +440,49 @@ $stmt_upd_edit = mysqli_prepare($conn, "UPDATE facturare_facturi SET
 	factura_client_pdf_generat=NULL, factura_client_efactura_generata=NULL, factura_client_tip_activitate=?
 	WHERE factura_ID=?");
 
+$e_cliente_denumire = isset($_POST["factura_client_denumire"]) ? $_POST["factura_client_denumire"] : null;
+$e_cliente_RO = isset($_POST["factura_client_RO"]) ? $_POST["factura_client_RO"] : null;
+$e_cliente_CIF = isset($_POST["factura_client_CIF"]) ? $_POST["factura_client_CIF"] : null;
+$e_cod_factura = isset($_POST["factura_cod_factura"]) ? $_POST["factura_cod_factura"] : null;
+$e_cliente_RC = isset($_POST["factura_client_RC"]) ? $_POST["factura_client_RC"] : null;
+$e_cliente_adresa = isset($_POST["factura_client_adresa"]) ? $_POST["factura_client_adresa"] : null;
+$e_cliente_judet = isset($_POST["factura_client_judet"]) ? $_POST["factura_client_judet"] : null;
+$e_cliente_localitate = isset($_POST["factura_client_localitate"]) ? $_POST["factura_client_localitate"] : null;
+$e_cliente_IBAN = isset($_POST["factura_client_IBAN"]) ? $_POST["factura_client_IBAN"] : null;
+$e_cliente_banca = isset($_POST["factura_client_banca"]) ? $_POST["factura_client_banca"] : null;
+$e_cliente_contract = isset($_POST["factura_client_contract"]) ? $_POST["factura_client_contract"] : null;
+$e_cliente_alocat = isset($_POST["factura_client_alocat"]) ? $_POST["factura_client_alocat"] : null;
+$e_cliente_an = isset($_POST["factura_client_an"]) ? $_POST["factura_client_an"] : null;
+$e_cliente_termen = isset($_POST["factura_client_termen"]) ? $_POST["factura_client_termen"] : null;
+$e_cliente_BU = isset($_POST["factura_client_BU"]) ? $_POST["factura_client_BU"] : null;
+$e_cliente_sales = isset($_POST["factura_client_sales"]) ? $_POST["factura_client_sales"] : null;
+$e_cliente_tip_activitate = isset($_POST["factura_client_tip_activitate"]) ? $_POST["factura_client_tip_activitate"] : null;
+
 mysqli_stmt_bind_param($stmt_upd_edit, "ssisssssssssssssssdddssi",
-	$_POST["factura_client_denumire"],
-	$dataemiterii,
-	$Client_ID,
-	$clientcui,
-	$_POST["factura_client_RO"],
-	$_POST["factura_client_CIF"],
-	$_POST["factura_cod_factura"],
-	$_POST["factura_client_RC"],
-	$_POST["factura_client_adresa"],
-	$_POST["factura_client_judet"],
-	$_POST["factura_client_localitate"],
-	$_POST["factura_client_IBAN"],
-	$_POST["factura_client_banca"],
-	$_POST["factura_client_contract"],
-	$_POST["factura_client_alocat"],
-	$_POST["factura_client_an"],
-	$_POST["factura_client_termen"],
-	$_POST["factura_client_BU"],
-	$_POST["factura_client_sales"],
-	$valoareproduse,
-	$valoareTVA,
-	$grandtotal,
-	$_POST["factura_client_tip_activitate"],
-	$cID
+  $e_cliente_denumire,
+  $dataemiterii,
+  $Client_ID,
+  $clientcui,
+  $e_cliente_RO,
+  $e_cliente_CIF,
+  $e_cod_factura,
+  $e_cliente_RC,
+  $e_cliente_adresa,
+  $e_cliente_judet,
+  $e_cliente_localitate,
+  $e_cliente_IBAN,
+  $e_cliente_banca,
+  $e_cliente_contract,
+  $e_cliente_alocat,
+  $e_cliente_an,
+  $e_cliente_termen,
+  $e_cliente_BU,
+  $e_cliente_sales,
+  $valoareproduse,
+  $valoareTVA,
+  $grandtotal,
+  $e_cliente_tip_activitate,
+  $cID
 );
 
 if (!mysqli_stmt_execute($stmt_upd_edit)) {
@@ -647,8 +699,7 @@ else{
             <input class="input-group-field" type="text" name="Cui" id="Cui"
               placeholder="<?php echo $strEnterVATNumber?>">
             <div class="input-group-button">
-              <button id="btn1" class="button success"><i
-                  class="fas fa-search"></i>&nbsp;<?php echo $strCheck ?></button>
+              <button id="btn1" class="button success"><i class="fas fa-search"></i>&nbsp;<?php echo $strCheck ?></button>
             </div>
           </div>
       </div>
@@ -660,21 +711,19 @@ else{
             <input type="radio" name="existent" value="0" id="nou">
             <label for="nou"><?php echo $strNewClient?></label>
         </div>
-   <form method="post"  action="siteinvoices.php?mode=new&cID=<?php echo $invoiceID?>">
         <div class="large-2 medium-2 cell">
           <label><?php echo $strReceipt?></label>
-            <input type="radio" name="factura_client_achitat" value="0" checked id="chitanta"><label
-              for="chitanta"><?php echo $strNo?></label><input name="factura_client_achitat" type="radio"
-              value="1" id="banca"><label for="banca"><?php echo $strYes?></label>
+            <input type="radio" name="factura_client_achitat" value="0" checked id="chitanta"><label for="chitanta"><?php echo $strNo?></label>
+            <input name="factura_client_achitat" type="radio" value="1" id="banca"><label for="banca"><?php echo $strYes?></label>
        </div>
     </div>
       <div class="grid-x grid-padding-x ">
          <div class="large-2 medium-2 cell">
           <label><?php echo $strNumber?></label>
-            <input name="factura_numar" type="text" value="<?php echo $siteInvoicingCode . "0000".$numarfactura?>" />
+            <input name="factura_numar" type="text" value="<?php echo $siteInvoicingCode . "000".$numarfactura?>" />
         </div>
-        <div class="large-2 medium-2 cell"></label>
-          <label><?php echo $strDate?>
+        <div class="large-2 medium-2 cell">
+          <label><?php echo $strDate?></label>
             <input type="date" name="data_emiterii" value="<?php echo date('Y-m-d')?>" required />
         </div>
         <div class="large-1 medium-1 cell">
@@ -1282,6 +1331,7 @@ echo $pages->display_pages() . " <a href=\"siteinvoices.php\" title=\"strClearAl
               <th><?php echo $strValue?></th>
               <th><?php echo $strVAT?></th>
               <th><?php echo $strPaymentDate?></th>
+              <th><?php echo $strRemaining?></th>
               <th><?php echo $strDays?></th>
               <th><?php echo $strSeenBy?></th>
               <th><?php echo $strEdit?></th>
@@ -1300,13 +1350,13 @@ While ($row=ezpub_fetch_array($result)){
 	{echo "<tr class=\"canceled\">";}
 else
 {
-	If ($row["factura_client_achitat"]=="0") 
-	{
-echo "<tr class=\"notpaid\">";
-} 
-else 
-{
-echo "<tr class=\"paid\">";}
+	if (!empty($row["factura_plata_partiala"]) && $row["factura_plata_partiala"]==1) {
+	echo "<tr class=\"paidpartial\">";
+	} elseif ($row["factura_client_achitat"]=="0") {
+	echo "<tr class=\"notpaid\">";
+	} else {
+	echo "<tr class=\"paid\">";
+	}
 }
   		echo"<td>$row[factura_numar]</td>
 			<td>". date("d.m.Y",strtotime($row["factura_data_emiterii"]))."</td>
@@ -1320,8 +1370,19 @@ If ($row["factura_client_achitat"]=="1") {
 else 	{
 	echo "<td>&nbsp;</td>";
 }	
-	echo	"<td>$row[factura_client_zile_achitat]</td>
-			<td>$row[factura_client_alocat]</td>";
+	
+		// Calcul rest de plată: 0 dacă factura este integral achitată, altfel partial/total
+		if ($row["factura_client_achitat"]=="1") {
+			$remaining = 0.0;
+		} elseif (!empty($row["factura_plata_partiala"]) && $row["factura_plata_partiala"]==1) {
+			$remaining = (float)$row["factura_client_valoare_totala"] - (float)($row["factura_suma_partiala"] ?? 0);
+			if ($remaining < 0) $remaining = 0.0;
+		} else {
+			$remaining = (float)$row["factura_client_valoare_totala"];
+		}
+		echo '<td align="right">' . romanize($remaining) . '</td>';
+		echo '<td>' . $row["factura_client_zile_achitat"] . '</td>'; 
+	echo "<td>$row[factura_client_alocat]</td>";
 If ($row["factura_client_achitat"]=="0" AND $row["factura_client_anulat"]=="0") {
 echo "<td><a href=\"siteinvoices.php?mode=edit&cID=$row[factura_ID]\" ><i class=\"far fa-edit fa-xl\" title=\"$strEdit\"></a></td>";}
 else {

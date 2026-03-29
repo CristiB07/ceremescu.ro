@@ -156,8 +156,8 @@ if (password_verify(trim($mypassword), $row['account_password'])) {
             $emailbody = "";
             $emailbody="<html>";
             $emailbody=$emailbody . "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />";
-            $emailbody=$emailbody . "<link href='".$siteCompanyWebsite."/fonts/open-sans-condensed-v21-latin-ext_latin-300.woff' rel='stylesheet' type='text/css'>";
-            $emailbody=$emailbody . "<link href='".$siteCompanyWebsite."/fonts/open-sans-v27-latin-ext_latin-regular.woff' rel='stylesheet' type='text/css'>";
+            $emailbody=$emailbody . "<link href='".$strSiteURL."/fonts/open-sans-condensed-v21-latin-ext_latin-300.woff' rel='stylesheet' type='text/css'>";
+            $emailbody=$emailbody . "<link href='".$strSiteURL."/fonts/open-sans-v27-latin-ext_latin-regular.woff' rel='stylesheet' type='text/css'>";
             $emailbody=$emailbody . "<style>body {margin-top: 10px; margin-bottom: 10px; margin-left: 10px; margin-right: 10px; font-size: 1.1em; font-family: 'Open Sans',sans-serif; padding: 0px; color: " . $color ."}";
             $emailbody=$emailbody . "h1,h2,h3,h4,h5 {font-family:'Open Sans',sans-serif; font-weight: bold; color: " . $color .";}";
             $emailbody=$emailbody . "td {font-size: 1em; font-family: 'Open Sans',sans-serif; color: " . $color ."; padding: 3px;  font-weight: normal; border-collapse:collapse; border: 1px solid " . $color .";}";
@@ -166,11 +166,11 @@ if (password_verify(trim($mypassword), $row['account_password'])) {
             $emailbody=$emailbody . ".button {background-color: " . $color . "; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; }";
             $emailbody=$emailbody . "</style>";
             $emailbody=$emailbody . "</head><body>";
-            $emailbody=$emailbody . "<a href=\"$siteCompanyWebsite\"><img src=\"".$siteCompanyWebsite."/img/logo.png\" title=\"$strSiteOwner\" width=\"150\" height=\"auto\"/></a>";
+            $emailbody=$emailbody . "<a href=\"$strSiteURL\"><img src=\"".$strSiteURL."/img/logo.png\" title=\"$strSiteOwner\" width=\"150\" height=\"auto\"/></a>";
             $emailbody=$emailbody . "<p>Stimate " .$emailrow["account_first_name"]. " ".$emailrow["account_last_name"]. ",<br>";
-            $emailbody=$emailbody . "Ca urmare a solicitării făcute de dumneavoastră pe site-ul ". $siteCompanyWebsite." aveți mai jos codul pentru acces în aplicație. </p>";
+            $emailbody=$emailbody . "Ca urmare a solicitării făcute de dumneavoastră pe site-ul ". $strSiteURL." aveți mai jos codul pentru acces în aplicație. </p>";
             $emailbody=$emailbody . "<p><strong>Vă rugăm să accesați următorul link:</strong><br />
-									<a href=\"" . $siteCompanyWebsite . "/account/validatelogin.php?hash=" . $secret . "&reset=" . $reset_hash . "\" class=\"button\">" . $strClickToAccess . "</a></p>
+									<a href=\"" . $strSiteURL . "/account/validatelogin.php?hash=" . $secret . "&reset=" . $reset_hash . "\" class=\"button\">" . $strClickToAccess . "</a></p>
 <p>Codul dumneavoastră de confirmare este: <strong>" . $randnum . "</strong></p>
 <p>Acest cod este valabil o oră de la primirea acestui email.</p>
 <p>Dacă nu ați solicitat accesul, vă rugăm să ignorați acest mesaj dar vă sfătuim să vă schimbați parola de acces.</p>
@@ -181,7 +181,7 @@ Vă mulțumim,<br />
 $siteCompanyLegalAddress <br />
 $siteCompanyPhones<br />
 $siteCompanyEmail<br />
-$siteCompanyWebsite <br />
+$strSiteURL <br />
 ";
 
             $emailbody=$emailbody . "</body>";
@@ -218,7 +218,7 @@ $mail->addReplyTo($SmtpUser, $strSiteOwner);
 $mail->addAddress($emailto, $emailtoname);
 $mail->addAddress($SmtpUser, $strSiteOwner);
 //Set the subject line
-$mail->Subject = 'Solicitare acces cont ' . $siteCompanyWebsite;
+$mail->Subject = 'Solicitare acces cont ' . $strSiteURL;
 //Read an HTML message body from an external file, convert referenced images to embedded,
 //convert HTML into a basic plain-text alternative body
     $mail->isHTML(true);                                  // Set email format to HTML

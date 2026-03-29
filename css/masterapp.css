@@ -354,6 +354,11 @@ div.promoted {
     font-size: 0.8em;
 }
 
+.paidpartial {
+    color: #f0be40;
+    font-size: 0.8em;
+}
+
 .loss {
     color: #FF0000;
 }

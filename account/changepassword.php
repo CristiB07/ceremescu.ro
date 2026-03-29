@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($changepasswordcount==1) {
         // Use prepared statement for update
-        $stmt_update = $conn->prepare("UPDATE site_accounts SET account_password=?, account_active='1', account_reset_hash='', account_reset_expire='', account_secret='', account_activation='' WHERE account_activation=? AND account_secret=?");
+        $stmt_update = $conn->prepare("UPDATE site_accounts SET account_password=?, account_active='1', account_reset_hash='', account_reset_expire=NULL, account_secret='', account_activation='' WHERE account_activation=? AND account_secret=?");
         $stmt_update->bind_param("sss", $password, $activationcode, $hash);
         $changepasswordresult = $stmt_update->execute();
         $stmt_update->close();

@@ -69,6 +69,14 @@ include_once(dirname(__DIR__) . '/lang/language_EN.php');
                 {
                     include 'crm.navigation.php';
                 }
+                elseif ($sitefunction=='robot')
+                {
+                    include 'robot.navigation.php';
+                }
+                elseif ($sitefunction=='bi')
+                {
+                    include 'bi.navigation.php';
+                }
                     else 
                 {
             	//he just try to get here directly or something is wrong

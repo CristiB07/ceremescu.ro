@@ -65,6 +65,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
         $stoc_final = $stoc_prev + $total_an - $valorificata - $eliminata;
         $rows[] = [
             'stoc_prev' => $stoc_prev,
+            'cod' => $cod,
             'total_an' => $total_an,
             'valorificata' => $valorificata,
             'eliminata' => $eliminata,
@@ -104,17 +105,18 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
     $uresult = ezpub_query($conn, $uquery);
     $userRow = ezpub_fetch_array($uresult);
     $responsabil_mediu = $userRow['utilizator_Prenume'] . ' ' . $userRow['utilizator_Nume'];
-    echo '<tr><td colspan="7"><strong>Client:</strong> ' . htmlspecialchars($clientRow['Client_Denumire'] ?? '') . '</td></tr>
-     <tr><td colspan="7"><strong>CUI:</strong> ' . htmlspecialchars($clientRow['Client_CUI'] ?? '') . '</td></tr>
-     <tr><td colspan="7"><strong>Registrul Comerțului:</strong> ' . htmlspecialchars($clientRow['Client_RC'] ?? '') . '</td></tr>
-     <tr><td colspan="7"><strong>Localitate:</strong> ' . htmlspecialchars($clientRow['Client_Localitate'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Județ:</strong> ' . htmlspecialchars($clientRow['Client_Judet'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Telefon:</strong> ' . htmlspecialchars($clientRow['Client_Telefon'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Cod CAEN:</strong> ' . htmlspecialchars($clientRow['Client_Cod_CAEN'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Responsabil Mediu:</strong> ' . htmlspecialchars($responsabil_mediu ?? '') . '</td></tr>
+    echo '<tr><td colspan="8"><strong>Client:</strong> ' . htmlspecialchars($clientRow['Client_Denumire'] ?? '') . '</td></tr>
+     <tr><td colspan="8"><strong>CUI:</strong> ' . htmlspecialchars($clientRow['Client_CUI'] ?? '') . '</td></tr>
+     <tr><td colspan="8"><strong>Registrul Comerțului:</strong> ' . htmlspecialchars($clientRow['Client_RC'] ?? '') . '</td></tr>
+     <tr><td colspan="8"><strong>Localitate:</strong> ' . htmlspecialchars($clientRow['Client_Localitate'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Județ:</strong> ' . htmlspecialchars($clientRow['Client_Judet'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Telefon:</strong> ' . htmlspecialchars($clientRow['Client_Telefon'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Cod CAEN:</strong> ' . htmlspecialchars($clientRow['Client_Cod_CAEN'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Responsabil Mediu:</strong> ' . htmlspecialchars($responsabil_mediu ?? '') . '</td></tr>
     ';
       // Header
     echo '<tr style="background-color:#4CAF50;color:#ffffff;font-weight:bold;">';
+    echo '<th>Cod deșeu</th>';
     echo '<th>Stoc ('.($selectedYear-1).')</th>';
     echo '<th>Cantitate generată</th>';
     echo '<th>Cantitate valorificată</th>';
@@ -125,13 +127,14 @@ if (isset($_GET['export']) && $_GET['export'] == 'excel') {
     echo '</tr>';
     foreach ($rows as $r) {
         echo '<tr>';
-        echo '<td>' . htmlspecialchars($r['stoc_prev']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['total_an']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['valorificata']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['eliminata']) . '</td>';
+        echo '<td>' . htmlspecialchars($r['cod']) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['stoc_prev'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['total_an'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['valorificata'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['eliminata'])) . '</td>';
         echo '<td>' . htmlspecialchars($r['op']) . '</td>';
         echo '<td>' . htmlspecialchars($r['operator']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['stoc_final']) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['stoc_final'])) . '</td>';
         echo '</tr>';
     }
     echo '</table>';
@@ -282,17 +285,18 @@ if ($selectedClient && $selectedYear) {
     echo '<body>';
     echo '<table border="1">';
     // Date client
-    echo '<tr><td colspan="7"><strong>Client:</strong> ' . htmlspecialchars($clientRow['Client_Denumire'] ?? '') . '</td></tr>
-     <tr><td colspan="7"><strong>CUI:</strong> ' . htmlspecialchars($clientRow['Client_CUI'] ?? '') . '</td></tr>
-     <tr><td colspan="7"><strong>Registrul Comerțului:</strong> ' . htmlspecialchars($clientRow['Client_RC'] ?? '') . '</td></tr>
-     <tr><td colspan="7"><strong>Localitate:</strong> ' . htmlspecialchars($clientRow['Client_Localitate'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Județ:</strong> ' . htmlspecialchars($clientRow['Client_Judet'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Telefon:</strong> ' . htmlspecialchars($clientRow['Client_Telefon'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Cod CAEN:</strong> ' . htmlspecialchars($clientRow['Client_Cod_CAEN'] ?? '') . '</td></tr>
-    <tr><td colspan="7"> <strong>Responsabil Mediu:</strong> ' . htmlspecialchars($resposabil_mediu ?? '') . '</td></tr>
+    echo '<tr><td colspan="8"><strong>Client:</strong> ' . htmlspecialchars($clientRow['Client_Denumire'] ?? '') . '</td></tr>
+     <tr><td colspan="8"><strong>CUI:</strong> ' . htmlspecialchars($clientRow['Client_CUI'] ?? '') . '</td></tr>
+     <tr><td colspan="8"><strong>Registrul Comerțului:</strong> ' . htmlspecialchars($clientRow['Client_RC'] ?? '') . '</td></tr>
+     <tr><td colspan="8"><strong>Localitate:</strong> ' . htmlspecialchars($clientRow['Client_Localitate'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Județ:</strong> ' . htmlspecialchars($clientRow['Client_Judet'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Telefon:</strong> ' . htmlspecialchars($clientRow['Client_Telefon'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Cod CAEN:</strong> ' . htmlspecialchars($clientRow['Client_Cod_CAEN'] ?? '') . '</td></tr>
+    <tr><td colspan="8"> <strong>Responsabil Mediu:</strong> ' . htmlspecialchars($resposabil_mediu ?? '') . '</td></tr>
     ';
      // Header
     echo '<tr style="background-color:#4CAF50;color:#ffffff;font-weight:bold;">';
+    echo '<th>Cod deșeu</th>';
     echo '<th>Stoc ('.($selectedYear-1).')</th>';
     echo '<th>Cantitate generată</th>';
     echo '<th>Cantitate valorificată</th>';
@@ -303,13 +307,14 @@ if ($selectedClient && $selectedYear) {
     echo '</tr>';
     foreach ($rows as $r) {
         echo '<tr>';
-        echo '<td>' . htmlspecialchars($r['stoc_prev']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['total_an']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['valorificata']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['eliminata']) . '</td>';
+        echo '<td>' . htmlspecialchars($r['cod']) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['stoc_prev'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['total_an'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['valorificata'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['eliminata'])) . '</td>';
         echo '<td>' . htmlspecialchars($r['op']) . '</td>';
         echo '<td>' . htmlspecialchars($r['operator']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['stoc_final']) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['stoc_final'])) . '</td>';
         echo '</tr>';
     }
     echo '</table>';
@@ -428,6 +433,7 @@ if ($selectedClient && $selectedYear) {
     echo '<h4>Raport anual pentru clientul selectat</h4>';
     echo '<table class="small-font-table" width="100%">';
     echo '<thead><tr>';
+    echo '<th>Cod deșeu</th>';
     echo '<th>Stoc ('.($selectedYear-1).')</th>';
     echo '<th>Cantitate generată</th>';
     echo '<th>Cantitate valorificată</th>';
@@ -438,13 +444,14 @@ if ($selectedClient && $selectedYear) {
     echo '</tr></thead><tbody>';
     foreach ($rows as $r) {
         echo '<tr>';
-        echo '<td>' . htmlspecialchars($r['stoc_prev']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['total_an']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['valorificata']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['eliminata']) . '</td>';
+        echo '<td>' . htmlspecialchars($r['cod']) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['stoc_prev'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['total_an'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['valorificata'])) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['eliminata'])) . '</td>';
         echo '<td>' . htmlspecialchars($r['op']) . '</td>';
         echo '<td>' . htmlspecialchars($r['operator']) . '</td>';
-        echo '<td>' . htmlspecialchars($r['stoc_final']) . '</td>';
+        echo '<td>' . htmlspecialchars(romanize($r['stoc_final'])) . '</td>';
         echo '</tr>';
     }
     echo '</tbody></table></div></div>';

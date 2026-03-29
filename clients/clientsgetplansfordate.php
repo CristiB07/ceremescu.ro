@@ -7,7 +7,9 @@ if (!isset($_SESSION['userlogedin']) || $_SESSION['userlogedin'] != 'Yes') {
 }
 $uid = (int)$_SESSION['uid'];
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+$dt = DateTime::createFromFormat('Y-m-d', $date);
+$dtErr = DateTime::getLastErrors();
+if (!$dt || $dt->format('Y-m-d') !== $date || $dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0) {
     die(json_encode(['error' => 'Invalid date']));
 }
 

@@ -119,12 +119,11 @@ if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
 }
 // Importă date fiscale ANAF dacă CUI numeric valid
 if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
-    // Import fiscal data by including the script directly (no output)
-    $_GET['cui'] = $cui_numeric;
-    ob_start();
-    include_once '../anaf/getfiscaldata.php';
-    ob_end_clean();
-    unset($_GET['cui']);
+    // Importăm direct librăria care conține funcția pentru a evita includerea unui script care ar putea lipsi
+    include_once '../anaf/getfiscaldata.lib.php';
+    // Apelăm funcția direct, trecând conexiunea la baza de date
+    $ok = getFiscalDataByCUI((string)$cui_numeric, $conn);
+    // Optional: puteți afișa un mesaj în funcție de $ok
 }
 
 echo "<div class=\"callout success\">$strRecordAdded</div>".$import_bilanturi_msg."</div></div>";

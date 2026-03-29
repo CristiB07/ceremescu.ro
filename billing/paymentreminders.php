@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
             $email_list = array_filter(array_map('trim', explode(';', $client_email_raw)));
             $valid_email_found = false;
             foreach ($email_list as $email) {
-                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                if (@filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $valid_email_found = true;
                     break;
                 }
@@ -59,18 +59,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
             }
             
             // Get overdue invoices for this client
-            $stmt_invoices = mysqli_prepare($conn, "SELECT factura_numar, factura_client_valoare_totala, factura_data_emiterii, factura_client_termen, DATEDIFF(CURDATE(), factura_client_termen) as zile_intarziere FROM facturare_facturi WHERE factura_client_ID=? AND factura_client_achitat='0' AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) >  3 ORDER BY factura_client_termen ASC");
+            $stmt_invoices = mysqli_prepare($conn, "SELECT factura_numar, factura_client_valoare_totala, IFNULL(factura_suma_partiala,0) AS suma_partiala, (factura_client_valoare_totala - IFNULL(factura_suma_partiala,0)) AS outstanding, factura_data_emiterii, factura_client_termen, DATEDIFF(CURDATE(), factura_client_termen) as zile_intarziere FROM facturare_facturi WHERE factura_client_ID=? AND factura_client_achitat='0' AND (factura_client_valoare_totala - IFNULL(factura_suma_partiala,0)) > 0 AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) > 0 ORDER BY factura_client_termen ASC");
             mysqli_stmt_bind_param($stmt_invoices, "i", $client_id);
             mysqli_stmt_execute($stmt_invoices);
             $result_invoices = mysqli_stmt_get_result($stmt_invoices);
             
             $invoices = [];
             $invoice_numbers = []; // Array pentru numerele facturilor
-            $total_debt = 0;
+            $total_debt = 0.0;
             while ($inv = mysqli_fetch_array($result_invoices, MYSQLI_ASSOC)) {
+                // folosește outstanding (total - suma_partiala)
+                $inv_out = isset($inv['outstanding']) ? (float)$inv['outstanding'] : ((float)$inv['factura_client_valoare_totala'] - (float)($inv['suma_partiala'] ?? 0));
+                if ($inv_out <= 0) continue;
+                $inv['outstanding'] = $inv_out;
                 $invoices[] = $inv;
-                $invoice_numbers[] = $inv['factura_numar']; // Colectăm numerele facturilor
-                $total_debt += $inv['factura_client_valoare_totala'];
+                $invoice_numbers[] = $inv['factura_numar'];
+                $total_debt += $inv_out;
             }
             mysqli_stmt_close($stmt_invoices);
             
@@ -102,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
                 $mail->setFrom($siteCompanyEmail, $strSiteOwner);
                 // Adaugă toate adresele valide
                 foreach ($email_list as $email) {
-                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    if (@filter_var($email, FILTER_VALIDATE_EMAIL)) {
                         $mail->addAddress($email, $client['factura_client_denumire']);
                     }
                 }
@@ -113,12 +117,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_reminders'])) {
                 
                 $mail->send();
                 
-                // Salvare notificare în baza de date
+                // Salvare notificare în baza de date (folosim format compatibil cu tipul coloanei)
                 $facturi_array_str = json_encode($invoice_numbers); // Convertim array-ul în JSON
-                $stmt_notif = mysqli_prepare($conn, "INSERT INTO facturare_notificari_trimise (notificare_client_id, notificare_data_trimiterii, notificare_facturi_intarziate) VALUES (?, NOW(), ?)");
-                mysqli_stmt_bind_param($stmt_notif, "is", $client_id, $facturi_array_str);
-                mysqli_stmt_execute($stmt_notif);
-                mysqli_stmt_close($stmt_notif);
+                // Detectăm tipul coloanei notificare_data_trimiterii
+                $colType = null;
+                $stmt_col = mysqli_prepare($conn, "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'facturare_notificari_trimise' AND COLUMN_NAME = 'notificare_data_trimiterii' LIMIT 1");
+                if ($stmt_col) {
+                    mysqli_stmt_execute($stmt_col);
+                    $res_col = mysqli_stmt_get_result($stmt_col);
+                    $colRow = ezpub_fetch_array($res_col);
+                    if ($colRow && isset($colRow['DATA_TYPE'])) {
+                        $colType = strtolower($colRow['DATA_TYPE']);
+                    }
+                    mysqli_stmt_close($stmt_col);
+                }
+
+                // Pregătim valoarea pentru coloana data în funcție de tip
+                if (in_array($colType, ['int','bigint','smallint','mediumint','tinyint'])) {
+                    $dateValue = time();
+                    $dateBindType = 'i';
+                } elseif ($colType === 'year') {
+                    $dateValue = (int)date('Y');
+                    $dateBindType = 'i';
+                } else {
+                    // datetime, timestamp, date, varchar etc. -> folosim stringul formatat
+                    $dateValue = date('Y-m-d H:i:s');
+                    $dateBindType = 's';
+                }
+
+                $stmt_notif = mysqli_prepare($conn, "INSERT INTO facturare_notificari_trimise (notificare_client_id, notificare_data_trimiterii, notificare_facturi_intarziate) VALUES (?, ?, ?)");
+                if ($stmt_notif) {
+                    $types = 'i' . $dateBindType . 's';
+                    mysqli_stmt_bind_param($stmt_notif, $types, $client_id, $dateValue, $facturi_array_str);
+                    mysqli_stmt_execute($stmt_notif);
+                    mysqli_stmt_close($stmt_notif);
+                }
                 
                 $sent_count++;
             } catch (Exception $e) {
@@ -184,12 +217,13 @@ function generateReminderEmail($client_name, $client_cif, $invoices, $total_debt
                 <tbody>';
     
     foreach ($invoices as $invoice) {
+        $out_value = isset($invoice['outstanding']) ? (float)$invoice['outstanding'] : ((float)$invoice['factura_client_valoare_totala'] - (float)($invoice['suma_partiala'] ?? 0));
         $html .= '<tr>
                         <td>' . htmlspecialchars($invoice['factura_numar'], ENT_QUOTES, 'UTF-8') . '</td>
                         <td>' . date('d.m.Y', strtotime($invoice['factura_data_emiterii'])) . '</td>
                         <td>' . date('d.m.Y', strtotime($invoice['factura_client_termen'])) . '</td>
                         <td style="color: #d9534f;"><strong>' . $invoice['zile_intarziere'] . ' zile</strong></td>
-                        <td>' . number_format($invoice['factura_client_valoare_totala'], 2, '.', ',') . '</td>
+                        <td>' . number_format($out_value, 2, '.', ',') . '</td>
                     </tr>';
     }
     
@@ -232,11 +266,11 @@ include '../dashboard/header.php';
         ?>
         
         <div class="callout primary">
-            <p><strong>Notă:</strong> Vor fi afișați doar clienții cu facturi restante mai vechi de  3 de zile.</p>
+            <p><strong>Notă:</strong> Vor fi afișați doar clienții cu facturi restante mai vechi de  1 zi.</p>
         </div>
         
         <?php
-        // Query to get clients with overdue invoices >  3 days
+        // Query to get clients with overdue invoices > 0 day
         // First try from clienti_abonamente
         $query = "SELECT DISTINCT 
                     f.factura_client_ID,
@@ -245,12 +279,13 @@ include '../dashboard/header.php';
                     MAX(COALESCE(a.abonament_client_email, c.Client_email)) as client_email,
                     COUNT(DISTINCT f.factura_ID) as numar_facturi,
                     (
-                        SELECT SUM(ff.factura_client_valoare_totala)
+                        SELECT SUM(ff.factura_client_valoare_totala - IFNULL(ff.factura_suma_partiala,0))
                         FROM facturare_facturi ff
                         WHERE ff.factura_client_ID = f.factura_client_ID
                           AND ff.factura_client_achitat = '0'
+                          AND (ff.factura_client_valoare_totala - IFNULL(ff.factura_suma_partiala,0)) > 0
                           AND ff.factura_client_termen < CURDATE()
-                          AND DATEDIFF(CURDATE(), ff.factura_client_termen) > 3
+                          AND DATEDIFF(CURDATE(), ff.factura_client_termen) > 0
                     ) as total_restant,
                     MIN(f.factura_client_termen) as prima_scadenta,
                     MAX(DATEDIFF(CURDATE(), f.factura_client_termen)) as zile_intarziere_max
@@ -260,7 +295,7 @@ include '../dashboard/header.php';
                 LEFT JOIN clienti_date c ON cc.ID_Client = c.ID_Client
                 WHERE f.factura_client_achitat = '0'
                 AND f.factura_client_termen < CURDATE()
-                AND DATEDIFF(CURDATE(), f.factura_client_termen) >  3
+                AND DATEDIFF(CURDATE(), f.factura_client_termen) > 0
                 GROUP BY f.factura_client_ID
                 HAVING client_email IS NOT NULL AND client_email != ''
                 ORDER BY zile_intarziere_max DESC";
@@ -300,7 +335,7 @@ include '../dashboard/header.php';
 
                             // 1. Numerele facturilor restante (concatenate)
                             $facturi_numer = [];
-                            $sql_facturi = "SELECT factura_numar FROM facturare_facturi WHERE factura_client_ID='$client_id' AND factura_client_achitat='0' AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) > 3";
+                            $sql_facturi = "SELECT factura_numar FROM facturare_facturi WHERE factura_client_ID='$client_id' AND factura_client_achitat='0' AND (factura_client_valoare_totala - IFNULL(factura_suma_partiala,0)) > 0 AND factura_client_termen < CURDATE() AND DATEDIFF(CURDATE(), factura_client_termen) > 0";
                             $res_facturi = ezpub_query($conn, $sql_facturi);
                             while ($rf = ezpub_fetch_array($res_facturi)) {
                                 $facturi_numer[] = $rf['factura_numar'];

@@ -204,9 +204,9 @@ else
 else
 {
 	// Validate indexd before using in filename
-	if (empty($indexd) || !preg_match('/^[a-zA-Z0-9_-]+$/', $indexd)) {
+	if (empty($indexd) || strspn($indexd, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-') !== strlen($indexd)) {
 		die("Invalid download index");
-	}
+	} 
 	
 	$retval=array();
 		$download_url=$download_url.$indexd;

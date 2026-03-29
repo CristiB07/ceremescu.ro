@@ -49,7 +49,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                         <option value="sitewastereporting.php?cl=<?php echo $cl?>&wID=<?php echo $waste?>&yr=<?php echo $year?>&aloc=<?php echo $aloc ?>" selected><?php echo $strPick?></option>
                         <?php
                         if ($clearence!='ADMIN' || $clearence!='MANAGER'){
-			$query7="SELECT * FROM date_utilizatori WHERE utilizator_ID='$uid' ORDER By utilizator_Nume ASC";
+			$query7="SELECT * FROM date_utilizatori ORDER By utilizator_Nume ASC";
             }
             else {
             $query7="SELECT * FROM date_utilizatori WHERE utilizator_Function='USER' ORDER By utilizator_Nume ASC";
@@ -57,7 +57,7 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
 			$result7=ezpub_query($conn,$query7);
 			while($seenby = ezpub_fetch_array($result7)){
 			if ((isset($_GET['aloc'])) && !empty($_GET['aloc'])){
-			If ($seenby['strSeenBy']==$_GET['aloc']) {
+			If ($seenby['utilizator_Code']==$_GET['aloc']) {
 			echo"<option selected value=\"sitewastereporting.php?cl=$cl&wID=$waste&yr=$year&aloc=".$seenby['utilizator_Code']."\">". $seenby['strUserName']."</option>";}
 			else{echo"<option value=\"sitewastereporting.php?cl=$cl&wID=$waste&yr=$year&aloc=".$seenby['utilizator_Code']."\">". $seenby['utilizator_Nume']." ". $seenby['utilizator_Prenume']."</option>";}}
 			else {echo"<option value=\"sitewastereporting.php?cl=$cl&wID=$waste&yr=$year&aloc=".$seenby['utilizator_Code']."\">". $seenby['utilizator_Nume']." ". $seenby['utilizator_Prenume']."</option>";}
@@ -72,8 +72,24 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
                             value="sitewastereporting.php?cl=<?php echo $cl?>&wID=<?php echo $waste?>&yr=<?php echo $year?>&aloc=<?php echo $aloc ?>"
                             selected><?php echo $strPick?></option>
                         <?php
-			$query7="SELECT DISTINCT raportare_client_id, Client_Denumire, ID_Client, Client_Aloc FROM clienti_date, deseuri_raportari WHERE raportare_client_id=ID_Client ORDER By Client_Denumire ASC";
-			$result7=ezpub_query($conn,$query7);
+                          if ($clearence!='ADMIN' || $clearence!='MANAGER')
+                {
+			$query7="SELECT DISTINCT r.raportare_client_id, c.Client_Denumire, c.ID_Client, a.abonament_client_aloc AS Client_Aloc
+                       FROM deseuri_raportari r
+                       JOIN clienti_date c ON r.raportare_client_id = c.ID_Client
+                       LEFT JOIN clienti_abonamente a ON a.abonament_client_ID = c.ID_Client
+                       ORDER BY c.Client_Denumire ASC";
+                          }
+                          else
+                            {
+            $query7="SELECT DISTINCT r.raportare_client_id, c.Client_Denumire, c.ID_Client, a.abonament_client_aloc AS Client_Aloc
+                       FROM deseuri_raportari r
+                       JOIN clienti_date c ON r.raportare_client_id = c.ID_Client
+                       LEFT JOIN clienti_abonamente a ON a.abonament_client_ID = c.ID_Client
+                       WHERE a.abonament_client_aloc='$code'
+                       ORDER BY c.Client_Denumire ASC";                    
+                            }
+                          $result7=ezpub_query($conn,$query7);
 			while($seenby = ezpub_fetch_array($result7)){
 			if ((isset($_GET['cl'])) && !empty($_GET['cl'])){
 			If ($seenby['ID_Client']==$_GET['cl']) {
@@ -130,21 +146,31 @@ function MM_jumpMenu(targ,selObj,restore){ //v3.0
 echo " <div class=\"grid-x grid-margin-x\">
      <div class=\"large-12 medium-12 small-12 cell\">
 <a href=\"wastereportselector.php\" class=\"button\">$strAdd&nbsp;<i class=\"fa-xl fa fa-plus\" title=\"$strAdd\"></i></a></div></div>";
-$query="SELECT c.ID_Client, c.Client_Denumire, c.Client_Aloc, r.raportare_an_raportare, r.raportare_cod_deseu, d.cd_id
+// build base query with dynamic where clauses collected
+$where = [];
+$where[] = "r.raportare_an_raportare = '$year'";
+if ($aloc !== '0' && $aloc !== 0) {
+    // only include when nonzero value selected, use abonnment allocation
+    $where[] = "a.abonament_client_aloc='" . mysqli_real_escape_string($conn, $aloc) . "'";
+}
+if ($cl !== '0' && $cl !== 0) {
+    $where[] = "raportare_client_id='" . mysqli_real_escape_string($conn, $cl) . "'";
+}
+if ($waste !== '0' && $waste !== 0) {
+    $where[] = "raportare_cod_deseu='" . mysqli_real_escape_string($conn, $waste) . "'";
+}
+
+$query="SELECT c.ID_Client, c.Client_Denumire, a.abonament_client_aloc AS Client_Aloc, r.raportare_an_raportare, r.raportare_cod_deseu, d.cd_id
 FROM deseuri_raportari r
 JOIN clienti_date c ON c.ID_Client = r.raportare_client_id
-LEFT JOIN deseuri_coduri d ON d.cd_full = r.raportare_cod_deseu
-WHERE r.raportare_an_raportare = '$year' 
-GROUP BY c.ID_Client, c.Client_Denumire, r.raportare_an_raportare, r.raportare_cod_deseu, d.cd_id";
-if ($aloc!='0'){
-$query= $query . " AND c.Client_Aloc='$aloc'";
-};
-if ($cl!='0'){
-$query= $query . " AND raportare_client_id='$cl'";
-};
-if ($waste!='0'){
-$query= $query . " AND raportare_cod_deseu='$waste'";
-};
+LEFT JOIN clienti_abonamente a ON a.abonament_client_ID = c.ID_Client
+LEFT JOIN deseuri_coduri d ON d.cd_full = r.raportare_cod_deseu";
+
+if (count($where) > 0) {
+    $query .= "\nWHERE " . implode(" AND ", $where);
+}
+
+$query .= "\nGROUP BY c.ID_Client, c.Client_Denumire, r.raportare_an_raportare, r.raportare_cod_deseu, d.cd_id";
 $result=ezpub_query($conn,$query);
 $numar=ezpub_num_rows($result,$query);
 $pages = new Pagination;  

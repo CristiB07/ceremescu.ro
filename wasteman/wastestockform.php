@@ -13,7 +13,9 @@ $msg = '';
 
 // Handle form submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $client && $cod_id) {
-    $stoc_cantitate = isset($_POST['stoc_cantitate']) ? floatval($_POST['stoc_cantitate']) : 0;
+    $stoc_cantitate_raw = isset($_POST['stoc_cantitate']) ? $_POST['stoc_cantitate'] : '';
+    $stoc_cantitate_norm = parseRomanianNumber($stoc_cantitate_raw);
+    $stoc_cantitate = is_numeric($stoc_cantitate_norm) ? (float)$stoc_cantitate_norm : 0;
     // Check if record exists
     $stmt = mysqli_prepare($conn, "SELECT stoc_id FROM deseuri_stocuri WHERE stoc_client_id=? AND stoc_an_raportare=? AND stoc_cod_deseu=?");
     mysqli_stmt_bind_param($stmt, "iss", $client, $year, $cod_id);

@@ -1,4 +1,8 @@
 <?php
+// Disable PCRE JIT on macOS if security restrictions prevent executable memory allocation
+// this avoids the warning about "Allocation of JIT memory failed".
+@ini_set('pcre.jit', '0');
+
 //update 8.01.2025
 
 // Connect to server and select databse.
@@ -55,26 +59,98 @@ function ezpub_query($conn, $query ){
 // Anti-SQL Injection
 function check_inject()
 {
-    $badchars = array(
-                    "insert",  "INSERT", "select", "SELECT", "update", "UPDATE", "delete", "DELETE", "distinct", "DISTINCT", "having", "HAVING", "truncate", "TRUNCATE", "replace", "REPLACE",
-                    "handler", "HANDLER", "like", "LIKE", " as ", " AS ", " or ", " OR ", "procedure", "limit", "order by", "group by", "asc", " ASC ", "desc", " DESC ",
-            );
-    foreach($_POST as $value)
-    {
-      if(in_array($value, $badchars))
-      {
-        die("SQL Injection Detected\n<br />\nIP: ".$_SERVER['REMOTE_ADDR']);
-      }
-            else
-            {
-                // Check for any bad token as substring (case-insensitive) instead of using preg_split
-                foreach ($badchars as $bad) {
-                        if (stripos($value, $bad) !== false) {
-                                die("SQL Injection Detected\n<br />\nIP: " . $_SERVER['REMOTE_ADDR']);
-                        }
+    // tokens to detect (lowercase/plain). Multi-word tokens or tokens with surrounding spaces are preserved
+    $badTokens = array(
+        'insert', 'select', 'update', 'delete', 'distinct', 'having', 'truncate', 'replace',
+        'handler', 'procedure', 'limit', 'order by', 'group by', 'asc', 'desc',
+        ' as ', ' or ', 'like'
+    );
+
+    // fields that legitimately contain HTML — skip heavy filtering for these
+    $skipFields = array(
+        'pagina_continut', 'produs_descriere', 'articol_continut', 'faq_a', 'pagina_descriere', 'produs_meta',
+        'course_whatyouget', 'course_description'
+    );
+
+    // recursive walker that preserves keys so we can skip specific fields
+    $walker = function($arr, $parentKey = '') use (&$walker, $badTokens, $skipFields) {
+        foreach ($arr as $key => $val) {
+            $fullKey = $parentKey === '' ? $key : $parentKey . '.' . $key;
+
+            // If the field name is in skip list, skip validation
+            if (in_array($key, $skipFields, true) || in_array($fullKey, $skipFields, true)) {
+                continue;
+            }
+
+            if (is_array($val)) {
+                $walker($val, $fullKey);
+                continue;
+            }
+
+            if (!is_string($val)) continue;
+
+            // strip HTML for checking and trim
+            $value = trim(strip_tags($val));
+            if ($value === '') continue;
+
+            foreach ($badTokens as $bad) {
+                if (strpos($bad, ' ') !== false) {
+                    // multi-word token -> simple substring check
+                    if (stripos($value, $bad) !== false) {
+                        error_log("SQL injection block: field=$fullKey token=$bad ip=" . getRealIpAddr() . " value=" . substr($value,0,200));
+                        die("SQL Injection Detected\n<br />\nIP: " . getRealIpAddr());
+                    }
+                } else {
+                    // whole-word match to avoid false positives (e.g. 'selected' != 'select')
+                    if (preg_match('/\b' . preg_quote($bad, '/') . '\b/i', $value)) {
+                        error_log("SQL injection block: field=$fullKey token=$bad ip=" . getRealIpAddr() . " value=" . substr($value,0,200));
+                        die("SQL Injection Detected\n<br />\nIP: " . getRealIpAddr());
+                    }
                 }
             }
-	}
+        }
+    };
+
+    $walker($_POST);
+}
+
+// Minimal normalizer helpers: only strip legal forms and collapse spaces
+if (!function_exists('normalize_company_name_for_search')) {
+    function normalize_company_name_for_search($name) {
+        if ($name === null) return '';
+        $s = trim($name);
+        if ($s === '') return '';
+
+        $patterns = [
+            '/\bS\.?R\.?L\.?\b/iu', '/\bSRL\b/iu', '/\bS\.?C\.?\b/iu', '/\bSC\b/iu',
+            '/\bS\.?A\.?\b/iu', '/\bSA\b/iu', '/\bPFA\b/iu', '/\bI\.?I\.?\b/iu',
+            '/\bIF\b/iu', '/\bSCA\b/iu', '/\bS\.?C\.?A\.?\b/iu', '/\bSCS\b/iu',
+            '/\bFIRMA\b/iu', '/\bUNITATE\b/iu', '/\bROMANIA\b/iu'
+        ];
+        $s = preg_replace($patterns, ' ', $s);
+        $s = preg_replace('/\s+/u', ' ', $s);
+        return trim($s);
+    }
+}
+
+if (!function_exists('normalize_company_name_for_search_verbose')) {
+    function normalize_company_name_for_search_verbose($name) {
+        $steps = [];
+        $steps['original'] = $name;
+        $s = trim($name);
+        $steps['trimmed'] = $s;
+        $patterns = [
+            '/\bS\.?R\.?L\.?\b/iu', '/\bSRL\b/iu', '/\bS\.?C\.?\b/iu', '/\bSC\b/iu',
+            '/\bS\.?A\.?\b/iu', '/\bSA\b/iu', '/\bPFA\b/iu', '/\bI\.?I\.?\b/iu',
+            '/\bIF\b/iu', '/\bSCA\b/iu', '/\bS\.?C\.?A\.?\b/iu', '/\bSCS\b/iu',
+            '/\bFIRMA\b/iu', '/\bUNITATE\b/iu', '/\bROMANIA\b/iu'
+        ];
+        $s_after = preg_replace($patterns, ' ', $s);
+        $s_after = preg_replace('/\s+/u', ' ', $s_after);
+        $steps['after_remove_forms'] = trim($s_after);
+        $steps['final'] = $steps['after_remove_forms'];
+        return $steps;
+    }
 }
 
 //Romanize numbers
@@ -85,6 +161,17 @@ else {
     $romanized = number_format($number,2,',','.');
 }
     return $romanized;
+}
+
+// Integer variant for presentation without decimals
+function romanize_int($number) {
+    if (empty($number) && $number !== 0 && $number !== '0') {
+        return '';
+    }
+    if ($number == 0 || $number === '0') {
+        return '0';
+    }
+    return number_format((int)$number, 0, ',', '.');
 }
 
 // Generate random string
@@ -287,8 +374,9 @@ class CursBNR
 			libxml_disable_entity_loader(true);
 		}
 		
-		// Validate XML content before parsing
-		if (empty($this->xmlDocument) || !preg_match('/^<\?xml/i', trim($this->xmlDocument))) {
+		// Validate XML content before parsing (avoid PCRE/JIT — use simple string check)
+		$trimmed = ltrim($this->xmlDocument);
+		if (empty($this->xmlDocument) || stripos($trimmed, '<?xml') !== 0) {
 			throw new Exception('Invalid XML response from BNR: ' . substr($this->xmlDocument, 0, 100));
 		}
 		
@@ -547,11 +635,92 @@ function xml2array($contents, $get_attributes=1, $priority = 'tag') {
 function parseRomanianNumber($value) {
     // Elimină spații albe
     $value = trim($value);
-    // Înlocuiește punct (separator de mii) cu nimic
-    $value = str_replace('.', '', $value);
-    // Înlocuiește virgulă (separator zecimal) cu punct
-    $value = str_replace(',', '.', $value);
+    if ($value === '') return $value;
+    // Normalizează caractere spațiu non-break
+    $value = str_replace(array("\xc2\xa0", "\u00A0"), '', $value);
+
+    // Dacă are virgulă, tratăm formatul românesc "1.234,56"
+    if (strpos($value, ',') !== false) {
+        $value = str_replace('.', '', $value); // elimină separatoarele de mii
+        $value = str_replace(',', '.', $value); // virgula devine separator zecimal
+        return $value;
+    }
+
+    // Dacă are doar puncte, decidem dacă sunt separatoare de mii sau separator zecimal
+    if (strpos($value, '.') !== false) {
+        $parts = explode('.', $value);
+        $decimalPart = end($parts);
+        // Dacă partea de după ultimul punct are exact 3 cifre și există cel puțin două grupuri, e probabil separator de mii
+        if (strlen($decimalPart) === 3 && count($parts) > 1) {
+            $value = str_replace('.', '', $value);
+            return $value;
+        }
+        // Altfel, presupunem că punctul este separator zecimal și păstrăm formatul
+        return $value;
+    }
+
+    // Nu există nici separatoare, returnăm ca atare
     return $value;
+}
+
+// Helper global pentru a returna o valoare numerică compatibilă SQL sau NULL
+if (!function_exists('sql_decimal_or_null')) {
+    /**
+     * sql_decimal_or_null
+     * Acceptă formatul românesc pentru numere (ex: "1.234,56" sau "0,18")
+     * și returnează fie NULL, fie un literal numeric potrivit pentru inserție în SQL (fără ghilimele).
+     * Dacă valoarea nu poate fi convertită, se întoarce un string securizat în ghilimele ca ultim resort.
+     *
+     * @param mixed $val
+     * @return string
+     */
+    function sql_decimal_or_null($val) {
+        if ($val === '' || $val === null) {
+            return 'NULL';
+        }
+        // Normalizează și curăță valoarea
+        $v = trim($val);
+        // Normalizează caractere spațiu non-break și alte spații
+        $v = str_replace(array("\xc2\xa0", "\u00A0", "\u00A0"), '', $v);
+        // Folosește funcția dedicată dacă există (converteste "1.234,56" -> "1234.56")
+        if (function_exists('parseRomanianNumber')) {
+            $v = parseRomanianNumber($v);
+        } else {
+            $v = str_replace('.', '', $v);
+            $v = str_replace(',', '.', $v);
+        }
+        // Elimină spațiile rămase
+        $v = str_replace(' ', '', $v);
+
+        // Înlocuiește eventuale virgule sau variante de virgulă rămase cu punct
+        $v = str_replace(array(',', '‚', '，'), '.', $v);
+
+        // Dacă stringul începe cu "." (ex: ".12") adaugă zero pentru compatibilitate SQL
+        if (strlen($v) > 0 && $v[0] === '.') {
+            $v = '0' . $v;
+        }
+        if (strlen($v) > 1 && substr($v, 0, 2) === '-.') {
+            $v = str_replace('-.', '-0.', $v);
+        }
+
+        // Dacă este numeric, returnează ca atare (fără ghilimele)
+        if (is_numeric($v)) {
+            return $v;
+        }
+
+        // Încercare de curățare suplimentară: păstrează doar cifre, punct și minus
+        $v2 = preg_replace('/[^0-9\.\-]/', '', $v);
+        // Dacă a rămas un punct la început (.12) adaugă zero
+        if ($v2 !== '' && $v2[0] === '.') {
+            $v2 = '0' . $v2;
+        }
+        if ($v2 !== '' && is_numeric($v2)) {
+            return $v2;
+        }
+
+        // Ca ultim resort, scapă și returnează quoted string
+        return "'" . addslashes($val) . "'";
+    }
 }
 
 /**

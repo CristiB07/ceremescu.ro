@@ -21,3 +21,9 @@ Thumbs.db
 .avi
 .mkv
 .flv
+
+#application credentials
+_site/
+
+#vscode
+.vscode/

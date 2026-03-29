@@ -5,7 +5,7 @@ $strPageTitle="Verificare furnizor";
 include '../dashboard/header.php';
 
 // Validate CUI input
-if (!isset($_GET['cui']) || !preg_match('/^\d{6,10}$/', $_GET['cui'])) {
+if (!isset($_GET['cui']) || !ctype_digit($_GET['cui']) || strlen($_GET['cui']) < 6 || strlen($_GET['cui']) > 10) {
     die("Invalid CUI format. Must be 6-10 digits.");
 }
 $cui = $_GET['cui'];

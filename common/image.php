@@ -24,7 +24,7 @@ include '../classes/upload.class.php';
 If (IsSet($_GET['directory']) AND IsSet($_GET['field'])) 
 {
     // Whitelist allowed directories to prevent path traversal
-    $allowed_directories = ['blog', 'shop', 'newsletter', 'contracts', 'products', 'uploads'];
+    $allowed_directories = ['blog', 'shop', 'newsletter', 'pages', 'contracts', 'products', 'uploads'];
     $directory = basename($_GET['directory']); // Remove any path separators
     
     if (!in_array($directory, $allowed_directories, true)) {
@@ -32,7 +32,7 @@ If (IsSet($_GET['directory']) AND IsSet($_GET['field']))
         echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
-    window.location = \"siteproducts.php\"
+    window.history.go(-1);
 }
 //-->
 </script>
@@ -53,7 +53,7 @@ else{
     echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
-    window.location = \"siteproducts.php\"
+    window.history.go(-1);
 }
 //-->
 </script>

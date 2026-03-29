@@ -63,7 +63,7 @@ If ($_GET['mode']=="new"){
 	$mSQL = $mSQL . "ad_an_raportare,";
 	$mSQL = $mSQL . "ad_total)";
 
-	$mSQL = $mSQL . "Values(";
+	$mSQL = $mSQL . "values(";
 	$mSQL = $mSQL . "'" .$_POST["ad_client_id"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["ad_ambalaj_id"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["ad_operator_denumire"] . "', ";
@@ -184,7 +184,7 @@ if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
         </div>
         </div>
  <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
+     <div class="large-12 medium-12 small-12 cell"> <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
 	</div>
 	</div>
   </form>
@@ -261,7 +261,7 @@ $row=ezpub_fetch_array($result);
         </div>
         </div>
  <div class="grid-x grid-margin-x">
-     <div class="large-12 medium-12 small-12 cell"> <input type="submit" Value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
+     <div class="large-12 medium-12 small-12 cell"> <input type="submit" value="<?php echo $strAdd?>" name="Submit" class="button success" /> 
 	</div>
 	</div>
   </form>

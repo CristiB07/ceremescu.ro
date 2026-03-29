@@ -31,6 +31,9 @@ class Pagination{
 		$this->mid_range = 7;
 		$this->ipp_array = array(10,25,50,100,'All');
 		$this->querystring = ''; // Initialize to empty string
+
+		// Set default items per page to 20
+		$this->default_ipp = 20;
 		
 		// Validate and sanitize items per page
 		if (!empty($_GET['ipp'])) {
@@ -151,16 +154,8 @@ class Pagination{
 	}
 	function display_items_per_page()
 	{
-		$items = '';
-		$base_url = htmlspecialchars(strtok($_SERVER["REQUEST_URI"], '?'), ENT_QUOTES, 'UTF-8');
-		$safe_querystring = htmlspecialchars($this->querystring ?? '', ENT_QUOTES, 'UTF-8');
-		
-		if(!isset($_GET[ipp])) $this->items_per_page = $this->default_ipp;
-		foreach($this->ipp_array as $ipp_opt) {
-			$safe_ipp_opt = htmlspecialchars($ipp_opt, ENT_QUOTES, 'UTF-8');
-			$items .= ($ipp_opt == $this->items_per_page) ? "<option selected value=\"$safe_ipp_opt\">$safe_ipp_opt</option>\n":"<option value=\"$safe_ipp_opt\">$safe_ipp_opt</option>\n";
-		}
-		return "<span class=\"paginate\">Items per page:</span><select class=\"paginate\" onchange=\"window.location='{$base_url}?page=1&ipp='+this[this.selectedIndex].value+'{$safe_querystring}';return false\">$items</select>\n";
+		// Dropdown for items per page removed — return empty string
+		return '';
 	}
 	function display_jump_menu()
 	{

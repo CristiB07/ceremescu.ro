@@ -31,12 +31,11 @@ if ((isset( $_GET['aloc'])) && !empty( $_GET['aloc'])){
     $aloc = 0;
 }
 
-if ((isset( $_GET['cl'])) && !empty( $_GET['cl'])){
-    if (!preg_match('/^[0-9]+$/', $_GET['cl'])) {
-        $cl = 0;
-    } else {
-        $cl = $_GET['cl'];
-    }
+// client filter: accept whatever string comes through (some clients start with
+// 'RO' so numeric check would discard them).  If nothing provided default to 0.
+if (isset($_GET['cl']) && $_GET['cl'] !== '') {
+    // preserve exactly as passed; will be used in prepared statement as string
+    $cl = $_GET['cl'];
 } else {
     $cl = 0;
 }
@@ -149,21 +148,15 @@ $monthname = $formatter->format($dateObj);
                         <option
                             value="sitereceivedinvoices.php?act=<?php echo $act?>&cl=<?php echo $cl?>&fmonth=<?php echo $fmonth?>&yr=<?php echo $year?>&paid=<?php echo $paid?>&aloc=<?php echo $aloc ?>"
                             selected><?php echo $strPick?></option>
-                        <?php
-			 			$query7="SELECT DISTINCT YEAR(fp_data_emiterii) as iyear FROM facturare_facturi_primite ORDER By YEAR(fp_data_emiterii) DESC";
-			$result7=ezpub_query($conn,$query7);
-			while($seenby = ezpub_fetch_array($result7)){
-						if ((isset($_GET['yr'])) && !empty($_GET['yr'])){
-			If ($seenby['iyear']==$_GET['yr']) {
-			echo"<option selected value=\"sitereceivedinvoices.php?act=$act&cl$cl&fmonth=$fmonth&paid=$paid&yr=".$seenby['iyear']."\">". $seenby['iyear']."</option>";}
-			else{echo"<option value=\"sitereceivedinvoices.php?act=$act&cl=$cl&paid=$paid&fmonth=$fmonth&yr=".$seenby['iyear']."\">". $seenby['iyear']."</option>";}}
-			else {
-			if ($year==$seenby['iyear']) 
-			{echo "<option value=\"sitereceivedinvoices.php?act=$act&cl=$cl&paid=$paid&fmonth=$fmonth&yr=".$seenby['iyear']." \" selected >". $seenby['iyear']."</option>";}
-			else {echo"<option value=\"sitereceivedinvoices.php?act=$act&cl=$cl&paid=$paid&fmonth=$fmonth&yr=".$seenby['iyear']."\">". $seenby['iyear']."</option>";}
-			}
-			}
-			 ?>
+<?php
+$query7="SELECT DISTINCT YEAR(fp_data_emiterii) as iyear FROM facturare_facturi_primite ORDER By YEAR(fp_data_emiterii) DESC";
+$result7=ezpub_query($conn,$query7);
+while($seenby = ezpub_fetch_array($result7)){
+    $iy = $seenby['iyear'];
+    $sel = ($iy == $year) ? ' selected' : '';
+      echo "<option value=\"sitereceivedinvoices.php?act=$act&cl=$cl&aloc=$aloc&fmonth=$fmonth&paid=$paid&yr=$iy\"$sel>$iy</option>";
+}
+?>
                     </select></label>
             </div>
             <div class="large-3 medium-3 small-3 cell">

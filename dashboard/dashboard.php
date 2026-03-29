@@ -181,6 +181,12 @@ if ($role == 'ADMIN') {
     }
 }
 ?>
+<?php 
+if ($sitefunction=='bi')
+        {
+include_once '../business/businessdashboard.php';
+        }
+?>
 <div class="callout primary">
             <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam eget augue elit. Pellentesque justo
                 tortor, ultricies vel lobortis at, vehicula gravida enim. Morbi sollicitudin pellentesque sodales.

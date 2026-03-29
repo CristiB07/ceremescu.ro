@@ -110,7 +110,13 @@ mysqli_stmt_close($stmt_ins);
         var parent_articol_pret = parent.document.getElementById('articol_pret_' + rowIndex);
         var myResult = myBox1 * myBox2;
         pret_lei.value = myResult;
-        parent_articol_pret.value = myResult;
+        if (parent_articol_pret) {
+            parent_articol_pret.value = myResult;
+            // trigger parent calculations so value/TVA/total update automatically
+            if (typeof parent.calculate === 'function') parent.calculate(rowIndex);
+            if (typeof parent.calculateTVA === 'function') parent.calculateTVA(rowIndex);
+            if (typeof parent.calculateTotal === 'function') parent.calculateTotal(rowIndex);
+        }
     }
     </script>
     <div class="grid-x grid-margin-x">

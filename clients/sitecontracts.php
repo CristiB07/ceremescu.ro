@@ -79,13 +79,36 @@ $contract_valuta = trim($_POST["Contract_Valuta"] ?? '');
 
 // File upload
 $uploaddir = $hddpath ."/" . $contracts_folder;
-$contractfiles= '';
-$countfiles = count($_FILES['file']['name']);
-for($i=0;$i<$countfiles;$i++){
-    $filename = $_FILES['file']['name'][$i];
-    move_uploaded_file($_FILES['file']['tmp_name'][$i],$uploaddir."/".$filename);
-    $contractfiles=$contractfiles.";".$filename;
+// Ensure upload directory exists
+$upload_errors = array();
+if (!is_dir($uploaddir)) {
+    if (!mkdir($uploaddir, 0755, true)) {
+        $upload_errors[] = "Unable to create upload directory: $uploaddir";
+        error_log(end($upload_errors));
+    }
 }
+$contractfiles = '';
+if (isset($_FILES['file']) && is_array($_FILES['file']['name'])) {
+    $countfiles = count($_FILES['file']['name']);
+    for ($i = 0; $i < $countfiles; $i++) {
+        $filename = basename($_FILES['file']['name'][$i]);
+        $tmp = $_FILES['file']['tmp_name'][$i] ?? null;
+        if ($tmp && is_uploaded_file($tmp)) {
+            $target = $uploaddir . '/' . $filename;
+            if (move_uploaded_file($tmp, $target)) {
+                $contractfiles .= ';' . $filename;
+            } else {
+                $upload_errors[] = "Failed to move uploaded file to $target";
+                error_log(end($upload_errors));
+            }
+        } elseif (!empty($filename)) {
+            $upload_errors[] = "Missing tmp file for upload: $filename";
+            error_log(end($upload_errors));
+        }
+    }
+} else {
+    $countfiles = 0;
+} 
 
 $lunifacturare= implode(';',$_POST['Contract_lunifacturare']);
 
@@ -134,7 +157,13 @@ If ($contract_abonament==1)
     echo "<div class=\"callout success\">Abonament adăugat.</div>";
 }
 
-echo "<div class=\"callout success\">$strRecordAdded</div></div></div>";
+echo "<div class=\"callout success\">$strRecordAdded</div>";
+if (!empty($upload_errors)) {
+    $upload_msg = '';
+    foreach ($upload_errors as $ue) { $upload_msg .= htmlspecialchars($ue, ENT_QUOTES, 'UTF-8') . '<br>'; }
+    echo "<div class='callout alert'>$upload_msg</div>";
+}
+echo "</div></div>"; 
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
@@ -165,12 +194,35 @@ If (isSet($row['Contract_File']) AND !empty($row['Contract_File'])) {
 
 // File upload
 $uploaddir = $hddpath ."/" . $contracts_folder;
-$countfiles = count($_FILES['file']['name']);
-for($i=0;$i<$countfiles;$i++){
-    $filename = $_FILES['file']['name'][$i];
-    move_uploaded_file($_FILES['file']['tmp_name'][$i],$uploaddir."/".$filename);
-    $contractfiles=$contractfiles.";".$filename;
+// Ensure upload directory exists
+$upload_errors = isset($upload_errors) && is_array($upload_errors) ? $upload_errors : array();
+if (!is_dir($uploaddir)) {
+    if (!mkdir($uploaddir, 0755, true)) {
+        $upload_errors[] = "Unable to create upload directory: $uploaddir";
+        error_log(end($upload_errors));
+    }
 }
+if (isset($_FILES['file']) && is_array($_FILES['file']['name'])) {
+    $countfiles = count($_FILES['file']['name']);
+    for ($i = 0; $i < $countfiles; $i++) {
+        $filename = basename($_FILES['file']['name'][$i]);
+        $tmp = $_FILES['file']['tmp_name'][$i] ?? null;
+        if ($tmp && is_uploaded_file($tmp)) {
+            $target = $uploaddir . '/' . $filename;
+            if (move_uploaded_file($tmp, $target)) {
+                $contractfiles = $contractfiles . ';' . $filename;
+            } else {
+                $upload_errors[] = "Failed to move uploaded file to $target";
+                error_log(end($upload_errors));
+            }
+        } elseif (!empty($filename)) {
+            $upload_errors[] = "Missing tmp file for upload: $filename";
+            error_log(end($upload_errors));
+        }
+    }
+} else {
+    $countfiles = 0;
+} 
 
 // Validare input pentru UPDATE
 $id_client = isset($_POST["ID_Client"]) && is_numeric($_POST["ID_Client"]) ? (int)$_POST["ID_Client"] : 0;
@@ -270,8 +322,13 @@ elseif ($contract_abonament==1) {
     echo "<div class=\"callout success\">$strSubscribtionAdded</div>";
 }
 
-echo "<div class=\"callout success\">$strRecordModified</div></div></div>";
-echo "<div class=\"callout success\">$strRecordModified</div></div></div>";
+echo "<div class=\"callout success\">$strRecordModified</div>";
+if (!empty($upload_errors)) {
+    $upload_msg = '';
+    foreach ($upload_errors as $ue) { $upload_msg .= htmlspecialchars($ue, ENT_QUOTES, 'UTF-8') . '<br>'; }
+    echo "<div class='callout alert'>$upload_msg</div>";
+}
+echo "</div></div>";
 echo "<script type=\"text/javascript\">
 <!--
 function delayer(){
@@ -290,8 +347,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 ?>
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell">
-                <p><a href="sitecontracts.php" class="button"><?php echo $strBack?> <i
-                            class="fas fa-backward fa-xl"></i></a></p>
+                <p><a href="sitecontracts.php" class="button"><?php echo $strBack?> <i class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
         <form method="post" action="sitecontracts.php?mode=new" enctype="multipart/form-data">
@@ -340,11 +396,10 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                         </select></label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
-                    <label><?php echo $strSubscribtion?>
+                    <label><?php echo $strSubscribtion?></label>
                         <input name="Contract_abonament" type="radio" value="0" checked />
                         <?php echo $strOneTimeJob?>&nbsp;&nbsp;
                         <input name="Contract_abonament" type="radio" value="1"><?php echo $strSubscribtion?>
-                    </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
@@ -393,7 +448,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
-                    <label><?php echo $strvalue?>
+                    <label><?php echo $strValue?>
                         <input name="Contract_Suma" type="text" id="numar" class="required" value="" />
                     </label>
                 </div>
@@ -423,8 +478,7 @@ If (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strActive?>
                         <input name="Contract_Activ" type="radio" value="0" checked />
-                        <?php echo $strYes?>&nbsp;&nbsp;<input name="Contract_Activ" type="radio"
-                            value="1"><?php echo $strNo?>
+                        <?php echo $strYes?>&nbsp;&nbsp;<input name="Contract_Activ" type="radio" value="1"><?php echo $strNo?>
                     </label>
                 </div>
             </div>
@@ -495,8 +549,7 @@ mysqli_stmt_close($stmt_edit);
                             class="fas fa-backward fa-xl"></i></a></p>
             </div>
         </div>
-        <form method="post" enctype="multipart/form-data"
-            action="sitecontracts.php?mode=edit&cID=<?php echo $cID?>">
+        <form method="post" enctype="multipart/form-data" action="sitecontracts.php?mode=edit&cID=<?php echo $cID?>">
             <?php
 // Prepared statement pentru SELECT abonamente
 $stmt_abon_select = mysqli_prepare($conn, 
@@ -506,6 +559,7 @@ mysqli_stmt_bind_param($stmt_abon_select, 'is', $row['ID_Client'], $row['Contrac
 mysqli_stmt_execute($stmt_abon_select);
 $aresult = mysqli_stmt_get_result($stmt_abon_select);
 $arow = mysqli_fetch_array($aresult, MYSQLI_ASSOC);
+if (!$arow) { $arow = array('abonament_ID' => ''); }
 mysqli_stmt_close($stmt_abon_select);
 ?>
 
@@ -567,18 +621,16 @@ mysqli_stmt_close($stmt_abon_select);
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strNumber?>
-                        <input name="Contract_Numar" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_Numar"]?>" />
+                        <input name="Contract_Numar" type="text" id="numar" class="required" value="<?php echo $row["Contract_Numar"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strYear?>
-                        <input name="Contract_An" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_An"]?>" />
+                        <input name="Contract_An" type="text" id="numar" class="required" value="<?php echo $row["Contract_An"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
-                    <label><?php echo $strSubscribtion?>
+                    <label><?php echo $strSubscribtion?></label>
 
                         <?php 
                         $client_id_temp = (int)$row['ID_Client'];
@@ -605,42 +657,37 @@ mysqli_stmt_close($stmt_abon_select);
                         <input name="Contract_abonament" type="hidden" value="3" />
                         <?php
 	}
-	?></label>
+	?>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strDay?>
-                        <input name="Contract_Zifacturare" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_Zifacturare"]?>" />
+                        <input name="Contract_Zifacturare" type="text" id="numar" class="required" value="<?php echo $row["Contract_Zifacturare"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strDeadline?>
-                        <input name="Contract_Termen" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_Termen"]?>" />
+                        <input name="Contract_Termen" type="text" id="numar" class="required"  value="<?php echo $row["Contract_Termen"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strCurrency?>
                         <input name="Contract_Valuta" type="radio" value="0"
                             <?php If ($row["Contract_Valuta"]==0) echo "checked"?> />
-                        <?php echo $strLei?>&nbsp;&nbsp;<input name="Contract_Valuta" type="radio" value="1"
-                            <?php If ($row["Contract_Valuta"]==1) echo "checked"?>><?php echo $strEuro?>
+                        <?php echo $strLei?>&nbsp;&nbsp;<input name="Contract_Valuta" type="radio" value="1"  <?php If ($row["Contract_Valuta"]==1) echo "checked"?>><?php echo $strEuro?>
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strDate?>
-                        <input name="Contract_Data" type="date" id="numar" class="required"
-                            value="<?php echo $row["Contract_Data"]?>" />
+                        <input name="Contract_Data" type="date" id="numar" class="required" value="<?php echo $row["Contract_Data"]?>" />
                     </label>
                 </div>
             </div>
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strvalue?>
-                        <input name="Contract_Suma" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_Suma"]?>" />
+                        <input name="Contract_Suma" type="text" id="numar" class="required"  value="<?php echo $row["Contract_Suma"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">
@@ -681,14 +728,12 @@ mysqli_stmt_close($stmt_abon_select);
             <div class="grid-x grid-margin-x">
                 <div class="large-3 medium-3 small-3 cell">
                     <label><?php echo $strResponsible?>
-                        <input name="Contract_Responsabil" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_Responsabil"]?>" />
+                        <input name="Contract_Responsabil" type="text" id="numar" class="required" value="<?php echo $row["Contract_Responsabil"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3cell">
                     <label><?php echo $strEmail?>
-                        <input name="Contract_Email_Facturare" type="text" id="numar" class="required"
-                            value="<?php echo $row["Contract_Email_Facturare"]?>" />
+                        <input name="Contract_Email_Facturare" type="text" id="numar" class="required"  value="<?php echo $row["Contract_Email_Facturare"]?>" />
                     </label>
                 </div>
                 <div class="large-3 medium-3 small-3 cell">

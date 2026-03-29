@@ -67,6 +67,13 @@ function searchDosare($numarDosar = '', $obiectDosar = '', $numeParte = '', $ins
     $response = curl_exec($ch);
     $error = curl_error($ch);
 
+    // Optional debug logging: append ?debug_just=1 to the URL to enable
+    if (!empty($_REQUEST['debug_just'])) {
+        error_log("[JUST DEBUG] numeParte=" . $numeParte);
+        error_log("[JUST DEBUG] SOAP Request (truncated): " . substr($xmlRequest, 0, 1000));
+        error_log("[JUST DEBUG] SOAP Response (truncated): " . substr((string)$response, 0, 2000));
+    }
+
     if ($error) {
         return ['error' => $error];
     }
@@ -146,16 +153,30 @@ $error = '';
 // If included from clientprofile (or any other script) and a client name is provided
 // use that name (cleaned from legal forms) as default search `numeParte` and run search.
 if ($is_included && isset($Client_Denumire) && !empty($Client_Denumire)) {
-    // Clean common legal forms: S.R.L., SRL, S.A., SA, PFA, II, I.I., S.C., SC etc.
-    $clean = trim($Client_Denumire);
-    $forms = ["S.R.L.", "S.R.L", "SRL", "S C", "S.C.", "SC", "S.A.", "S A", "SA", "PFA", "II", "I.I.", "SRL.", "Srl", "s.r.l.", "srl", "s.a."];
-    foreach ($forms as $f) {
-        $clean = str_ireplace($f, '', $clean);
+    // Minimal normalization per request: only remove common legal forms and collapse spaces
+    $clean = $Client_Denumire ?? '';
+    if ($clean !== '') {
+        $patterns = [
+            '/\bS\.?R\.?L\.?\b/iu',
+            '/\bSRL\b/iu',
+            '/\bS\.?C\.?\b/iu',
+            '/\bSC\b/iu',
+            '/\bS\.?A\.?\b/iu',
+            '/\bSA\b/iu',
+            '/\bPFA\b/iu',
+            '/\bI\.?I\.?\b/iu',
+            '/\bIF\b/iu',
+            '/\bSCA\b/iu',
+            '/\bS\.?C\.?A\.?\b/iu',
+            '/\bSCS\b/iu',
+            '/\bFIRMA\b/iu',
+            '/\bUNITATE\b/iu',
+            '/\bROMANIA\b/iu'
+        ];
+        $clean = preg_replace($patterns, ' ', $clean);
+        $clean = preg_replace('/\s+/u', ' ', $clean);
+        $clean = trim($clean);
     }
-    // remove extraneous punctuation and multiple spaces
-    $clean = preg_replace('/[\,\.;:\(\)\"]+/', ' ', $clean);
-    $clean = preg_replace('/\s+/', ' ', $clean);
-    $clean = trim($clean);
 
     $numarDosar = '';
     $obiectDosar = '';

@@ -56,7 +56,7 @@ function import_bilanturi_anaf($cui, $conn) {
             'Capital subscris varsat' => 'capital_subscris',
             'Patrimoniul regiei' => 'patrimoniu_regie',
             'Numar mediu de salariati' => 'numar_salariati',
-            'ACTIVE IMOBILIZATE - TOTAL ' => 'active_imobilizate',
+            'ACTIVE IMOBILIZATE - TOTAL' => 'active_imobilizate',
             'ACTIVE CIRCULANTE - TOTAL, din care:' => 'active_circulante',
             'Stocuri' => 'stocuri',
             'Creante' => 'creante',

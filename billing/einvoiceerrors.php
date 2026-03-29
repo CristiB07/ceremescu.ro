@@ -73,63 +73,129 @@ $foldername=$cid;
 $filelocation=$hddpath .'/' . $error_folder ."/".$filename;
 $ziplocation=$hddpath .'/' . $error_folder ."/".$foldername."/";
 
+// debug output
+if (isset($_GET['debug']) && $_GET['debug']) {
+    echo '<pre>DEBUG einvoiceerrors:' . "\n";
+    echo 'cid=' . htmlspecialchars($cid) . "\n";
+    echo 'filelocation=' . $filelocation . "\n";
+    echo 'exists file=' . (file_exists($filelocation) ? 'yes' : 'no') . "\n";
+    echo 'ziplocation=' . $ziplocation . "\n";
+    echo 'is_dir=' . (is_dir($ziplocation) ? 'yes' : 'no') . "\n";
+    echo '</pre>';
+}
+
 $zip = new ZipArchive;
 $res = $zip->open($filelocation);
 if ($res === TRUE) {
 	echo "<div class=\"callout success\">$strFileExtracted:<br/>";
 	for( $i = 0; $i < $zip->numFiles; $i++ ){ 
-	$stat = $zip->statIndex( $i ); 
-    print_r( basename( $stat['name'] ) . '<br />' ); 
-	$zipfile=basename( $stat['name']);
-	$result = file_get_contents('zip://'.$filelocation."#".$zipfile);
-	}	 
+		$stat = $zip->statIndex( $i ); 
+        print_r( basename( $stat['name'] ) . '<br />' ); 
+		$zipfile=basename( $stat['name']);
+		$zipEntry = 'zip://' . $filelocation . "#" . $zipfile;
+		$result = file_get_contents($zipEntry);
+	}
 
-  $zip->extractTo($ziplocation);
-  $zip->close();
+    // make sure destination folder exists before extraction
+    if (!is_dir($ziplocation)) {
+        mkdir($ziplocation, 0755, true);
+    }
+    $zip->extractTo($ziplocation);
+    $zip->close();
 		echo "</div>";
 } else {
 	echo "<div class=\"callout alert\">";
-  echo $strThereWasAnError;
-  echo "</div>";
+    echo $strThereWasAnError;
+    if (isset($_GET['debug']) && $_GET['debug']) {
+        echo ' (zip open returned code ' . $res . ')';
+    }
+    echo "</div>";
+    // nothing to process further
+    exit;
 }
 
-$files = scandir ($ziplocation);
-$firstFile = $ziplocation . $files[2];// because [0] = "." [1] = ".." 
+// ensure the extraction directory exists and contains files before proceeding
+if (!is_dir($ziplocation)) {
+    if (isset($_GET['debug']) && $_GET['debug']) {
+        echo '<pre>DEBUG: ziplocation not directory: ' . $ziplocation . '</pre>';
+    }
+    echo '<div class="callout alert">' . $strThereWasAnError . '</div>';
+    exit;
+}
 
-$xml=file_get_contents($firstFile) or die("Error: Cannot create object");
-$result=xml2array($xml);
+$files = scandir($ziplocation);
+if (isset($_GET['debug']) && $_GET['debug']) {
+    echo '<pre>DEBUG scandir result: ' . var_export($files, true) . '</pre>';
+}
+if ($files === false || count($files) <= 2) {
+    echo '<div class="callout alert">' . $strThereWasAnError . '</div>';
+    exit;
+}
 
-$information=json_encode($result, true);
-$obj = json_decode($information, true);
+$firstFile = $ziplocation . $files[2]; // because [0] = "." [1] = ".." 
 
-echo "<hr>";
+if (!file_exists($firstFile)) {
+    if (isset($_GET['debug']) && $_GET['debug']) {
+        echo '<pre>DEBUG: firstFile not found: ' . $firstFile . '</pre>';
+    }
+    echo '<div class="callout alert">' . $strThereWasAnError . '</div>';
+    exit;
+}
 
+$xml = file_get_contents($firstFile);
+if ($xml === false) {
+    die("Error: Cannot create object");
+}
+// debug xml
+if (isset($_GET['debug']) && $_GET['debug']) {
+    echo '<pre>DEBUG raw XML:' . htmlspecialchars($xml) . '</pre>';
+}
+$result = xml2array($xml);
+if (isset($_GET['debug']) && $_GET['debug']) {
+    echo '<pre>DEBUG parsed array:' . var_export($result, true) . '</pre>';
+}
 
 // Extrage indexul de încărcare și mesajul de eroare
 $index_incarcare = isset($result['header_attr']['Index_incarcare']) ? $result['header_attr']['Index_incarcare'] : '';
 $error_message = isset($result['header']['Error_attr']['errorMessage']) ? $result['header']['Error_attr']['errorMessage'] : '';
 
-// Funcție recursivă pentru a extrage toate mesajele de eroare
-function list_error_messages($errorArray, $index_incarcare) {
-    if (isset($errorArray['Error_attr']['errorMessage']) && !empty($errorArray['Error_attr']['errorMessage'])) {
-        echo '<div class="callout alert">Factura cu index de încărcare <strong>' . htmlspecialchars($index_incarcare ?? '') . '</strong> are următoarea eroare: <strong>' . htmlspecialchars($errorArray['Error_attr']['errorMessage'] ?? '') . '</strong>!</div>';
+// Flag pentru a detecta dacă a fost tipărită cel puţin o eroare
+$errors_found = false;
+
+// Funcție recursivă pentru a extragă toate mesajele de eroare
+function list_error_messages($array, $index_incarcare) {
+    global $errors_found;
+    if (!is_array($array)) {
+        return;
     }
-    if (isset($errorArray['Error']) && is_array($errorArray['Error'])) {
-        // Poate fi o listă de erori sau un singur array
-        if (array_keys($errorArray['Error']) === range(0, count($errorArray['Error']) - 1)) {
-            // Este o listă indexată
-            foreach ($errorArray['Error'] as $subError) {
-                list_error_messages($subError, $index_incarcare);
-            }
-        } else {
-            // Este un singur sub-array
-            list_error_messages($errorArray['Error'], $index_incarcare);
+    foreach ($array as $key => $value) {
+        // dacă cheia se termină cu _attr și are eroare
+        if (is_string($key) && substr($key, -5) === '_attr' && isset($value['errorMessage'])) {
+            echo '<div class="callout alert">Factura cu index de încărcare <strong>' . htmlspecialchars($index_incarcare ?? '') . '</strong> are următoarea eroare: <strong>' . htmlspecialchars($value['errorMessage']) . '</strong>!</div>';
+            $errors_found = true;
+        }
+        // dacă avem o sub-listă de erori, recursiv
+        if (is_array($value)) {
+            list_error_messages($value, $index_incarcare);
         }
     }
 }
 
 if ($index_incarcare && isset($result['header'])) {
+    if (isset($_GET['debug']) && $_GET['debug']) {
+        echo '<pre>DEBUG calling list_error_messages with index ' . htmlspecialchars($index_incarcare) . '</pre>';
+    }
     list_error_messages($result['header'], $index_incarcare);
+} else {
+    if (isset($_GET['debug']) && $_GET['debug']) {
+        echo '<pre>DEBUG no header or index found; index_incarcare="' . htmlspecialchars($index_incarcare) . '"</pre>';
+    }
+}
+
+// dacă nu s-a tipărit nicio eroare, arătăm structura pentru inspecţie
+if (!$errors_found) {
+    echo '<div class="callout warning">Nu s-au găsit mesaje de eroare în fișierul XML.</div>';
+    echo '<pre>Structură analizată: ' . var_export($result, true) . '</pre>';
 }
 ?>
     </div>

@@ -116,6 +116,9 @@ try {
         'extendedProps' => [
             'client' => isset($row['programare_client']) ? $row['programare_client'] : null,
             'zona' => isset($row['programare_zona']) ? $row['programare_zona'] : null,
+            'zona_place_id' => isset($row['programare_zone_place_id']) ? $row['programare_zone_place_id'] : null,
+            'zona_lat' => isset($row['programare_zone_lat']) ? $row['programare_zone_lat'] : null,
+            'zona_lng' => isset($row['programare_zone_lng']) ? $row['programare_zone_lng'] : null,
             'finalizata' => isset($row['programare_finalizata']) ? $row['programare_finalizata'] : 0,
             'vizita_id' => isset($row['programare_vizita_id']) ? $row['programare_vizita_id'] : null,
             'durata' => isset($row['programare_durata']) ? $row['programare_durata'] : null,

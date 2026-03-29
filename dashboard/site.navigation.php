@@ -52,6 +52,7 @@ if ($role=='ADMIN')
     <a href="#"><?php echo $strCMS?></a>
     <ul class="menu">
         <li><a href="<?php echo $strSiteURL ?>/cms/sitepages.php"><i class="far fa-file-alt"></i><?php echo $strPages?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/faq/sitefaqs.php"><i class="fas fa-question-circle"></i> FAQ</a></li>
     </ul>
 </li>
 <?php 

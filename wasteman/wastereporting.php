@@ -38,12 +38,7 @@ die;
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
     { // start if post
 
-    // Helper pentru valori numerice/decimale
-    if (!function_exists('sql_decimal_or_null')) {
-        function sql_decimal_or_null($val) {
-            return ($val === '' || $val === null) ? 'NULL' : "'" . addslashes($val) . "'";
-        }
-    }
+
 
 if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){
 //insert new data
@@ -254,14 +249,14 @@ for ( $m = 1; $m <= 12; $m ++) {
         IntlDateFormatter::GREGORIAN,
         'MMMM');
     $monthname = $formatter->format($dateObj);
-    $query = "SELECT * FROM deseuri_raportari WHERE raportare_client_id='$client' AND raportare_luna_raportare='$m' AND raportare_an_raportare='$year'";
+    $query = "SELECT * FROM deseuri_raportari WHERE raportare_client_id='$client' AND raportare_luna_raportare='$m' AND raportare_an_raportare='$year' and raportare_cod_deseu='$wastecode' ORDER BY raportare_id ASC";
     $result = ezpub_query($conn, $query);
     echo ezpub_error($conn);
 
     // 1. Afișează toate raportările existente pentru luna $m
     while ($row = ezpub_fetch_array($result)) {
 ?>
-    <tr> 
+    <tr data-raportare-id="<?php echo $row['raportare_id']?>" data-rap-luna="<?php echo $m?>" data-rap-an="<?php echo $year?>" data-rap-cod="<?php echo htmlspecialchars($wastecode, ENT_QUOTES)?>"> 
     <form method="post" action="wastereporting.php?mode=edit&wID=<?php echo $wid?>&cID=<?php echo $row["raportare_id"]?>&year=<?php echo $_GET["year"]?>&client=<?php echo $client?>&cod_id=<?php echo $strwastetoreport?>">
         <input name="raportare_luna_raportare" type="hidden" value="<?php echo $m?>">
         <input name="raportare_an_raportare" type="hidden" value="<?php echo $year?>">
@@ -282,16 +277,48 @@ for ( $m = 1; $m <= 12; $m ++) {
             var valorificata = document.getElementById('valorificata_' + id);
             var eliminata = document.getElementById('eliminata_' + id);
             var stoc = document.getElementById('stoc_' + id);
-            function calcStoc() {
-                var t = parseFloat(total.value) || 0;
-                var v = parseFloat(valorificata.value) || 0;
-                var e = parseFloat(eliminata.value) || 0;
-                stoc.value = (t - v - e).toFixed(2);
+
+            function parseNum(s) {
+                if (!s) return 0;
+                s = String(s).replace(/\u00A0/g, '').replace(/\s/g, '');
+                if (s.indexOf(',') !== -1) {
+                    // are virgulă zecimală: elimină punctele ca separator de mii
+                    s = s.replace(/\./g, '').replace(',', '.');
+                } else if (s.indexOf('.') !== -1) {
+                    // doar puncte: decidem dacă sunt separatoare de mii sau separator zecimal
+                    var parts = s.split('.');
+                    var last = parts[parts.length - 1];
+                    if (last.length === 3 && parts.length > 1) {
+                        // probabil separatoare de mii
+                        s = s.replace(/\./g, '');
+                    } else {
+                        // păstrăm punctul ca separator zecimal (ex: 0.12)
+                        // nu facem nimic
+                    }
+                }
+                // corectează formele ".12" sau "-.12"
+                if (s.charAt(0) === '.') s = '0' + s;
+                if (s.indexOf('-.') === 0) s = s.replace('-.', '-0.');
+                var n = parseFloat(s);
+                return isNaN(n) ? 0 : n;
             }
+
+            function calcStoc() {
+                var t = parseNum(total && total.value);
+                var v = parseNum(valorificata && valorificata.value);
+                var e = parseNum(eliminata && eliminata.value);
+                if (stoc) {
+                    stoc.value = (t - v - e).toFixed(2);
+                }
+
+            }
+
             if (total && valorificata && eliminata && stoc) {
                 total.addEventListener('input', calcStoc);
                 valorificata.addEventListener('input', calcStoc);
                 eliminata.addEventListener('input', calcStoc);
+                // initializează valoarea la încărcare
+                calcStoc();
             }
         })();
         </script>
@@ -316,15 +343,16 @@ for ( $m = 1; $m <= 12; $m ++) {
             }
         })();
         </script>
-        <td><input name="raportare_tip_stocare" type="text" value="<?php echo $row["raportare_tip_stocare"]?>"  /></td>
-        <td><input name="raportare_tratare" type="text" value="<?php echo $row["raportare_tratare"]?>"  /></td>
-        <td><input name="raportare_tip_tratare" type="text" value="<?php echo $row["raportare_tip_tratare"]?>"  /></td>
-        <td><input name="raportare_scop_tratare" type="text" value="<?php echo $row["raportare_scop_tratare"]?>"  /></td>
-        <td><input name="raportare_transport" type="text" value="<?php echo $row["raportare_transport"]?>"  /></td>
-        <td><input name="raportare_tip_transport" type="text" value="<?php echo $row["raportare_tip_transport"]?>"  /></td>
-        <td><input type="submit" value="<?php echo $strModify?>" class="button" name="Submit"></td>
-        <td><a href="wastereporting.php?mode=delete&cID=<?php echo $row["raportare_id"]?>&year=<?php echo $year?>" class="ask button" OnClick="return confirm('<?php echo $strConfirmDelete?>');">
-        <i class="large fa fa-eraser" title="<?php echo $strDelete?>"></i></a></td>
+        <td><input name="raportare_tip_stocare" type="text" value="<?php echo $row['raportare_tip_stocare']?>"  /></td>
+        <td><input name="raportare_tratare" type="text" value="<?php echo $row['raportare_tratare']?>"  /></td>
+        <td><input name="raportare_tip_tratare" type="text" value="<?php echo $row['raportare_tip_tratare']?>"  /></td>
+        <td><input name="raportare_scop_tratare" type="text" value="<?php echo $row['raportare_scop_tratare']?>"  /></td>
+        <td><input name="raportare_transport" type="text" value="<?php echo $row['raportare_transport']?>"  /></td>
+        <td><input name="raportare_tip_transport" type="text" value="<?php echo $row['raportare_tip_transport']?>"  /></td>
+        <?php $editAction = htmlspecialchars('wastereporting.php?mode=edit&wID=' . $wid . '&cID=' . $row['raportare_id'] . '&year=' . $_GET['year'] . '&client=' . $client . '&cod_id=' . $strwastetoreport, ENT_QUOTES); ?>
+        <td><button type="button" class="button" data-action="<?php echo $editAction ?>" onclick="submitRow(this)"><?php echo $strModify?></button></td>
+        <td><a href="wastereporting.php?mode=delete&cID=<?php echo $row['raportare_id']?>&year=<?php echo $year?>" class="ask button" OnClick="return confirm('<?php echo $strConfirmDelete?>');">
+        <i class="large fa fa-eraser" title="<?php echo $strDelete?>"></i></a></td> 
         </form>
         <script>
         // Sincronizare cantitate totală cu stocare pentru formularul de editare
@@ -347,7 +375,7 @@ for ( $m = 1; $m <= 12; $m ++) {
 
     // 2. Formular gol pentru adăugare raportare nouă (mereu prezent)
 ?>
-    <tr>
+    <tr data-rap-luna="<?php echo $m?>" data-rap-an="<?php echo $year?>" data-rap-cod="<?php echo htmlspecialchars($wastecode, ENT_QUOTES)?>">
     <form method="post" action="wastereporting.php?mode=new&wID=<?php echo $wid?>&year=<?php echo $_GET["year"]?>&client=<?php echo $client?>&cod_id=<?php echo $strwastetoreport?>" >    
         <input name="raportare_luna_raportare" type="hidden" value="<?php echo $m?>">
         <input name="raportare_an_raportare" type="hidden" value="<?php echo $year?>">
@@ -407,7 +435,8 @@ for ( $m = 1; $m <= 12; $m ++) {
         <td><input name="raportare_scop_tratare" type="text" value=""/></td>
         <td><input name="raportare_transport" type="text" value=""/></td>
         <td><input name="raportare_tip_transport" type="text" value=""/></td>
-        <td><input type="submit" value="<?php echo $strAdd?>" class="button" name="Submit"></td>
+        <?php $newAction = htmlspecialchars('wastereporting.php?mode=new&wID=' . $wid . '&year=' . $_GET['year'] . '&client=' . $client . '&cod_id=' . $strwastetoreport, ENT_QUOTES); ?>
+        <td><button type="button" class="button" data-action="<?php echo $newAction ?>" onclick="submitRow(this)"><?php echo $strAdd?></button></td>
         <td><p class="button"><i class="large fa fa-eraser" title="<?php echo $strDelete?>"></i></p></td>
         </form>
         <script>
@@ -732,7 +761,7 @@ for ($m = 1; $m <= 12; $m++) {
         IntlDateFormatter::GREGORIAN,
         'MMMM');
     $monthname = $formatter->format($dateObj);
-    $query4 = "SELECT raportare_operator, raportare_cantitate_valorificata, raportare_cod_operatiune_valorificare FROM deseuri_raportari WHERE raportare_client_id='$client' AND raportare_luna_raportare='$m' AND raportare_an_raportare='$year'";
+    $query4 = "SELECT raportare_operator, raportare_cantitate_valorificata, raportare_cod_operatiune_valorificare FROM deseuri_raportari WHERE raportare_client_id='$client' AND raportare_luna_raportare='$m' AND raportare_an_raportare='$year' AND raportare_cod_deseu='$wastecode'";
     $result4 = ezpub_query($conn, $query4);
     $operators = [];
     $codes = [];
@@ -834,7 +863,7 @@ for ($m = 1; $m <= 12; $m++) {
         IntlDateFormatter::GREGORIAN,
         'MMMM');
     $monthname = $formatter->format($dateObj);
-    $query5 = "SELECT raportare_operator, raportare_cantitate_eliminata, raportare_cod_operatiune_eliminare FROM deseuri_raportari WHERE raportare_client_id='$client' AND raportare_luna_raportare='$m' AND raportare_an_raportare='$year'";
+    $query5 = "SELECT raportare_operator, raportare_cantitate_eliminata, raportare_cod_operatiune_eliminare FROM deseuri_raportari WHERE raportare_client_id='$client' AND raportare_luna_raportare='$m' AND raportare_an_raportare='$year' AND raportare_cod_deseu='$wastecode'";
     $result5 = ezpub_query($conn, $query5);
     $operators = [];
     $codes = [];
@@ -892,6 +921,97 @@ echo "<tr><td><strong>$strTotal</strong></td><td><strong>" . ($totalrow4["total_
 } // close the main else block
 ?>
 <!-- end tabs-content -->
+<script>
+// Trimite programatic rândul curent (pentru a evita problemele create de formularele plasate în interiorul <tr>)
+function submitRow(button, actionUrl) {
+    try {
+        var tr = button.closest('tr');
+        if (!tr) return;
+        // Găsește toate input-urile din rând (inclusiv hidden & text & number)
+        var inputs = tr.querySelectorAll('input[name]');
+        var f = document.createElement('form');
+        f.method = 'POST';
+        var action = actionUrl || button.getAttribute('data-action') || button.dataset.action;
+        if (!action) return;
+        f.action = action;
+        var numericRegex = /(cantitate|stoc|valorificata|eliminata)/i;
+        // Copy existing inputs
+        inputs.forEach(function(inp){
+            if (inp.type === 'submit' || inp.type === 'button') return;
+            var h = document.createElement('input');
+            h.type = 'hidden';
+            h.name = inp.name;
+            var v = inp.value;
+            if (numericRegex.test(inp.name)) {
+                // numeric normalization
+                if (typeof v === 'string') {
+                    v = v.replace(/\u00A0/g, '');
+                    if (v.indexOf(',') !== -1) {
+                        v = v.replace(/\./g, '');
+                        v = v.replace(',', '.');
+                    } else {
+                        v = v.replace(/\./g, '');
+                    }
+                    v = v.trim();
+                    if (v.charAt(0) === '.') v = '0' + v;
+                    if (v.indexOf('-.') === 0) v = v.replace('-.', '-0.');
+                }
+            } else {
+                // keep normal text values (trim, preserve spaces)
+                if (typeof v === 'string') {
+                    v = v.replace(/\u00A0/g, ' ').trim();
+                }
+            }
+            h.value = v;
+            f.appendChild(h);
+        });
+        // Add dataset fallbacks if inputs are not present (safeguard when original hidden fields are moved by browser)
+        if (tr.dataset) {
+            if (tr.dataset.rapLuna && !f.querySelector('[name="raportare_luna_raportare"]')) {
+                var a = document.createElement('input'); a.type = 'hidden'; a.name = 'raportare_luna_raportare'; a.value = tr.dataset.rapLuna; f.appendChild(a);
+            }
+            if (tr.dataset.rapAn && !f.querySelector('[name="raportare_an_raportare"]')) {
+                var b = document.createElement('input'); b.type = 'hidden'; b.name = 'raportare_an_raportare'; b.value = tr.dataset.rapAn; f.appendChild(b);
+            }
+            if (tr.dataset.rapCod && !f.querySelector('[name="raportare_cod_deseu"]')) {
+                var c = document.createElement('input'); c.type = 'hidden'; c.name = 'raportare_cod_deseu'; c.value = tr.dataset.rapCod; f.appendChild(c);
+            }
+            if (tr.dataset.raportareId && !f.querySelector('[name="raportare_id"]')) {
+                var d = document.createElement('input'); d.type = 'hidden'; d.name = 'raportare_id'; d.value = tr.dataset.raportareId; f.appendChild(d);
+            }
+        }
+        document.body.appendChild(f);
+        f.submit();
+    } catch (e) {
+        console.error('submitRow error', e);
+    }
+}
+
+// Normalizează inputuri numerice românești (ex: "0,18" -> "0.18") la trimitere
+(function(){
+    var forms = document.querySelectorAll('form');
+    forms.forEach(function(f){
+        f.addEventListener('submit', function(e){
+            var inputs = f.querySelectorAll('input[type="text"], input[type="number"]');
+            inputs.forEach(function(inp){
+                try {
+                    if (inp.name && inp.name.indexOf('raportare_') === 0) {
+                        var v = inp.value || '';
+                        if (v.indexOf(',') !== -1) {
+                            // elimină separator mii '.' doar dacă există virgula zecimală
+                            v = v.replace(/\./g, '');
+                            v = v.replace(',', '.');
+                            inp.value = v;
+                        }
+                    }
+                } catch (err) {
+                    // ignore
+                }
+            });
+        });
+    });
+})();
+</script>
 <?php
 include '../bottom.php';
 ?>

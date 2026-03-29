@@ -83,13 +83,18 @@ if (!isset($_POST['alimentare_valoare'], $_POST['alimentare_litri'], $_POST['ali
     die('<div class="callout alert">All fields are required</div>');
 }
 
-// Sanitize and validate inputs
-$suma = floatval(str_replace(",",".",$_POST["alimentare_valoare"]));
-$litri = floatval(str_replace(",",".",$_POST["alimentare_litri"]));
+// Sanitize and validate inputs (accept Romanian decimal format)
+$suma_norm = parseRomanianNumber($_POST["alimentare_valoare"]);
+if (!is_numeric($suma_norm)) { die('<div class="callout alert">Invalid amount</div>'); }
+$suma = (float)$suma_norm;
+$litri_norm = parseRomanianNumber($_POST["alimentare_litri"]);
+if (!is_numeric($litri_norm)) { die('<div class="callout alert">Invalid liters</div>'); }
+$litri = (float)$litri_norm;
 $alimentare_data = trim($_POST["alimentare_data"]);
 $alimentare_platit = intval($_POST["alimentare_platit"]);
 $alimentare_auto = trim($_POST["alimentare_auto"]);
-$alimentare_km = floatval($_POST["alimentare_km"]);
+$alimentare_km_norm = parseRomanianNumber($_POST["alimentare_km"]);
+$alimentare_km = is_numeric($alimentare_km_norm) ? (float)$alimentare_km_norm : 0.0;
 $alimentare_bf = trim($_POST["alimentare_bf"]);
 
 // Validate date format
@@ -163,11 +168,14 @@ if (!isset($_POST['alimentare_bf'], $_POST['alimentare_valoare'], $_POST['alimen
     die('<div class="callout alert">All fields are required</div>');
 }
 
-// Sanitize inputs
+// Sanitize inputs (accept Romanian decimal format)
 $alimentare_bf = trim($_POST["alimentare_bf"]);
-$suma = floatval(str_replace(",",".",$_POST["alimentare_valoare"]));
-$alimentare_litri = floatval($_POST["alimentare_litri"]);
-$alimentare_km = floatval($_POST["alimentare_km"]);
+$suma_norm = parseRomanianNumber($_POST["alimentare_valoare"]);
+$suma = is_numeric($suma_norm) ? (float)$suma_norm : 0.0;
+$alimentare_litri_norm = parseRomanianNumber($_POST["alimentare_litri"]);
+$alimentare_litri = is_numeric($alimentare_litri_norm) ? (float)$alimentare_litri_norm : 0.0;
+$alimentare_km_norm = parseRomanianNumber($_POST["alimentare_km"]);
+$alimentare_km = is_numeric($alimentare_km_norm) ? (float)$alimentare_km_norm : 0.0;
 $alimentare_data = trim($_POST["alimentare_data"]);
 
 // Validate date format

@@ -22,7 +22,7 @@ if ($role=='ADMIN')
         <li><a href="<?php echo $strSiteURL ?>/clients/siteclientactivities.php"><i class="fa fa-hourglass-half"></i><?php echo $strActivities?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/clientsdashboard.php"><i class="fas fa-chart-line"></i><?php echo $strClientsDashboard?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/sitevisitreports.php"><i class="fas fa-newspaper"></i><?php echo $strReports?></a></li>
-        <li><a href="<?php echo $strSiteURL ?>/clients/clientsplanning.php"><i class="fas fa-calendar"></i><?php echo $strSchedules?></a></li>
+    <li><a href="<?php echo $strSiteURL ?>/clients/clientsplanning.php"><i class="fas fa-calendar"></i><?php echo $strSchedules?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/sitecontacts.php"><i class="fas fa-address-book"></i><?php echo $strContacts?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/clients/clientcontractdetails.php"><i class="far fa-address-book"></i><?php echo $strGetContractData?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/admin/exportclients.php"><i class="fas fa-file-export"></i><?php echo $strExportClients?></a></li>
@@ -41,6 +41,8 @@ if ($role=='ADMIN')
         <li><a href="<?php echo $strSiteURL ?>/billing/bulkeinvoice.php"><i class="fas fa-file-upload"></i><?php echo $strBulkEinvoice?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/billing/paymentreminders.php"><i class="fas fa-bell"></i><?php echo $strPaymentReminders?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/billing/sitereceivedinvoices.php"><i class="fas fa-file-invoice-dollar"></i><?php echo $strReceivedInvoices?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/billing/siteotherexpenses.php"><i class="fas fa-file-invoice-dollar"></i><?php echo $strOtherExpenses?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/billing/siteotherrecurentexpenses.php"><i class="fas fa-file-invoice-dollar"></i><?php echo $strOtherRecurentExpenses?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/billing/sitecashin.php"><i class="fas fa-money-check"></i><?php echo $strCashIn?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/billing/sitepayout.php"><i class="fas fa-money-bill-wave"></i><?php echo $strPayout?></a> </li>
         <li><a href="<?php echo $strSiteURL ?>/billing/sitereceipts.php"><i class="fas fa-receipt"></i><?php echo $strReceipts?></a></li>
@@ -77,6 +79,18 @@ if ($role=='ADMIN')
 </li>
 <?php
 }?>
+<?php if ($legal==1)
+    {?>
+<li>
+    <a href="#"><?php echo $strLegislation?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/legal/sitelaws.php"><i class="fas fa-file-alt"></i>Legislație generală</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/legal/siteownlaws.php"><i class="fas fa-file-alt"></i>Legislație proprie</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/legal/just_search.php"><i class="fas fa-check"></i>Caută legislație</a></li>
+    </ul>
+</li>
+<?php
+}?>
 
 <?php if ($administrative==1)
     {?>
@@ -85,8 +99,10 @@ if ($role=='ADMIN')
     <ul class="menu">
         <li><a href="<?php echo $strSiteURL ?>/administrative/personalexpenses.php"><i class="fas fa-file-invoice"></i>&nbsp;<?php echo $strPersonalExpenses?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/administrative/personalworkingdays.php"><i class="fas fa-calendar-alt"></i>&nbsp;<?php echo $strWorkingDays?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/administrative/siteholidays.php"><i class="fas fa-umbrella-beach"></i>&nbsp;<?php echo $strHolidays?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/administrative/gasfilling.php"><i class="fas fa-gas-pump"></i>&nbsp;<?php echo $strGasFillings?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/administrative/personalcarsheets.php"><i class="fas fa-car-side"></i>&nbsp;<?php echo $strCarSheet?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/administrative/siteassets.php"><i class="fas fa-box-open"></i>&nbsp;<?php echo $strAssets ?? 'Bunuri'?></a></li>
     </ul>
 </li>
 <?php 
@@ -101,7 +117,9 @@ if ($role=='ADMIN')
         <li><a href="<?php echo $strSiteURL ?>/admin/siteerrors.php"><i class="fas fa-exclamation-triangle"></i><?php echo $strErrors?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/admin/sitedbbackup.php"><i class="fas fa-save"></i><?php echo $strDatabaseBackup?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/admin/managetoken.php?op=gettoken"><i class="far fa-file-code"></i><?php echo $strGetToken?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/admin/filemanager.php"><i class="fas fa-folder-open"></i><?php echo $strCurrentFiles?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/admin/managetoken.php"><i class="far fa-file-code"></i><?php echo $strRefreshTheToken?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/legal/just_search.php"><i class="fas fa-gavel"></i>Căutare legislație</a></li>
     </ul>
 </li>
 <?php if ($sales==1)
@@ -190,8 +208,7 @@ elseif ($role=='USER')
 	        <a href="#"><?php echo $strAdministrative?></a>
 	        <ul class="menu">
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalexpenses.php"><i class="fas fa-file-invoice"></i>&nbsp;<?php echo $strPersonalExpenses?></a></li>
-	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalworkingdays.php"><i class="fas fa-calendar-alt"></i>&nbsp;<?php echo $strWorkingDays?></a></li>
-	            <li><a href="<?php echo $strSiteURL ?>/administrative/gasfilling.php"><i class="fas fa-gas-pump"></i>&nbsp;<?php echo $strGasFillings?></a></li>
+	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalworkingdays.php"><i class="fas fa-calendar-alt"></i>&nbsp;<?php echo $strWorkingDays?></a></li>            <li><a href="<?php echo $strSiteURL ?>/administrative/siteholidays.php"><i class="fas fa-umbrella-beach"></i>&nbsp;<?php echo $strHolidays?></a></li>	            <li><a href="<?php echo $strSiteURL ?>/administrative/gasfilling.php"><i class="fas fa-gas-pump"></i>&nbsp;<?php echo $strGasFillings?></a></li>
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalcarsheets.php"><i class="fas fa-car-side"></i>&nbsp;<?php echo $strCarSheet?></a></li>
 	        </ul>
 	    </li>
@@ -241,7 +258,18 @@ if ($documents==1)
 </li>
 <?php
 }
-
+if ($legal==1)
+    {?>
+<li>
+    <a href="#"><?php echo $strLegislation?></a>
+    <ul class="menu">
+        <li><a href="<?php echo $strSiteURL ?>/legal/sitelaws.php"><i class="fas fa-file-alt"></i>Legislație generală</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/legal/siteownlaws.php"><i class="fas fa-file-alt"></i>Legislație proprie</a></li>
+        <li><a href="<?php echo $strSiteURL ?>/legal/just_search.php"><i class="fas fa-check"></i>Caută legislație</a></li>
+    </ul>
+</li>
+<?php
+} //end of legal check
 } //end of user check, start AGENT
 elseif ($role=='AGENT')
 {
@@ -251,6 +279,7 @@ elseif ($role=='AGENT')
 	        <ul class="menu">
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalexpenses.php"><i class="fas fa-file-invoice"></i>&nbsp;<?php echo $strPersonalExpenses?></a></li>
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalworkingdays.php"><i class="fas fa-calendar-alt"></i>&nbsp;<?php echo $strWorkingDays?></a></li>
+	            <li><a href="<?php echo $strSiteURL ?>/administrative/siteholidays.php"><i class="fas fa-umbrella-beach"></i>&nbsp;<?php echo $strHolidays?></a></li>
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/gasfilling.php"><i class="fas fa-gas-pump"></i>&nbsp;<?php echo $strGasFillings?></a></li>
 	            <li><a href="<?php echo $strSiteURL ?>/administrative/personalcarsheets.php"><i class="fas fa-car-side"></i>&nbsp;<?php echo $strCarSheet?></a></li>
 	        </ul>

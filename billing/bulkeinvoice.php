@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
          FROM facturare_facturi 
          WHERE factura_client_efactura_generata IS NULL 
          AND factura_data_emiterii >= '2024-01-01'
+         AND factura_tip='0'
          ORDER BY factura_data_emiterii ASC");
     
     mysqli_stmt_execute($stmt);
@@ -139,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
         "SELECT COUNT(*) as total 
          FROM facturare_facturi 
          WHERE factura_client_efactura_generata IS NULL 
+         AND factura_tip='0' 
          AND factura_data_emiterii >= '2024-01-01'");
     
     mysqli_stmt_execute($stmt_count);
@@ -159,6 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
              FROM facturare_facturi 
              WHERE factura_client_efactura_generata IS NULL 
              AND factura_data_emiterii >= '2024-01-01'
+             AND factura_tip='0'
              ORDER BY factura_data_emiterii ASC
              LIMIT 20");
         

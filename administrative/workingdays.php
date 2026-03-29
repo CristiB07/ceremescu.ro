@@ -183,22 +183,43 @@ function delayer(){
 else
 {
 	if ($mode === "fill")
-{	
-$d=cal_days_in_month(CAL_GREGORIAN,$month,$year);
-$dd=0;
+{
+	// preload leave days for current user/month so pontaj_CO can be auto-filled with "8"
+	$leaveDays = array();
+	$monthStart = "$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01";
+	$monthEnd = date('Y-m-t', strtotime($monthStart));
+	$stmt_leaves = $conn->prepare("SELECT concediu_data_inceput, concediu_data_sfarsit FROM administrative_concedii WHERE concediu_angajat = ? AND NOT (concediu_data_sfarsit < ? OR concediu_data_inceput > ?)");
+	$stmt_leaves->bind_param('iss', $code, $monthStart, $monthEnd);
+	$stmt_leaves->execute();
+	$res_leaves = $stmt_leaves->get_result();
+	while ($lr = $res_leaves->fetch_assoc()) {
+		$from = max(strtotime($lr['concediu_data_inceput']), strtotime($monthStart));
+		$to = min(strtotime($lr['concediu_data_sfarsit']), strtotime($monthEnd));
+		for ($t = $from; $t <= $to; $t += 86400) {
+			$day = (int)date('j', $t);
+			$leaveDays[$day] = true;
+		}
+	}
+	$stmt_leaves->close();
+
+	$d=cal_days_in_month(CAL_GREGORIAN,$month,$year);
 for ( $i = 1; $i <= $d; $i ++) {
  $monthday=$i;
  $dayofmonth=$year."-".$month."-".$i;
  $namedayofthemonth= date('D', strtotime($dayofmonth));
- 
- 
- if(in_Array($dayofmonth, $holidays) OR in_array($namedayofthemonth, $skipdays))
- {
-	 $dd=$dd;
+
+ // Verifică dacă ziua este concediu legal, weekend sau concediu angajat
+ $isLegalHoliday = in_Array($dayofmonth, $holidays);
+ $isWeekend = in_array($namedayofthemonth, $skipdays);
+ $isEmployeeLeave = false;
+ if (!empty($leaveDays) && isset($leaveDays[$i])) {
+     $isEmployeeLeave = true;
  }
- else
- {
-	 		$dd=$dd+1;
+ if ($isLegalHoliday || $isWeekend || $isEmployeeLeave) {
+     // zi nelucrătoare
+     $dd = $dd;
+ } else {
+     $dd = $dd + 1;
  }
  }
 
@@ -286,7 +307,7 @@ echo htmlspecialchars($strNumberOfWorkingDaysInMonth, ENT_QUOTES, 'UTF-8') . " "
                     <td><input name="pontaj_zi" type="text" value="<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="month" type="text" value="<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="year" type="text" value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" readonly></td>
-                    <td><input name="pontaj_CO" type="text" size="4" value="" /></td>
+                    <td><input name="pontaj_CO" type="text" size="4" value="<?php echo (isset($leaveDays[$i]) ? '8' : '') ?>" /></td>
                     <td><input name="pontaj_ore_WFH" type="text" size="4" value="" /></td>
                     <td><input name="pontaj_ore_T" type="text" size="4" value="" /></td>
                     <td><input name="pontaj_ore_B" type="text" size="4" value="" /></td>
@@ -307,7 +328,7 @@ echo htmlspecialchars($strNumberOfWorkingDaysInMonth, ENT_QUOTES, 'UTF-8') . " "
                     <td><input name="pontaj_zi" type="text" value="<?php echo htmlspecialchars($i, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="month" type="text" value="<?php echo htmlspecialchars($month, ENT_QUOTES, 'UTF-8')?>" readonly></td>
                     <td><input name="year" type="text" value="<?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8')?>" readonly></td>
-                    <td><input name="pontaj_CO" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_CO"], ENT_QUOTES, 'UTF-8')?>" /></td>
+                    <td><input name="pontaj_CO" type="text" size="4" value="<?php echo htmlspecialchars((trim($row['pontaj_CO'])!=="" ? $row['pontaj_CO'] : (isset($leaveDays[$i]) ? '8' : '')), ENT_QUOTES, 'UTF-8') ?>" /></td>
                     <td><input name="pontaj_ore_WFH" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_WFH"], ENT_QUOTES, 'UTF-8')?>" /></td>
                     <td><input name="pontaj_ore_T" type="text" size="4" value="<?php echo htmlspecialchars($row["pontaj_ore_T"], ENT_QUOTES, 'UTF-8')?>" /></td>
                     <td><input name="pontaj_ore_B" type="text" value="<?php echo htmlspecialchars($row["pontaj_ore_B"], ENT_QUOTES, 'UTF-8')?>" /></td>

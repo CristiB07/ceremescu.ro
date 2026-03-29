@@ -93,12 +93,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         }
         
-        if (!isset($_POST["decont_suma"]) || !is_numeric(str_replace(",", ".", $_POST["decont_suma"]))) {
+        if (!isset($_POST["decont_suma"])) {
             header("location: personalexpenses.php?mode=new&message=Error");
             exit();
         }
+        $suma_norm = parseRomanianNumber($_POST["decont_suma"]);
+        if (!is_numeric($suma_norm)) {
+            header("location: personalexpenses.php?mode=new&message=Error");
+            exit();
+        }
+        $suma = (float)$suma_norm;
         
-        if (!isset($_POST["decont_data"]) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST["decont_data"])) {
+        if (!isset($_POST["decont_data"])) {
+            header("location: personalexpenses.php?mode=new&message=Error");
+            exit();
+        }
+        $dt = DateTime::createFromFormat('Y-m-d', $_POST["decont_data"]);
+        $dtErr = DateTime::getLastErrors();
+        if (!$dt || $dt->format('Y-m-d') !== $_POST["decont_data"] || $dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0) {
             header("location: personalexpenses.php?mode=new&message=Error");
             exit();
         }
@@ -108,7 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         }
         
-        $suma = str_replace(",", ".", $_POST["decont_suma"]);
         $decont_descriere = trim($_POST["decont_descriere"]);
         $decont_data = $_POST["decont_data"];
         $decont_achitat_card = intval($_POST["decont_achitat_card"]);
@@ -152,12 +163,25 @@ else {
             exit();
         }
         
-        if (!isset($_POST["decont_suma"]) || !is_numeric(str_replace(",", ".", $_POST["decont_suma"]))) {
+        // Validate amount (accept Romanian decimal format)
+        if (!isset($_POST["decont_suma"])) {
             header("location: personalexpenses.php?mode=edit&cID=$cID&message=Error");
             exit();
         }
+        $suma_norm = parseRomanianNumber($_POST["decont_suma"]);
+        if (!is_numeric($suma_norm)) {
+            header("location: personalexpenses.php?mode=edit&cID=$cID&message=Error");
+            exit();
+        }
+        $suma = (float)$suma_norm;
         
-        if (!isset($_POST["decont_data"]) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST["decont_data"])) {
+        if (!isset($_POST["decont_data"])) {
+            header("location: personalexpenses.php?mode=edit&cID=$cID&message=Error");
+            exit();
+        }
+        $dt = DateTime::createFromFormat('Y-m-d', $_POST["decont_data"]);
+        $dtErr = DateTime::getLastErrors();
+        if (!$dt || $dt->format('Y-m-d') !== $_POST["decont_data"] || $dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0) {
             header("location: personalexpenses.php?mode=edit&cID=$cID&message=Error");
             exit();
         }
@@ -175,7 +199,6 @@ else {
         }
         $stmt_check->close();
         
-        $suma = str_replace(",", ".", $_POST["decont_suma"]);
         $decont_descriere = trim($_POST["decont_descriere"]);
         $decont_data = $_POST["decont_data"];
         $decont_document = isset($_POST["decont_document"]) ? trim($_POST["decont_document"]) : '';

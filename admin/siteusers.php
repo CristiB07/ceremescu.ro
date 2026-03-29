@@ -93,7 +93,8 @@ $stmt->execute();
 $stmt->close();
 
 // Also delete encryption key
-$stmt_key = $conn->prepare("DELETE FROM date_utilizatori_chei WHERE cheie_primara = (SELECT hash('sha256', utilizator_Email) FROM date_utilizatori WHERE utilizator_ID = ?)");
+// use LOWER(SHA2(...,256)) to match PHP hash('sha256', ...) formatting
+$stmt_key = $conn->prepare("DELETE FROM date_utilizatori_chei WHERE cheie_primara = (SELECT LOWER(SHA2(utilizator_Email, 256)) FROM date_utilizatori WHERE utilizator_ID = ?)");
 $stmt_key->bind_param("i", $cID);
 $stmt_key->execute();
 $stmt_key->close();

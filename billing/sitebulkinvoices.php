@@ -417,9 +417,9 @@ $emailbody=$emailbody . "<p>Stimate client,</p>
 <p><strong>Sumar factură:</strong></p>
 <table align=\"center\" width=\"85%\">
 <thead>
-<tr><th>Valoare factură curentă</th><th>Scadență</th><th>Sold la data emiterii</th><th>Total de plătit</th></tr>
+<tr><th>Număr factură</th><th>Valoare factură curentă</th><th>Scadență</th><th>Sold la data emiterii</th><th>Total de plătit</th></tr>
 </thead>
-<tr><td align=\"right\">". romanize($row22["factura_client_valoare_totala"]) ."</td><td align=\"right\">". date('d.m.Y',strtotime($row22["factura_client_termen"])). "</td><td align=\"right\">". romanize($soldanterior)."</td><td align=\"right\">".romanize($soldtotal)."</td></tr>
+<tr><td>". htmlspecialchars($row22["factura_numar"]) ."</td><td align=\"right\">". romanize($row22["factura_client_valoare_totala"]) ."</td><td align=\"right\">". date('d.m.Y',strtotime($row22["factura_client_termen"])). "</td><td align=\"right\">". romanize($soldanterior)."</td><td align=\"right\">".romanize($soldtotal)."</td></tr>
 </table>";
 $queryRest = "SELECT factura_numar, factura_client_valoare_totala, factura_data_emiterii, factura_client_termen FROM facturare_facturi WHERE factura_client_ID=? AND factura_client_achitat='0' AND factura_ID <> ? ORDER BY factura_data_emiterii ASC";
 $stmtRest = mysqli_prepare($conn, $queryRest);
@@ -440,12 +440,27 @@ if (mysqli_num_rows($resultRest) > 0) {
 	<tbody>";
 	while ($rowRest = ezpub_fetch_array($resultRest)) {
 		$data_emiterii = $rowRest['factura_data_emiterii'];
-		$termen = (int)$rowRest['factura_client_termen'];
-		$scadenta = date('Y-m-d', strtotime("$data_emiterii +$termen days"));
-		$scadenta_disp = date('d.m.Y', strtotime($scadenta));
-		$emisa_disp = date('d.m.Y', strtotime($data_emiterii));
-		$zile_intarziere = (strtotime(date('Y-m-d')) - strtotime($scadenta)) / (60*60*24);
-		$zile_intarziere = $zile_intarziere > 0 ? (int)$zile_intarziere : 0;
+		$raw_termen = $rowRest['factura_client_termen'];
+		// Compatibilitate: dacă 'factura_client_termen' este număr (zile) — calculează scadența din data emiterii.
+		// Altfel, dacă e un string de tip dată (YYYY-MM-DD), folosește-l direct.
+		if (is_numeric($raw_termen) && $raw_termen !== '') {
+			$termen_days = (int)$raw_termen;
+			$scadenta = date('Y-m-d', strtotime($data_emiterii . " +{$termen_days} days"));
+		} elseif (!empty($raw_termen) && strtotime($raw_termen) !== false) {
+			$scadenta = date('Y-m-d', strtotime($raw_termen));
+		} else {
+			$scadenta = null;
+		}
+
+		if ($scadenta) {
+			$scadenta_disp = date('d.m.Y', strtotime($scadenta));
+			$emisa_disp = date('d.m.Y', strtotime($data_emiterii));
+			$zile_intarziere = max(0, (int) floor((strtotime(date('Y-m-d')) - strtotime($scadenta)) / 86400));
+		} else {
+			$scadenta_disp = '-';
+			$emisa_disp = date('d.m.Y', strtotime($data_emiterii));
+			$zile_intarziere = 0;
+		}
 		$emailbody .= "<tr><td>".htmlspecialchars($rowRest['factura_numar'])."</td>
 		<td align='right'>".romanize($rowRest['factura_client_valoare_totala'])."</td>
 		<td>".$emisa_disp."</td>
@@ -521,7 +536,7 @@ $mail->Subject = 'Factura ' . $strSiteOwner;
     $mail->Body    = $emailbody;
     $mail->AltBody = 'Acest mail conține factura $siteOwner. Ea a fost emisă pe '. date("d.m.Y", strtotime($row22["factura_data_emiterii"])).' și este în valoare de '
 	. romanize($row22["factura_client_valoare_totala"]) .' și are ca termen '. date('d.m.Y',strtotime($row22["factura_client_termen"])).'. La data emiteri facturii, soldul dumneavoastră este '. romanize($soldanterior).'. Mulțumim, $siteOwner.';
-//Attach an image file
+//Attach pdf file
 $codenumarfactura=str_pad($row22["factura_numar"], 8, '0', STR_PAD_LEFT);
 
 $mail->addAttachment($hddpath ."/" . $invoice_folder ."/Factura_".$siteInvoicingCode. $codenumarfactura.'.pdf');
@@ -554,9 +569,9 @@ else {
 ?>
         <div class="grid-x grid-margin-x">
             <div class="large-12 medium-12 small-12 cell">
-                <p><a href="sitebulkinvoices.php?id=1" class="button">1</a><a href="sitebulkinvoices.php?id=15"
-                        class="button warning">15</a><a href="sitebulkinvoices.php"
-                        class="button success"><?php echo $strAll?></a></p>
+                <p><a href="sitebulkinvoices.php?id=1" class="button">1</a>
+				<a href="sitebulkinvoices.php?id=15"  class="button warning">15</a>
+				<a href="sitebulkinvoices.php" class="button success"><?php echo $strAll?></a></p>
             </div>
         </div>
         <div class="grid-x grid-margin-x">
@@ -564,12 +579,10 @@ else {
                 <form method="post"  action="sitebulkinvoices.php">
                     <div class="grid-x grid-margin-x">
                         <div class="large-6 medium-6 small-6 cell">
-                            <input name="luna_facturarii" type="text" placeholder=<?php echo $strInvoiceMonth ?>
-                                value="" />
+                            <input name="luna_facturarii" type="text" placeholder=<?php echo $strInvoiceMonth ?>  value="" />
                         </div>
                         <div class="large-6 medium-6 small-6 cell">
-                            <input name="trimestrul_facturarii" type="text" placeholder=<?php echo $strInvoiceQuarter ?>
-                                value="" />
+                            <input name="trimestrul_facturarii" type="text" placeholder=<?php echo $strInvoiceQuarter ?> value="" />
                         </div>
                     </div>
 
@@ -641,11 +654,17 @@ MIN(clienti_abonamente.abonament_client_ID) as abonament_client_ID,
 MIN(clienti_abonamente.abonament_client_email) as abonament_client_email
 FROM clienti_abonamente, clienti_date
 WHERE clienti_date.ID_Client=clienti_abonamente.abonament_client_ID AND abonament_client_activ=0 AND abonament_client_frecventa<>3 AND abonament_client_frecventa<>0";
+
+// filter by month list stored in abonament_client_lunafacturare
+$filterMonth = intval($month);
+// normalize stored array: remove spaces and convert semicolons to commas
+$query .= " AND FIND_IN_SET('" . $filterMonth . "', " .
+          "REPLACE(REPLACE(abonament_client_lunafacturare,' ',''),';',','))";
+
 if ((isset( $_GET['id'])) && !empty( $_GET['id'])){
 $id=$_GET['id'];
 $query=$query . " AND abonament_client_zifacturare='$id'";}
 $query=$query . " GROUP BY clienti_date.ID_Client, clienti_date.Client_Denumire ORDER BY clienti_date.Client_Denumire ASC";
-
 $result=ezpub_query($conn,$query);
 $numar=ezpub_num_rows($result,$query);
 if ($numar==0)

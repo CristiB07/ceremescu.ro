@@ -38,6 +38,7 @@ $tip = isset($_POST['eventTipVizita']) ? trim($_POST['eventTipVizita']) : '';
 $detalii = isset($_POST['eventDetalii']) ? trim($_POST['eventDetalii']) : '';
 $finalized = isset($_POST['eventFinalized']) ? 1 : 0;
 $inviteEmail = isset($_POST['inviteEmail']) ? trim($_POST['inviteEmail']) : '';
+$sendInvite = isset($_POST['sendInvite']) ? 1 : 0; // new: checkbox to request saving invite even when no recipient
 $duration = isset($_POST['eventDurationMinutes']) ? (int)$_POST['eventDurationMinutes'] : 60;
 
 // normalize datetime and compute end time
@@ -57,7 +58,19 @@ if (!empty($inviteEmail)) {
     $parts = array_filter(array_map('trim', explode(',', $normalized)));
     foreach ($parts as $p) {
         if ($p === '') continue;
-        if (filter_var($p, FILTER_VALIDATE_EMAIL)) $inviteEmailsArray[] = $p;
+        // Use suppressed filter_var and fallback to a lightweight check to avoid PCRE JIT allocation warnings
+        $isEmail = false;
+        $validated = @filter_var($p, FILTER_VALIDATE_EMAIL);
+        if ($validated !== false && $validated !== null) {
+            $isEmail = true;
+        } else {
+            // Simple fallback: must contain @ and a dot after the @
+            $at = strpos($p, '@');
+            if ($at !== false && strpos($p, '.', $at) !== false) {
+                $isEmail = true;
+            }
+        }
+        if ($isEmail) $inviteEmailsArray[] = $p;
     }
     $inviteEmailsArray = array_values(array_unique($inviteEmailsArray));
     $inviteEmailsClean = implode(',', $inviteEmailsArray);
@@ -102,18 +115,81 @@ if ($overlapStmt) {
     mysqli_stmt_close($overlapStmt);
 }
 
+// Validate client existence: if client is 0 or does not exist, store NULL
+$clientValid = false;
+if ($client > 0) {
+    $cstmt = mysqli_prepare($conn, "SELECT ID_Client FROM clienti_date WHERE ID_Client = ? LIMIT 1");
+    if ($cstmt) {
+        mysqli_stmt_bind_param($cstmt, 'i', $client);
+        mysqli_stmt_execute($cstmt);
+        $cres = mysqli_stmt_get_result($cstmt);
+        if ($cres && mysqli_num_rows($cres) > 0) $clientValid = true;
+        mysqli_stmt_close($cstmt);
+    }
+}
+if (!$clientValid) {
+    echo json_encode(['success'=>false,'message'=>'Clientul este obligatoriu. Vă rugăm selectați un client valid.']);
+    exit;
+}
+
 if ($eventId > 0) {
-    $stmt = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_data_inceput=?, programare_data_sfarsit=?, programare_obiectiv=?, programare_client=?, programare_zona=?, programare_tipvizita=?, programare_detalii=?, programare_finalizata=?, programare_durata=?, programare_invite_email=? WHERE programare_id=?");
-    // types: start(s), end(s), objective(s), client(i), zone(s), tip(s), detalii(s), finalized(i), duration(i), inviteEmail(s), eventId(i)
-    mysqli_stmt_bind_param($stmt, "sssisssiisi", $startDT, $endDT, $objective, $client, $zone, $tip, $detalii, $finalized, $duration, $inviteEmailsClean, $eventId);
+    // prepare conditional update: set programare_client to ? or to NULL depending on validation
+    if ($client === null) {
+        $stmt = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_data_inceput=?, programare_data_sfarsit=?, programare_obiectiv=?, programare_client=NULL, programare_zona=?, programare_tipvizita=?, programare_detalii=?, programare_finalizata=?, programare_durata=?, programare_invite_email=? WHERE programare_id=?");
+        mysqli_stmt_bind_param($stmt, "sssssiiisi", $startDT, $endDT, $objective, $zone, $tip, $detalii, $finalized, $duration, $inviteEmailsClean, $eventId);
+    } else {
+        $stmt = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_data_inceput=?, programare_data_sfarsit=?, programare_obiectiv=?, programare_client=?, programare_zona=?, programare_tipvizita=?, programare_detalii=?, programare_finalizata=?, programare_durata=?, programare_invite_email=? WHERE programare_id=?");
+        // types: start(s), end(s), objective(s), client(i), zone(s), tip(s), detalii(s), finalized(i), duration(i), inviteEmail(s), eventId(i)
+        mysqli_stmt_bind_param($stmt, "sssisssiisi", $startDT, $endDT, $objective, $client, $zone, $tip, $detalii, $finalized, $duration, $inviteEmailsClean, $eventId);
+    }
     $ok = mysqli_stmt_execute($stmt);
     $err = mysqli_stmt_error($stmt);
     mysqli_stmt_close($stmt);
     if ($ok) {
         $insertedId = 0; // update case
+        // ensure programare_invite column exists & update its flag
+        $colCheckInv = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_invite'");
+        if ($colCheckInv && mysqli_num_rows($colCheckInv) == 0) {
+            // add column as tinyint(1)
+            @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_invite TINYINT(1) DEFAULT 0");
+        }
+        // set invite flag according to checkbox
+        $updInviteFlag = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_invite = ? WHERE programare_id = ?");
+        if ($updInviteFlag) { mysqli_stmt_bind_param($updInviteFlag, 'ii', $sendInvite, $eventId); mysqli_stmt_execute($updInviteFlag); mysqli_stmt_close($updInviteFlag); }
+
+        // Save Google Place metadata (place_id, lat, lng) if provided
+        $placeId = isset($_POST['eventZonePlaceId']) ? trim($_POST['eventZonePlaceId']) : '';
+        $placeLat = isset($_POST['eventZoneLat']) ? trim($_POST['eventZoneLat']) : '';
+        $placeLng = isset($_POST['eventZoneLng']) ? trim($_POST['eventZoneLng']) : '';
+        if ($placeId !== '' || $placeLat !== '' || $placeLng !== '') {
+            // ensure columns exist
+            $colCheck1 = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_zone_place_id'");
+            if ($colCheck1 && mysqli_num_rows($colCheck1) == 0) {
+                @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_zone_place_id VARCHAR(255) NULL");
+            }
+            $colCheck2 = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_zone_lat'");
+            if ($colCheck2 && mysqli_num_rows($colCheck2) == 0) {
+                @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_zone_lat DECIMAL(10,7) NULL");
+            }
+            $colCheck3 = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_zone_lng'");
+            if ($colCheck3 && mysqli_num_rows($colCheck3) == 0) {
+                @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_zone_lng DECIMAL(10,7) NULL");
+            }
+            // update values
+            $upPlace = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_zone_place_id = ?, programare_zone_lat = ?, programare_zone_lng = ? WHERE programare_id = ?");
+            if ($upPlace) {
+                $pl_lat = ($placeLat !== '' ? floatval($placeLat) : null);
+                $pl_lng = ($placeLng !== '' ? floatval($placeLng) : null);
+                mysqli_stmt_bind_param($upPlace, 'sddi', $placeId, $pl_lat, $pl_lng, $eventId);
+                mysqli_stmt_execute($upPlace);
+                mysqli_stmt_close($upPlace);
+            }
+        }
+
         // Attempt Microsoft Graph calendar creation and fallback to ICS+SMTP similar to sales flow
         $graphCreated = false;
-        if (!empty($inviteEmailsClean) || !empty($inviteEmail)) {
+        // trigger invite flow when sendInvite is set, even if no explicit invite email provided
+        if ($sendInvite) {
             // fetch user data for organizer
             $userEmail = '';$userPassEncrypted = ''; $userUpgraded = 1; $userFirstName=''; $userLastName='';
             $ustmt = mysqli_prepare($conn, "SELECT utilizator_Email, utilizator_Parola, utilizator_Upgraded, utilizator_Prenume, utilizator_Nume FROM date_utilizatori WHERE utilizator_ID = ? LIMIT 1");
@@ -322,16 +398,59 @@ if ($eventId > 0) {
         echo json_encode(['success'=>false,'message'=>$err]);
     }
 } else {
-    $stmt = mysqli_prepare($conn, "INSERT INTO clienti_programari (programare_user, programare_client, programare_data_inceput, programare_data_sfarsit, programare_obiectiv, programare_finalizata, programare_zona, programare_tipvizita, programare_detalii, programare_durata, programare_invite_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    mysqli_stmt_bind_param($stmt, "iisssisssis", $uid, $client, $startDT, $endDT, $objective, $finalized, $zone, $tip, $detalii, $duration, $inviteEmailsClean);
+    if ($client === null) {
+        $stmt = mysqli_prepare($conn, "INSERT INTO clienti_programari (programare_user, programare_client, programare_data_inceput, programare_data_sfarsit, programare_obiectiv, programare_finalizata, programare_zona, programare_tipvizita, programare_detalii, programare_durata, programare_invite_email) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "isssisssis", $uid, $startDT, $endDT, $objective, $finalized, $zone, $tip, $detalii, $duration, $inviteEmailsClean);
+    } else {
+        $stmt = mysqli_prepare($conn, "INSERT INTO clienti_programari (programare_user, programare_client, programare_data_inceput, programare_data_sfarsit, programare_obiectiv, programare_finalizata, programare_zona, programare_tipvizita, programare_detalii, programare_durata, programare_invite_email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        mysqli_stmt_bind_param($stmt, "iisssisssis", $uid, $client, $startDT, $endDT, $objective, $finalized, $zone, $tip, $detalii, $duration, $inviteEmailsClean);
+    }
     $ok = mysqli_stmt_execute($stmt);
     $err = mysqli_stmt_error($stmt);
     $insertedId = mysqli_insert_id($conn);
     mysqli_stmt_close($stmt);
     if ($ok) {
+        // ensure programare_invite column exists & set according to checkbox for inserts
+        $colCheckInv = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_invite'");
+        if ($colCheckInv && mysqli_num_rows($colCheckInv) == 0) {
+            @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_invite TINYINT(1) DEFAULT 0");
+        }
+        $updInviteFlag = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_invite = ? WHERE programare_id = ?");
+        if ($updInviteFlag) { mysqli_stmt_bind_param($updInviteFlag, 'ii', $sendInvite, $insertedId); mysqli_stmt_execute($updInviteFlag); mysqli_stmt_close($updInviteFlag); }
+
+        // Save Google Place metadata (place_id, lat, lng) if provided for inserted row
+        $placeId = isset($_POST['eventZonePlaceId']) ? trim($_POST['eventZonePlaceId']) : '';
+        $placeLat = isset($_POST['eventZoneLat']) ? trim($_POST['eventZoneLat']) : '';
+        $placeLng = isset($_POST['eventZoneLng']) ? trim($_POST['eventZoneLng']) : '';
+        if ($placeId !== '' || $placeLat !== '' || $placeLng !== '') {
+            // ensure columns exist
+            $colCheck1 = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_zone_place_id'");
+            if ($colCheck1 && mysqli_num_rows($colCheck1) == 0) {
+                @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_zone_place_id VARCHAR(255) NULL");
+            }
+            $colCheck2 = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_zone_lat'");
+            if ($colCheck2 && mysqli_num_rows($colCheck2) == 0) {
+                @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_zone_lat DECIMAL(10,7) NULL");
+            }
+            $colCheck3 = mysqli_query($conn, "SHOW COLUMNS FROM clienti_programari LIKE 'programare_zone_lng'");
+            if ($colCheck3 && mysqli_num_rows($colCheck3) == 0) {
+                @mysqli_query($conn, "ALTER TABLE clienti_programari ADD COLUMN programare_zone_lng DECIMAL(10,7) NULL");
+            }
+            // update values
+            $upPlace = mysqli_prepare($conn, "UPDATE clienti_programari SET programare_zone_place_id = ?, programare_zone_lat = ?, programare_zone_lng = ? WHERE programare_id = ?");
+            if ($upPlace) {
+                $pl_lat = ($placeLat !== '' ? floatval($placeLat) : null);
+                $pl_lng = ($placeLng !== '' ? floatval($placeLng) : null);
+                mysqli_stmt_bind_param($upPlace, 'sddi', $placeId, $pl_lat, $pl_lng, $insertedId);
+                mysqli_stmt_execute($upPlace);
+                mysqli_stmt_close($upPlace);
+            }
+        }
+
         // run the same invite flow as update branch so inserts also create Graph/ICS invites
         $eventId = $insertedId;
-        if (!empty($inviteEmailsClean) || !empty($inviteEmail)) {
+        // trigger invite flow when sendInvite is set, even if no explicit invite email provided
+        if ($sendInvite) {
             $graphCreated = false;
             // fetch user data for organizer
             $userEmail = '';$userPassEncrypted = ''; $userUpgraded = 1; $userFirstName=''; $userLastName='';

@@ -58,12 +58,15 @@ foreach ($required_fields as $field) {
     }
 }
 
-// Validare preț
-if (!is_numeric($_POST['produs_pret']) || $_POST['produs_pret'] < 0) {
+// Normalizează și validează preț (acceptă format românesc cu virgulă)
+$produs_pret_norm = parseRomanianNumber($_POST['produs_pret']);
+if (!is_numeric($produs_pret_norm) || (float)$produs_pret_norm < 0) {
     echo "<div class=\"callout alert\">Preț invalid!</div></div></div>";
     include '../bottom.php';
     die;
 }
+// Folosim valoarea normalizată pentru inserție/actualizare
+$_POST['produs_pret'] = $produs_pret_norm;
 
 // Validare imagine (basename pentru path traversal)
 $produs_imagine = basename($_POST['produs_imagine']);
@@ -86,8 +89,12 @@ If ($_GET['mode']=="new"){
          produs_thumb, produs_limba, produs_tva, produs_dpret) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $produs_dpret = isset($_POST['produs_dpret']) && is_numeric($_POST['produs_dpret']) ? 
-                    $_POST['produs_dpret'] : '0.0000';
+    // Normalize produs_dpret if provided
+$produs_dpret = '0.0000';
+if (isset($_POST['produs_dpret']) && $_POST['produs_dpret'] !== '') {
+    $produs_dpret_norm = parseRomanianNumber($_POST['produs_dpret']);
+    $produs_dpret = is_numeric($produs_dpret_norm) ? $produs_dpret_norm : '0.0000';
+}
     
     mysqli_stmt_bind_param($stmt, 'sssssssssssss',
         $_POST['produs_nume'],
@@ -136,8 +143,12 @@ if (!isset($_GET['pID']) || !is_numeric($_GET['pID'])) {
 }
 
 $pID = (int)$_GET['pID'];
-$produs_dpret = isset($_POST['produs_dpret']) && is_numeric($_POST['produs_dpret']) ? 
-                $_POST['produs_dpret'] : '0.0000';
+// Normalize produs_dpret if provided
+$produs_dpret = '0.0000';
+if (isset($_POST['produs_dpret']) && $_POST['produs_dpret'] !== '') {
+    $produs_dpret_norm = parseRomanianNumber($_POST['produs_dpret']);
+    $produs_dpret = is_numeric($produs_dpret_norm) ? $produs_dpret_norm : '0.0000';
+}
 
 $stmt = mysqli_prepare($conn,
     "UPDATE magazin_produse SET 
