@@ -5,15 +5,18 @@ include '../classes/common.php';
 include '../classes/paginator.class.php';
 $strPageTitle = "Administrare legislație salvată";
 include '../dashboard/header.php';
-if(!isset($_SESSION)) { session_start(); }
-if (!isSet($_SESSION['userlogedin'])) {
-    header("location:$strSiteURL/login/index.php?message=MLF");
-    exit();
+if(!isset($_SESSION)) 
+{ 
+	session_start(); 
 }
-if (!isset($_SESSION['clearence']) || $_SESSION['clearence'] != 'ADMIN') {
-    header("location:$strSiteURL/index.php?message=unauthorized");
-    exit();
+if (!isSet($_SESSION['userlogedin']))
+{
+	header("location:$strSiteURL/login/index.php?message=MLF");
 }
+
+$uid=$_SESSION['uid'];
+$code=$_SESSION['code'];
+$uid_to_use = ($userlegal == 1) ? $uid : 0;
 // CSRF token
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -30,8 +33,8 @@ if (isset($_GET['mode']) && $_GET['mode'] == 'delete') {
         die('Invalid ID');
     }
     $id = (int)$_GET['id'];
-    $stmt = mysqli_prepare($conn, "DELETE FROM legislatie_salvata WHERE id = ?");
-    mysqli_stmt_bind_param($stmt, 'i', $id);
+    $stmt = mysqli_prepare($conn, "DELETE FROM legislatie_salvata WHERE id = ? AND uid = ?");
+    mysqli_stmt_bind_param($stmt, 'ii', $id, $uid_to_use);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
     echo '<div class="callout success">Înregistrare ștearsă.</div>';
@@ -60,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             die('Invalid ID');
         }
         $id = (int)$_GET['id'];
-        $stmt = mysqli_prepare($conn, "UPDATE legislatie_salvata SET tip_act=?, numar=?, titlu=?, data_vigoare=?, emitent=?, publicatie=?, link_html=?, text=?, last_updated=NOW() WHERE id=?");
-        mysqli_stmt_bind_param($stmt, 'ssssssssi', $tip_act, $numar, $titlu, $data_vigoare, $emitent, $publicatie, $link_html, $text, $id);
+        $stmt = mysqli_prepare($conn, "UPDATE legislatie_salvata SET tip_act=?, numar=?, titlu=?, data_vigoare=?, emitent=?, publicatie=?, link_html=?, text=?, last_updated=NOW() WHERE id=? AND uid=?");
+        mysqli_stmt_bind_param($stmt, 'ssssssssii', $tip_act, $numar, $titlu, $data_vigoare, $emitent, $publicatie, $link_html, $text, $id, $uid_to_use);
         if (!mysqli_stmt_execute($stmt)) {
             die('Error: ' . mysqli_stmt_error($stmt));
         }
@@ -72,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     } else {
         // new
-        $stmt = mysqli_prepare($conn, "INSERT INTO legislatie_salvata (tip_act, numar, titlu, data_vigoare, emitent, publicatie, link_html, text, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-        mysqli_stmt_bind_param($stmt, 'ssssssss', $tip_act, $numar, $titlu, $data_vigoare, $emitent, $publicatie, $link_html, $text);
+        $stmt = mysqli_prepare($conn, "INSERT INTO legislatie_salvata (tip_act, numar, titlu, data_vigoare, emitent, publicatie, link_html, text, last_updated, uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)");
+        mysqli_stmt_bind_param($stmt, 'ssssssssi', $tip_act, $numar, $titlu, $data_vigoare, $emitent, $publicatie, $link_html, $text, $uid_to_use);
         if (!mysqli_stmt_execute($stmt)) {
             die('Error: ' . mysqli_stmt_error($stmt));
         }
@@ -87,31 +90,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // --- list with search and pagination ---
 $search = isset($_GET['q']) ? trim($_GET['q']) : '';
-$where = '';
-$params = [];
-$types = '';
+$where = 'WHERE uid = ?';
+$params = [$uid_to_use];
+$types = 'i';
 if ($search !== '') {
     // search in multiple fields incl. text
-    $where = "WHERE (tip_act LIKE ? OR numar LIKE ? OR titlu LIKE ? OR text LIKE ? )";
+    $where .= " AND (tip_act LIKE ? OR numar LIKE ? OR titlu LIKE ? OR text LIKE ? )";
     $kw = '%' . $search . '%';
-    $params = [$kw, $kw, $kw, $kw];
-    $types = 'ssss';
+    $params[] = $kw;
+    $params[] = $kw;
+    $params[] = $kw;
+    $params[] = $kw;
+    $types .= 'ssss';
 }
 
 // count
-if ($where) {
-    $stmt = mysqli_prepare($conn, "SELECT COUNT(*) AS cnt FROM legislatie_salvata $where");
-    mysqli_stmt_bind_param($stmt, $types, ...$params);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_bind_result($stmt, $cnt);
-    mysqli_stmt_fetch($stmt);
-    mysqli_stmt_close($stmt);
-    $numar = (int)$cnt;
-} else {
-    $res_count = ezpub_query($conn, "SELECT COUNT(*) AS cnt FROM legislatie_salvata");
-    $rowcnt = ezpub_fetch_array($res_count);
-    $numar = (int)$rowcnt['cnt'];
-}
+$stmt = mysqli_prepare($conn, "SELECT COUNT(*) AS cnt FROM legislatie_salvata $where");
+mysqli_stmt_bind_param($stmt, $types, ...$params);
+mysqli_stmt_execute($stmt);
+mysqli_stmt_bind_result($stmt, $cnt);
+mysqli_stmt_fetch($stmt);
+mysqli_stmt_close($stmt);
+$numar = (int)$cnt;
 
 $pages = new Pagination;
 $pages->items_total = $numar;
@@ -121,17 +121,13 @@ $limit = $pages->limit;
 
 // fetch rows
 $sql = "SELECT id, tip_act, numar, titlu, data_vigoare, emitent, publicatie, link_html, LEFT(text,400) AS excerpt, last_updated FROM legislatie_salvata ";
-if ($where) $sql .= $where . ' ';
+$sql .= $where . ' ';
 $sql .= "ORDER BY last_updated DESC " . $limit;
 
-if ($where) {
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, $types, ...$params);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-} else {
-    $result = ezpub_query($conn, $sql);
-}
+$stmt = mysqli_prepare($conn, $sql);
+mysqli_stmt_bind_param($stmt, $types, ...$params);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
 ?>
 
@@ -203,8 +199,8 @@ if ($where) {
 // view / new / edit forms
 if (isset($_GET['mode']) && $_GET['mode'] == 'view' && isset($_GET['id']) && filter_var($_GET['id'], FILTER_VALIDATE_INT)) {
     $id = (int)$_GET['id'];
-    $stmt = mysqli_prepare($conn, "SELECT * FROM legislatie_salvata WHERE id=?");
-    mysqli_stmt_bind_param($stmt, 'i', $id);
+    $stmt = mysqli_prepare($conn, "SELECT * FROM legislatie_salvata WHERE id=? AND uid=?");
+    mysqli_stmt_bind_param($stmt, 'ii', $id, $uid_to_use);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
     $item = mysqli_fetch_assoc($res);
@@ -227,8 +223,8 @@ if (isset($_GET['mode']) && in_array($_GET['mode'], ['new','edit'])) {
     if ($mode == 'edit') {
         if (!isset($_GET['id']) || !filter_var($_GET['id'], FILTER_VALIDATE_INT)) { die('Invalid ID'); }
         $id = (int)$_GET['id'];
-        $stmt = mysqli_prepare($conn, "SELECT * FROM legislatie_salvata WHERE id=?");
-        mysqli_stmt_bind_param($stmt, 'i', $id);
+        $stmt = mysqli_prepare($conn, "SELECT * FROM legislatie_salvata WHERE id=? AND uid=?");
+        mysqli_stmt_bind_param($stmt, 'ii', $id, $uid_to_use);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
         $item = mysqli_fetch_assoc($res);

@@ -33,13 +33,19 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
     </div>
 
     <?php if ($cui!=''):
-        // Prepare and fetch from od_firme_master
-        $stmt = mysqli_prepare($conn, "SELECT * FROM od_firme_master WHERE CUI = ? LIMIT 1");
-        mysqli_stmt_bind_param($stmt, 's', $cui);
+        // CUI este exclusiv numeric în od_firme_master; normalizăm la cifre
+        $cui_numeric = preg_replace('/\D/', '', $cui);
+        // Prepare and fetch from od_firme_master – all records ordered by DATA_INMATRICULARE DESC
+        $stmt = mysqli_prepare($conn, "SELECT * FROM od_firme_master WHERE CUI = ? ORDER BY DATA_INMATRICULARE DESC");
+        mysqli_stmt_bind_param($stmt, 's', $cui_numeric);
         mysqli_stmt_execute($stmt);
         $res = mysqli_stmt_get_result($stmt);
-        $od = mysqli_fetch_array($res, MYSQLI_ASSOC);
+        $od_all = [];
+        while ($row_od = mysqli_fetch_array($res, MYSQLI_ASSOC)) {
+            $od_all[] = $row_od;
+        }
         mysqli_stmt_close($stmt);
+        $od = !empty($od_all) ? $od_all[0] : null; // cea mai recentă înregistrare
 
         // ANAF fiscal data - try direct lookup, then fallback to normalized CUI lookup
         $anaf = null;
@@ -109,6 +115,10 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
         <li class="tabs-title"><a href="#panel2">Date ANAF</a></li>
         <li class="tabs-title"><a href="#panel3">Date bilanț</a></li>
         <li class="tabs-title"><a href="#panel4">Date JUST</a></li>
+        <li class="tabs-title"><a href="#panel5">Analiză financiară</a></li>
+        <?php if (count($od_all) > 1): ?>
+        <li class="tabs-title"><a href="#panel6">Istoric firmă</a></li>
+        <?php endif; ?>
     </ul>
 
     <div class="tabs-content" data-tabs-content="company-tabs">
@@ -118,6 +128,7 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
                 <tbody>
                     <tr><td>Denumire</td><td><?php echo htmlspecialchars($od['DENUMIRE'] ?? '')?></td></tr>
                     <tr><td>CUI</td><td><?php echo htmlspecialchars($od['CUI'] ?? '')?></td></tr>
+                    <tr><td>Cod înmatriculare</td><td><?php echo htmlspecialchars($od['COD_INMATRICULARE'] ?? '')?></td></tr>
                     <tr><td>Data înmatriculare</td><td><?php
                         $data_inm = isset($od['DATA_INMATRICULARE']) ? $od['DATA_INMATRICULARE'] : '';
                         if (!empty($data_inm) && $d = DateTime::createFromFormat('Y-m-d', $data_inm)) {
@@ -126,6 +137,119 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
                             echo htmlspecialchars((string)$data_inm);
                         }
                         ?></td></tr>
+                    <tr><td>Administratori</td><td><?php
+                        $cod_inmatr = $od['COD_INMATRICULARE'] ?? '';
+                        $adm_persons = []; // ['name' => ..., 'birthdate' => ''] pentru verificare identitate
+                        if (!empty($cod_inmatr)) {
+                            $stmt_adm = mysqli_prepare($conn, "SELECT PERSOANA_IMPUTERNICITA, CALITATE, DATA_NASTERE, LOCALITATE_NASTERE FROM od_reprezentanti_legali WHERE COD_INMATRICULARE = ?");
+                            if ($stmt_adm) {
+                                mysqli_stmt_bind_param($stmt_adm, 's', $cod_inmatr);
+                                mysqli_stmt_execute($stmt_adm);
+                                $res_adm = mysqli_stmt_get_result($stmt_adm);
+                                $adm_parts = [];
+                                while ($row_adm = mysqli_fetch_array($res_adm, MYSQLI_ASSOC)) {
+                                    $adm_persons[] = [
+                                        'name'      => $row_adm['PERSOANA_IMPUTERNICITA'],
+                                        'birthdate' => !empty($row_adm['DATA_NASTERE']) ? substr($row_adm['DATA_NASTERE'], 0, 10) : null,
+                                    ];
+                                    $adm_label = htmlspecialchars($row_adm['PERSOANA_IMPUTERNICITA']);
+                                    if (!empty($row_adm['CALITATE'])) {
+                                        $adm_label .= ' (' . htmlspecialchars($row_adm['CALITATE']) . ')';
+                                    }
+                                    $adm_parts[] = $adm_label;
+                                }
+                                mysqli_stmt_close($stmt_adm);
+                                echo implode('<br>', $adm_parts);
+                            }
+                        }
+                    ?></td></tr>
+                    <tr><td>Alte firme cu același administrator</td><td><?php
+                        if (!empty($cod_inmatr) && !empty($adm_persons)) {
+                            $alte_firme = [];
+                            $alte_firme_seen = [];
+                            foreach ($adm_persons as $adm_person) {
+                                $adm_name      = $adm_person['name'];
+                                $adm_birthdate = $adm_person['birthdate']; // null dacă lipsește
+                                // Dacă avem dată naștere, verificăm și după ea pentru a confirma identitatea
+                                if ($adm_birthdate !== null) {
+                                    $stmt_af = mysqli_prepare($conn, "SELECT DISTINCT rl.COD_INMATRICULARE FROM od_reprezentanti_legali rl WHERE rl.PERSOANA_IMPUTERNICITA = ? AND SUBSTR(rl.DATA_NASTERE,1,10) = ? AND rl.COD_INMATRICULARE != ? LIMIT 20");
+                                    if ($stmt_af) {
+                                        mysqli_stmt_bind_param($stmt_af, 'sss', $adm_name, $adm_birthdate, $cod_inmatr);
+                                    }
+                                } else {
+                                    $stmt_af = mysqli_prepare($conn, "SELECT DISTINCT rl.COD_INMATRICULARE FROM od_reprezentanti_legali rl WHERE rl.PERSOANA_IMPUTERNICITA = ? AND rl.COD_INMATRICULARE != ? LIMIT 20");
+                                    if ($stmt_af) {
+                                        mysqli_stmt_bind_param($stmt_af, 'ss', $adm_name, $cod_inmatr);
+                                    }
+                                }
+                                if ($stmt_af) {
+                                    mysqli_stmt_execute($stmt_af);
+                                    $res_af = mysqli_stmt_get_result($stmt_af);
+                                    while ($row_af = mysqli_fetch_array($res_af, MYSQLI_ASSOC)) {
+                                        $inm = $row_af['COD_INMATRICULARE'];
+                                        if (isset($alte_firme_seen[$inm])) continue;
+                                        $alte_firme_seen[$inm] = true;
+                                        $stmt_fm2 = mysqli_prepare($conn, "SELECT DENUMIRE, CUI FROM od_firme_master WHERE COD_INMATRICULARE = ? LIMIT 1");
+                                        if ($stmt_fm2) {
+                                            mysqli_stmt_bind_param($stmt_fm2, 's', $inm);
+                                            mysqli_stmt_execute($stmt_fm2);
+                                            $res_fm2 = mysqli_stmt_get_result($stmt_fm2);
+                                            $row_fm2 = mysqli_fetch_array($res_fm2, MYSQLI_ASSOC);
+                                            if ($row_fm2 && !empty($row_fm2['CUI'])) {
+                                                $alte_firme[] = '<a href="?cui=' . urlencode($row_fm2['CUI']) . '">' . htmlspecialchars($row_fm2['DENUMIRE']) . '</a>';
+                                            }
+                                            mysqli_stmt_close($stmt_fm2);
+                                        }
+                                    }
+                                    mysqli_stmt_close($stmt_af);
+                                }
+                            }
+                            echo implode('<br>', $alte_firme);
+                        }
+                    ?></td></tr>
+                    <tr><td>Coduri CAEN autorizate</td><td><?php
+                        if (!empty($cod_inmatr)) {
+                            $stmt_caen = mysqli_prepare($conn, "SELECT COD_CAEN_AUTORIZAT, VER_CAEN_AUTORIZAT FROM od_caen_autorizat WHERE COD_INMATRICULARE = ?");
+                            if ($stmt_caen) {
+                                mysqli_stmt_bind_param($stmt_caen, 's', $cod_inmatr);
+                                mysqli_stmt_execute($stmt_caen);
+                                $res_caen = mysqli_stmt_get_result($stmt_caen);
+                                $caen_parts = [];
+                                while ($row_caen = mysqli_fetch_array($res_caen, MYSQLI_ASSOC)) {
+                                    $caen_cod = $row_caen['COD_CAEN_AUTORIZAT'];
+                                    $caen_ver = $row_caen['VER_CAEN_AUTORIZAT'];
+                                    $caen_den = '';
+                                    if ($caen_ver == 1) {
+                                        // Versiunea 1 CAEN - nu avem tabel cu denumiri
+                                        $caen_den = '';
+                                    } elseif ($caen_ver == 3) {
+                                        $stmt_cdn = mysqli_prepare($conn, "SELECT Denumire FROM generale_coduri_caen_v3 WHERE Clasa = ? LIMIT 1");
+                                        if ($stmt_cdn) {
+                                            mysqli_stmt_bind_param($stmt_cdn, 's', $caen_cod);
+                                            mysqli_stmt_execute($stmt_cdn);
+                                            $res_cdn = mysqli_stmt_get_result($stmt_cdn);
+                                            $row_cdn = mysqli_fetch_array($res_cdn, MYSQLI_ASSOC);
+                                            $caen_den = $row_cdn ? $row_cdn['Denumire'] : '';
+                                            mysqli_stmt_close($stmt_cdn);
+                                        }
+                                    } else {
+                                        $stmt_cdn = mysqli_prepare($conn, "SELECT Denumire FROM generale_coduri_caen_v2 WHERE Clasa = ? LIMIT 1");
+                                        if ($stmt_cdn) {
+                                            mysqli_stmt_bind_param($stmt_cdn, 's', $caen_cod);
+                                            mysqli_stmt_execute($stmt_cdn);
+                                            $res_cdn = mysqli_stmt_get_result($stmt_cdn);
+                                            $row_cdn = mysqli_fetch_array($res_cdn, MYSQLI_ASSOC);
+                                            $caen_den = $row_cdn ? $row_cdn['Denumire'] : '';
+                                            mysqli_stmt_close($stmt_cdn);
+                                        }
+                                    }
+                                    $caen_parts[] = htmlspecialchars($caen_cod) . ($caen_den !== '' ? ' - ' . htmlspecialchars($caen_den) : '');
+                                }
+                                mysqli_stmt_close($stmt_caen);
+                                echo implode('<br>', $caen_parts);
+                            }
+                        }
+                    ?></td></tr>
                     <tr><td>Adresă județ</td><td><?php echo htmlspecialchars($od['ADR_JUDET'] ?? '')?></td></tr>
                     <tr><td>Adresă localitate</td><td><?php echo htmlspecialchars($od['ADR_LOCALITATE'] ?? '')?></td></tr>
                     <tr><td>Adresă stradă</td><td><?php echo htmlspecialchars($od['ADR_DEN_STRADA'] ?? '')?></td></tr>
@@ -154,6 +278,11 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
                     <tr><td>Web</td><td><?php echo htmlspecialchars($od['WEB'] ?? '')?></td></tr>
                 </tbody>
             </table>
+            <?php
+            if (!empty($od['DATA_PRELUCRARII']) && $dp = DateTime::createFromFormat('Y-m-d', $od['DATA_PRELUCRARII'])) {
+                echo '<p><em>Notă: Datele au fost actualizate la ' . $dp->format('d.m.Y') . '.</em></p>';
+            }
+            ?>
             <?php } ?>
         </div>
 
@@ -220,8 +349,8 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
 
                 echo '<table class="stack"><thead><tr><th>Indicator</th><th>Valoare</th></tr></thead><tbody>';
                 foreach ($anaf as $field => $value) {
-                    // skip internal id
-                    if ($field === 'id') continue;
+                    // skip internal id and data actualizare (afișat ca notiță sub tabel)
+                    if ($field === 'id' || $field === 'data') continue;
                     echo '<tr><td>'.(isset($field_labels[$field])?htmlspecialchars($field_labels[$field]):htmlspecialchars($field)).'</td><td>';
                     if (in_array($field, $date_fields) && !empty($value) && $value !== '0000-00-00') {
                         $d = DateTime::createFromFormat('Y-m-d', $value);
@@ -230,12 +359,58 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
                         if ($value === '1' || $value === 1) { echo 'Da'; }
                         elseif ($value === '0' || $value === 0) { echo 'Nu'; }
                         else { echo htmlspecialchars((string)$value); }
+                    } elseif ($field === 'cod_CAEN' && !empty($value)) {
+                        $caen_den_anaf = '';
+                        $caen_ver_anaf = null;
+                        $nr_reg_com = $anaf['nrRegCom'] ?? '';
+                        if (!empty($nr_reg_com)) {
+                            $stmt_cv = mysqli_prepare($conn, "SELECT VER_CAEN_AUTORIZAT FROM od_caen_autorizat WHERE COD_INMATRICULARE = ? AND COD_CAEN_AUTORIZAT = ? LIMIT 1");
+                            if ($stmt_cv) {
+                                mysqli_stmt_bind_param($stmt_cv, 'ss', $nr_reg_com, $value);
+                                mysqli_stmt_execute($stmt_cv);
+                                $res_cv = mysqli_stmt_get_result($stmt_cv);
+                                $row_cv = mysqli_fetch_array($res_cv, MYSQLI_ASSOC);
+                                $caen_ver_anaf = $row_cv ? trim($row_cv['VER_CAEN_AUTORIZAT']) : null;
+                                mysqli_stmt_close($stmt_cv);
+                            }
+                        }
+                        if ($caen_ver_anaf == 3) {
+                            $stmt_cdn_a = mysqli_prepare($conn, "SELECT Denumire FROM generale_coduri_caen_v3 WHERE Clasa = ? LIMIT 1");
+                            if ($stmt_cdn_a) {
+                                mysqli_stmt_bind_param($stmt_cdn_a, 's', $value);
+                                mysqli_stmt_execute($stmt_cdn_a);
+                                $res_cdn_a = mysqli_stmt_get_result($stmt_cdn_a);
+                                $row_cdn_a = mysqli_fetch_array($res_cdn_a, MYSQLI_ASSOC);
+                                $caen_den_anaf = $row_cdn_a ? $row_cdn_a['Denumire'] : '';
+                                mysqli_stmt_close($stmt_cdn_a);
+                            }
+                        } elseif ($caen_ver_anaf == 2 || $caen_ver_anaf === null || ($caen_ver_anaf !== null && $caen_ver_anaf != 1)) {
+                            $stmt_cdn_a = mysqli_prepare($conn, "SELECT Denumire FROM generale_coduri_caen_v2 WHERE Clasa = ? LIMIT 1");
+                            if ($stmt_cdn_a) {
+                                mysqli_stmt_bind_param($stmt_cdn_a, 's', $value);
+                                mysqli_stmt_execute($stmt_cdn_a);
+                                $res_cdn_a = mysqli_stmt_get_result($stmt_cdn_a);
+                                $row_cdn_a = mysqli_fetch_array($res_cdn_a, MYSQLI_ASSOC);
+                                $caen_den_anaf = $row_cdn_a ? $row_cdn_a['Denumire'] : '';
+                                mysqli_stmt_close($stmt_cdn_a);
+                            }
+                        }
+                        echo htmlspecialchars($value);
+                        if ($caen_den_anaf !== '') {
+                            echo ' - ' . htmlspecialchars($caen_den_anaf);
+                        }
                     } else {
                         echo htmlspecialchars((string)$value);
                     }
                     echo '</td></tr>';
                 }
                 echo '</tbody></table>';
+                if (!empty($anaf['data']) && $anaf['data'] !== '0000-00-00') {
+                    $d_anaf = DateTime::createFromFormat('Y-m-d', $anaf['data']);
+                    if ($d_anaf) {
+                        echo '<p><em>Notă: Datele au fost actualizate la ' . $d_anaf->format('d.m.Y') . '.</em></p>';
+                    }
+                }
             }
             ?>
         </div>
@@ -380,6 +555,58 @@ $cui = isset($_GET['cui']) ? trim($_GET['cui']) : '';
             }
             ?>
         </div>
+      <!-- analiză financiară -->
+        <div class="tabs-panel" id="panel5">
+        <?php include __DIR__ . '/../common/panel_analiza_financiara.php'; ?>
+        </div>
+       <!-- istoric firmă --> 
+        <?php if (count($od_all) > 1): ?>
+        <div class="tabs-panel" id="panel6">
+            <p>Această secțiune cuprinde istoricul firmei înregistrate în baza de date, adică toate înregistrările găsite la Registrul Comerțului care au același cod CUI. 
+                Acest lucru poate fi util pentru a vedea evoluția firmei în timp, eventuale schimbări de denumire, sediu social în alt județ.</p>
+            <table class="stack">
+                <thead>
+                    <tr>
+                        <th>Denumire</th>
+                        <th>Cod înmatriculare</th>
+                        <th>CUI</th>
+                        <th>Județ</th>
+                        <th>Localitate</th>
+                        <th>Stradă nr.</th>
+                        <th>Cod status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($od_all as $od_row):
+                    $cod_status_row = isset($od_row['COD_STATUS']) ? $od_row['COD_STATUS'] : '';
+                    $status_label_row = $cod_status_row;
+                    if ($cod_status_row !== '') {
+                        $stmt_sr = mysqli_prepare($conn, "SELECT DENUMIRE FROM od_stare_firma WHERE COD = ? LIMIT 1");
+                        if ($stmt_sr) {
+                            mysqli_stmt_bind_param($stmt_sr, 's', $cod_status_row);
+                            mysqli_stmt_execute($stmt_sr);
+                            $res_sr = mysqli_stmt_get_result($stmt_sr);
+                            $row_sr = mysqli_fetch_array($res_sr, MYSQLI_ASSOC);
+                            if ($row_sr && !empty($row_sr['DENUMIRE'])) { $status_label_row = $row_sr['DENUMIRE']; }
+                            mysqli_stmt_close($stmt_sr);
+                        }
+                    }
+                    $strada_nr = trim(($od_row['ADR_DEN_STRADA'] ?? '') . ' ' . ($od_row['ADR_NR_STRADA'] ?? ''));
+                ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($od_row['DENUMIRE'] ?? '') ?></td>
+                        <td><?php echo htmlspecialchars($od_row['COD_INMATRICULARE'] ?? '') ?></td>
+                        <td><?php echo htmlspecialchars($od_row['CUI'] ?? '') ?></td>
+                        <td><?php echo htmlspecialchars($od_row['ADR_JUDET'] ?? '') ?></td>
+                        <td><?php echo htmlspecialchars($od_row['ADR_LOCALITATE'] ?? '') ?></td>
+                        <td><?php echo htmlspecialchars($strada_nr) ?></td>
+                        <td><?php echo htmlspecialchars($status_label_row) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
 
         <div class="tabs-panel" id="panel4">
             <?php

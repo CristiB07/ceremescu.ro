@@ -24,7 +24,7 @@ $sdata=$yn."-".$m."-".$i." 00:00:00";
             și <a href="<?php echo $strSiteURL ?>/cookies.php">Politica privind utilizarea modulelor cookie</a>, 
             înainte de a naviga pe site. Dacă nu sunteți de acord cu acești Termeni sau cu politicile indicate mai sus, 
             vă rugăm să nu utilizați site-ul. </p>
-            <?php if ($shop==1 || $elearning==1)
+            <?php if ($shop==1 || $elearning==1 || $sitefunction=='bi')
 {?>
 <h2>Date cu caracter personal</h2>
 <p>
@@ -90,7 +90,26 @@ datele personale pe care ni le furnizați despre dumneavoastră, un membru al fa
             Prin acceptarea acestor termeni şi condiţii la validarea comenzii, cumpărătorul este de acord să nu solicite
             returnarea produselor.</p>
             <?php }?>
-<h2>Reguli de utilizare</h2>
+<?php if ($sitefunction=='bi') { ?>
+<h2>Termeni și condiții de utilizare</h2>
+<p>Pentru a accesa serviciile complete ale platformei, trebuie să vă creați un cont de utilizator. 
+    Informațiile pe care le furnizați la înregistrare trebuie să fie corecte, complete și actualizate. 
+    Sunteți responsabil pentru menținerea confidențialității datelor de autentificare și pentru toate activitățile desfășurate sub contul dumneavoastră.</p>
+<p><strong>Utilizați platforma pe propriul dumneavoastră risc. Nu suntem responsabili pentru deciziile pe care le luați pe baza informațiilor obținute prin intermediul serviciilor noastre. 
+    Nu răspundem pentru eventualele pierderi de profituri, întreruperi de activitate, pierderi de oportunități, prejudicii de imagine sau alte daune indirecte sau consecutive 
+    care ar putea rezulta din utilizarea sau imposibilitatea de a utiliza platforma.</p>
+<p>Nu răspundem pentru acuratețea sau promptitudinea actualizării surselor oficiale din 
+    care extragem datele, acestea fiind responsabilitatea exclusivă a instituțiilor publice care le gestionează.</strong></p>
+    <p>În eventualitatea în care răspunderea noastră ar fi angajată pentru orice situație legată de furnizarea serviciilor, aceasta este limitată la contravaloarea serviciilor achiziționate, 
+        indiferent dacă este vorba despre un singur incident sau despre multiple evenimente.</p>
+    <p>Furnizorul asigură buna funcţionare a site-ului şi împrospătarea informaţiilor în măsura în care eforturile nu sunt disproporţionate cu interesul manifestat de utilizatori şi nu răspunde sau garantează că:</p>
+<ul>
+    <li class="tiny">serviciile îndeplinesc sau vor fi adaptate la orice cerinţă a dumneavoastră;</li>
+    <li class="tiny">serviciile vor fi disponibile şi funcţionale permanent (pot exista perioade scurte de mentenanţă);</li>
+    <li class="tiny">datele prezentate pe site sunt integral complete, actuale şi corecte (sunt cele mai recente informaţii culese);</li>
+</ul>
+<?php } ?>
+    <h2>Reguli de utilizare</h2>
 <p>Prin accesarea, vizitarea, plasarea unei comenzi sau desfășurarea oricărei alte activități pe site-ul nostru, 
     aveți obligația să respectați următoarele reguli:</p>
 <ul>
@@ -114,6 +133,9 @@ datele personale pe care ni le furnizați despre dumneavoastră, un membru al fa
 <h3>Data încheierii contractului</h3> 
 <p>Contractul dintre dumneavoastră și noi se încheie în momentul în care comanda dumneavoastră va fi acceptată în mod expres de noi și veți primi, 
     în acest sens, un e-mail în care vom confirma livrarea.</p> 
+<p>Serviciile achiziționate sunt valabile conform duratei specificate în oferta acceptată. 
+    Tarifele pe care le oferim sunt stabilite având în vedere această perioadă de utilizare, 
+    iar rezilierea anticipată nu atrage returnarea sumelor deja plătite.</p>
 <h3>Prețuri și plăți</h3>
 <p>Toate prețurile afișate pe site sunt exprimate în lei, includ TVA și alte taxe aplicabile, 
     dar nu includ costurile de livrare care vor fi afișate separat în momentul plasării comenzii, atunci când este cazul. 

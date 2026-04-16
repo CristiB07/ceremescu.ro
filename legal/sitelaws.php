@@ -2,8 +2,20 @@
 include '../settings.php';
 include '../classes/common.php';
 include '../classes/paginator.class.php';
-$strDescription="Administrare legislație";
-$strPageTitle="Administrează legislația!";
+$strPageTitle="Administrează legislația";
+
+if(!isset($_SESSION)) 
+{ 
+	session_start(); 
+}
+if (!isSet($_SESSION['userlogedin']))
+{
+	header("location:$strSiteURL/login/index.php?message=MLF");
+}
+
+$uid=$_SESSION['uid'];
+$code=$_SESSION['code'];
+$uid_to_use = ($userlegal == 1) ? $uid : 0;
 
 include '../dashboard/header.php';
 ?>
@@ -14,7 +26,7 @@ include '../dashboard/header.php';
 echo "<h1>$strPageTitle</h1>";
 if (IsSet($_GET['mode']) AND $_GET['mode']=="delete"){
 
-$nsql="DELETE FROM legislatie WHERE lege_ID=" .$_GET['pID']. ";";
+$nsql="DELETE FROM legislatie WHERE lege_ID=" .(int)$_GET['pID']. " AND uid=$uid_to_use;";
 ezpub_query($conn,$nsql);
 echo "<div class=\"callout success\">$strRecordDeleted</div></div>" ;
 echo "<script type=\"text/javascript\">
@@ -36,21 +48,25 @@ if ($_GET['mode']=="new"){
 //insert new user
 	$mSQL = "INSERT INTO legislatie(";
 	$mSQL = $mSQL . "lege_denumire,";
+	$mSQL = $mSQL . "lege_rezumat,";
 	$mSQL = $mSQL . "lege_modificari,";
 	$mSQL = $mSQL . "lege_link,";
 	$mSQL = $mSQL . "lege_categorie,";
 	$mSQL = $mSQL . "lege_data,";
 	$mSQL = $mSQL . "lege_lastupdated,";
-	$mSQL = $mSQL . "lege_tip)";
+	$mSQL = $mSQL . "lege_tip,";
+	$mSQL = $mSQL . "uid)";
 
 	$mSQL = $mSQL . "Values(";
 	$mSQL = $mSQL . "'" .$_POST["lege_denumire"] . "', ";
+	$mSQL = $mSQL . "'" .$_POST["lege_rezumat"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["lege_modificari"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["lege_link"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["lege_categorie"] . "', ";
 	$mSQL = $mSQL . "'" .$_POST["lege_data"] . "', ";
 	$mSQL = $mSQL . "'" .$lastupdated . "', ";
-	$mSQL = $mSQL . "'" .$_POST["lege_tip"] ."')";
+	$mSQL = $mSQL . "'" .$_POST["lege_tip"] . "', ";
+	$mSQL = $mSQL . $uid_to_use . ")";
 				
 //It executes the SQL
 if (!ezpub_query($conn,$mSQL))
@@ -74,14 +90,16 @@ die;
 //ends if post new
 else
 {// edit
-$strWhereClause = " WHERE legislatie.lege_ID=" . $_GET["pID"] . ";";
+$strWhereClause = " WHERE legislatie.lege_ID=" . (int)$_GET["pID"] . " AND uid=$uid_to_use;";
 $query= "UPDATE legislatie SET legislatie.lege_denumire='" . $_POST["lege_denumire"] . "' ," ;
+$query= $query . " legislatie.lege_rezumat='" . $_POST["lege_rezumat"] . "', "; 
 $query= $query . " legislatie.lege_modificari='" . $_POST["lege_modificari"] . "', "; 
 $query= $query . " legislatie.lege_link='" . $_POST["lege_link"] . "', "; 
 $query= $query . " legislatie.lege_categorie='" . $_POST["lege_categorie"] . "', "; 
 $query= $query . " legislatie.lege_data='" . $_POST["lege_data"] . "', "; 
 $query= $query . " legislatie.lege_lastupdated='" . $lastupdated . "', "; 
-$query= $query . " legislatie.lege_tip='" . $_POST["lege_tip"] . "' "; 
+$query= $query . " legislatie.lege_tip='" . $_POST["lege_tip"] . "', "; 
+$query= $query . " legislatie.uid=" . $uid_to_use . " "; 
 $query= $query . $strWhereClause;
 if (!ezpub_query($conn,$query))
   {
@@ -109,34 +127,34 @@ if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){ // we have new page
 ?>
 <form method="post" action="sitelaws.php?mode=new" >
 		    <div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
+              <div class="large-3 medium-3 small-6 cell">
                 <label><?php echo $strType?></label>
                 <input type="text" name="lege_tip" Type="text" size="30" placeholder="<?php echo $strType?>" required/>
               </div>
-            </div>		
+              <div class="large-3 medium-3 small-6 cell">
+                <label><?php echo $strCategory?></label>
+                <input type="text" name="lege_categorie" Type="text" size="30" placeholder="<?php echo $strCategory?>" />
+              </div>
+              <div class="large-3 medium-3 small-6 cell">
+                <label><?php echo $strYear?></label>
+                <input type="text" name="lege_data" Type="text" size="30" placeholder="<?php echo $strYear?>" />
+              </div>
+              <div class="large-3 medium-3 small-6 cell">
+                <label><?php echo $strURL?></label>
+                <input type="text" name="lege_link" Type="text" size="30" placeholder="<?php echo $strURL?>" required/>
+              </div>
+            </div>
 		    <div class="grid-x grid-padding-x">
               <div class="large-12 cell">
                 <label><?php echo $strTitle?></label>
                 <input type="text" name="lege_denumire" Type="text" size="30" placeholder="<?php echo $strTitle?>" required/>
               </div>
-            </div>		
-			<div class="grid-x grid-padding-x">
+            </div>						
+            <div class="grid-x grid-padding-x">
               <div class="large-12 cell">
-                <label><?php echo $strURL?></label>
-                <input type="text" name="lege_link" Type="text" size="30" placeholder="<?php echo $strURL?>" required/>
-              </div>
-            </div>
-					<div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
-                <label><?php echo $strCategory?></label>
-                <input type="text" name="lege_categorie" Type="text" size="30" placeholder="<?php echo $strCategory?>" />
-              </div>
-            </div>		
-			<div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
-                <label><?php echo $strYear?></label>
-                <input type="text" name="lege_data" Type="text" size="30" placeholder="<?php echo $strYear?>" />
-              </div>
+                <label><?php echo $strSummary?></label>
+                <textarea name="lege_rezumat" id="simple-html-editor-rezumat" class="simple-html-editor" data-upload-dir="legal" rows="6"  ></textarea>
+			  </div>
             </div>
             <div class="grid-x grid-padding-x">
               <div class="large-12 cell"><textarea name="lege_modificari" id="simple-html-editor" class="simple-html-editor" data-upload-dir="legal" rows="10"  ></textarea>
@@ -148,39 +166,40 @@ if (IsSet($_GET['mode']) AND $_GET['mode']=="new"){ // we have new page
 } // ends if new page
 elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="edit"){
 	echo "<a href=\"sitelaws.php\" class=\"button\">$strBack &nbsp;<i class=\"fas fa-backward\"></i></a>";
-$query="SELECT * FROM legislatie WHERE lege_ID=$_GET[pID]";
+$query="SELECT * FROM legislatie WHERE lege_ID=" . (int)$_GET['pID'] . " AND uid=$uid_to_use";
 $result=ezpub_query($conn,$query);
 $row=ezpub_fetch_array($result);
 ?>
 <form method="post" action="sitelaws.php?mode=edit&pID=<?php echo $row['lege_ID']?>" >
          <div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
+              <div class="large-3 medium-3 small-6 cell">
                 <label><?php echo $strType?></label>
                 <input type="text" name="lege_tip" Type="text" size="30" value="<?php echo $row["lege_tip"]?>" required/>
               </div>
-            </div>		
-		    <div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
-                <label><?php echo $strTitle?></label>
-                <input type="text" name="lege_denumire" Type="text" size="30" value="<?php echo $row["lege_denumire"]?>" required/>
-              </div>
-            </div>		
-			<div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
-                <label><?php echo $strURL?></label>
-                <input type="text" name="lege_link" Type="text" size="30" value="<?php echo $row["lege_link"]?>" required/>
-              </div>
-            </div>
-					<div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
+     <div class="large-3 medium-3 small-6 cell">
                 <label><?php echo $strCategory?></label>
                 <input type="text" name="lege_categorie" Type="text" size="30" value="<?php echo $row["lege_categorie"]?>"" />
               </div>
-            </div>		
-			<div class="grid-x grid-padding-x">
-              <div class="large-12 cell">
+              <div class="large-3 medium-3 small-6 cell">
+                <label><?php echo $strURL?></label>
+                <input type="text" name="lege_link" Type="text" size="30" value="<?php echo $row["lege_link"]?>" required/>
+              </div>
+               <div class="large-3 medium-3 small-6 cell">
                 <label><?php echo $strYear?></label>
                 <input type="text" name="lege_data" Type="text" size="30" value="<?php echo $row["lege_data"]?>"" />
+              </div>
+            </div>
+					<div class="grid-x grid-padding-x">
+                      <div class="large-12 medium-12 small-12 cell">
+                <label><?php echo $strTitle?></label>
+                <input type="text" name="lege_denumire" Type="text" size="30" value="<?php echo $row["lege_denumire"]?>" required/>
+              </div>
+      
+            </div>		
+            <div class="grid-x grid-padding-x">
+              <div class="large-12 cell">
+                <label><?php echo $strSummary?></label>
+                <textarea name="lege_rezumat" id="simple-html-editor-rezumat" class="simple-html-editor" data-upload-dir="legal" rows="6"  ><?php echo $row["lege_rezumat"]?></textarea>
               </div>
             </div>
             <div class="grid-x grid-padding-x">
@@ -193,15 +212,64 @@ $row=ezpub_fetch_array($result);
   </form>
 <?php
 } // ends editing
+elseIf (IsSet($_GET['mode']) AND $_GET['mode']=="view"){
+	$pID = (int)$_GET['pID'];
+	echo "<a href=\"sitelaws.php\" class=\"button\">$strBack &nbsp;<i class=\"fas fa-backward\"></i></a>";
+
+	// Fetch current record
+	$stmt = mysqli_prepare($conn, "SELECT * FROM legislatie WHERE lege_ID = ? AND uid = ?");
+	mysqli_stmt_bind_param($stmt, "ii", $pID, $uid_to_use);
+	mysqli_stmt_execute($stmt);
+	$result = mysqli_stmt_get_result($stmt);
+	$row = ezpub_fetch_array($result);
+
+	// Get all IDs in order for prev/next navigation
+	$stmt2 = mysqli_prepare($conn, "SELECT lege_ID FROM legislatie WHERE uid = ? ORDER BY lege_categorie ASC, lege_denumire ASC");
+	mysqli_stmt_bind_param($stmt2, "i", $uid_to_use);
+	mysqli_stmt_execute($stmt2);
+	$result2 = mysqli_stmt_get_result($stmt2);
+	$allIDs = [];
+	while ($idrow = ezpub_fetch_array($result2)) {
+		$allIDs[] = $idrow['lege_ID'];
+	}
+	$currentPos = array_search($pID, $allIDs);
+	$prevID = ($currentPos > 0) ? $allIDs[$currentPos - 1] : null;
+	$nextID = ($currentPos !== false && $currentPos < count($allIDs) - 1) ? $allIDs[$currentPos + 1] : null;
+
+	// Navigation prev/next
+	echo "<div class=\"grid-x grid-padding-x\" style=\"margin-bottom:1rem;\">";
+	echo "<div class=\"large-12 cell\">";
+	if ($prevID) echo "<a href=\"sitelaws.php?mode=view&pID=$prevID\" class=\"button secondary\"><i class=\"fas fa-chevron-left\"></i> $strPrevious</a> ";
+	if ($nextID) echo "<a href=\"sitelaws.php?mode=view&pID=$nextID\" class=\"button secondary\">$strNext <i class=\"fas fa-chevron-right\"></i></a> ";
+	echo "<a href=\"sitelaws.php?mode=edit&pID=$pID\" class=\"button warning\" style=\"float:right;\"><i class=\"fas fa-edit\"></i> $strEdit</a>";
+	echo "</div></div>";
+
+	// Record details
+	echo "<div class=\"grid-x grid-padding-x\">";
+	echo "<div class=\"large-3 medium-3 small-6 cell\"><strong>$strType:</strong> " . htmlspecialchars($row['lege_tip']) . "</div>";
+	echo "<div class=\"large-3 medium-3 small-6 cell\"><strong>$strCategory:</strong> " . htmlspecialchars($row['lege_categorie']) . "</div>";
+	echo "<div class=\"large-3 medium-3 small-6 cell\"><strong>$strYear:</strong> " . htmlspecialchars($row['lege_data']) . "</div>";
+	echo "<div class=\"large-3 medium-3 small-6 cell\"><strong>$strURL:</strong> <a href=\"" . htmlspecialchars($row['lege_link']) . "\" target=\"_blank\" rel=\"noopener noreferrer\"><i class=\"fas fa-globe fa-lg\"></i></a></div>";
+	echo "</div>";
+	echo "<div class=\"grid-x grid-padding-x\">";
+	echo "<div class=\"large-12 cell\"><h3>" . htmlspecialchars($row['lege_denumire']) . "</h3></div>";
+	echo "</div>";
+	echo "<div class=\"grid-x grid-padding-x\">";
+	echo "<div class=\"large-12 cell\"><strong>$strSummary:</strong><br>" . $row['lege_rezumat'] . "</div>";
+	echo "</div>";
+	echo "<div class=\"grid-x grid-padding-x\">";
+	echo "<div class=\"large-12 cell fontsmall\"><strong>$strLawChanges:</strong><br>" . $row['lege_modificari'] . "</div>";
+	echo "</div>";
+} // ends view
 else
 { // just lists records
 echo " <div class=\"grid-x grid-margin-x\">
      <div class=\"large-12 medium-12 small-12 cell\">
 <a href=\"sitelaws.php?mode=new\" class=\"button\">$strAdd <i class=\"large fa fa-plus\" title=\"$strAdd\"></i></a>
-<a href=\"exportlaws.php?type=general\" class=\"button\">$strAdd <i class=\"large fa fa-plus\" title=\"$strAdd\"></i></a>
+<a href=\"exportlaws.php?type=general\" class=\"button\">$strExport <i class=\"large fa fa-file-excel\" title=\"$strExport\"></i></a>
 </div></div>";
 
-$query="SELECT lege_ID, lege_link, lege_categorie, lege_data, lege_denumire, lege_modificari FROM legislatie ";
+$query="SELECT lege_ID, lege_link, lege_categorie, lege_data, lege_denumire, lege_modificari, lege_lastupdated FROM legislatie WHERE uid=$uid_to_use ";
 $result=ezpub_query($conn,$query);
 $numar=ezpub_num_rows($result,$query);
 $pages = new Pagination;  
@@ -246,8 +314,9 @@ While ($row=ezpub_fetch_array($result)){
 			<td>$row[lege_ID]</td>
 			<td>$row[lege_categorie]</td>
 			<td>$row[lege_denumire]</td>
-			<td>$row[lege_lastupdated]</td>
-			<td><a href=\"sitelaws.php?mode=edit&pID=$row[lege_ID]\" class=\"ask\"><i class=\"fas fa-edit\"></i></a></td>
+			<td>$row[lege_lastupdated]</td>			
+      <td><a href=\"sitelaws.php?mode=view&pID=$row[lege_ID]\" class=\"ask\"><i class=\"fas fa-eye\"></i></a></td>			
+      <td><a href=\"sitelaws.php?mode=edit&pID=$row[lege_ID]\" class=\"ask\"><i class=\"fas fa-edit\"></i></a></td>
 			<td><a href=\"sitelaws.php?mode=delete&pID=$row[lege_ID]\" class=\"ask\" OnClick=\"return confirm('$strConfirmDelete');\"><i class=\"large fa fa-eraser\" title=\"$strDelete\"></i></a></td>
         </tr>";
 	}

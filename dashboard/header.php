@@ -91,8 +91,7 @@ include_once(dirname(__DIR__) . '/lang/language_EN.php');
                     </div>
                     <div class="grid-x grid-margin-x">
                         <div class="large-4 medium-4 small-4 cell">
-                            <h1><a href="<?php echo $strSiteURL ?>/index.php"><img
-                                        src="<?php echo $strSiteURL ?>/img/logo.png" width="300px"></a></h1>
+                            <img src="<?php echo $strSiteURL ?>/img/logo.png" width="300px">
                         </div>
                         <div class="large-8 medium-8 small-8 cell">
                         </div>

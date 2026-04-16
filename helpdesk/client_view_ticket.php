@@ -10,10 +10,21 @@ $strPageTitle="Client — Vizualizează tichet";
 include '../dashboard/header.php';
 
 $ticketId = (int)($_GET['ticket_id'] ?? 0);
-try { can_view_ticket($pdo, $ticketId, $role, $ui); } catch (Throwable $e) { http_response_code(403); echo $e->getMessage(); exit; }
-$tstmt = $pdo->prepare("SELECT * FROM tickets WHERE ticket_id=:tid"); $tstmt->execute([':tid'=>$ticketId]); $ticket = $tstmt->fetch(); if(!$ticket){ http_response_code(404); echo 'Ticket inexistent'; exit; }
-$r = $pdo->prepare("SELECT * FROM tickets_replies WHERE reply_ticketid=:tid AND is_internal=0 AND (reply_validated='approved' OR reply_by_type IN ('client','admin')) ORDER BY reply_at ASC"); $r->execute([':tid'=>$ticketId]); $replies = $r->fetchAll();
-$atts = get_attachments_for_viewer($pdo, $ticketId, $role);
+try { can_view_ticket($ticketId, $role, $ui); } catch (Throwable $e) { http_response_code(403); echo $e->getMessage(); exit; }
+$stmt_t = mysqli_prepare($conn, "SELECT * FROM tickets WHERE ticket_id=?");
+mysqli_stmt_bind_param($stmt_t, "i", $ticketId);
+mysqli_stmt_execute($stmt_t);
+$ticket = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_t));
+mysqli_stmt_close($stmt_t);
+if(!$ticket){ http_response_code(404); echo 'Ticket inexistent'; exit; }
+$stmt_r = mysqli_prepare($conn, "SELECT * FROM tickets_replies WHERE reply_ticketid=? AND is_internal=0 AND (reply_validated='approved' OR reply_by_type IN ('client','admin')) ORDER BY reply_at ASC");
+mysqli_stmt_bind_param($stmt_r, "i", $ticketId);
+mysqli_stmt_execute($stmt_r);
+$res_r = mysqli_stmt_get_result($stmt_r);
+$replies = [];
+while ($row = mysqli_fetch_assoc($res_r)) { $replies[] = $row; }
+mysqli_stmt_close($stmt_r);
+$atts = get_attachments_for_viewer($ticketId, $role);
 ?>
 <div class="grid-x grid-margin-x">
     <div class="large-12 medium-12 small-12 cell">

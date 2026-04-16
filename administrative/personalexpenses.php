@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $dt = DateTime::createFromFormat('Y-m-d', $_POST["decont_data"]);
         $dtErr = DateTime::getLastErrors();
-        if (!$dt || $dt->format('Y-m-d') !== $_POST["decont_data"] || $dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0) {
+        if (!$dt || $dt->format('Y-m-d') !== $_POST["decont_data"] || (is_array($dtErr) && ($dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0))) {
             header("location: personalexpenses.php?mode=new&message=Error");
             exit();
         }
@@ -181,7 +181,7 @@ else {
         }
         $dt = DateTime::createFromFormat('Y-m-d', $_POST["decont_data"]);
         $dtErr = DateTime::getLastErrors();
-        if (!$dt || $dt->format('Y-m-d') !== $_POST["decont_data"] || $dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0) {
+        if (!$dt || $dt->format('Y-m-d') !== $_POST["decont_data"] || (is_array($dtErr) && ($dtErr['warning_count'] > 0 || $dtErr['error_count'] > 0))) {
             header("location: personalexpenses.php?mode=edit&cID=$cID&message=Error");
             exit();
         }

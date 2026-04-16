@@ -16,7 +16,7 @@ $sdata=$yn."-".$m."-".$i." 00:00:00";
     <div class="large-12 cell">
         <h1><?php echo $strPageTitle?></span></h1>
              <h2>Date personale</h2>
-        <?php if ($shop==1)
+        <?php if ($shop==1 || $elearning==1 || $sitefunction=='bi')
 {?>
         <h3>Date privind operatorul de date</h3>
         <p><?php echo $strSiteOwnerData?>.</p>
@@ -50,6 +50,36 @@ $sdata=$yn."-".$m."-".$i." 00:00:00";
     <li class="tiny"><strong>Datele transmise de dumneavoastră ca aplicare în vederea angajării sau pentru intership, fie spontan, 
         fie ca urmare a unui anunț</strong> sunt păstrate între 6 luni și un an, în funcție de potrivirea profilului dumneavoastră cu cerințele postului.</li>
 </ul>
+<?php if ($sitefunction=='bi') { ?>
+<h3>Informații despre firme</h3>
+<p>Bazele de date referitoare la firme și informațiile de contact ale acestora nu fac obiectul GDPR 
+întrucât regulamentul nr. 679/2016 (GDPR) la punctul 14 stipulează că acesta nu se aplică prelucrării datelor cu caracter personal 
+care privesc persoane juridice.</p>
+<p>Informațiile de contact din baza de date cu firme sunt referitoare strict la persoanele juridice și 
+    nu aparțin persoanelor de contact ale firmelor. Informațiile de contact sunt preluate din sursele oficiale menționate mai sus, iar în unele cazuri prin acces direct la site-ul companiei.</p>
+<p>Din acest motiv informațiile de contact prelucrate nu se referă la persoane fizice, sunt anonime, 
+    nu necesită identificare și vor fi tratate ca atare conform paragrafului 26 și art. 11 din regulament.</p>
+<p>În cazul în care o persoană fizică revendică anumite informații de contact asociate firmelor ca fiind personale, 
+    în conformitate cu prevederile GDPR aceasta trebuie să ofere informații suplimentare care permit identificarea sa și să probeze că informațiile 
+    respective îi aparțin pentru a-și putea exercita drepturile de acces, de rectificare, ștergere, restricționare și portabilitate.</p>
+<p>Informațiile de contact asociate firmelor care vor fi probate a avea caracter personal 
+    vor fi restricționate fără excepție de la orice prelucrare întrucât datele de contact cu caracter personal 
+    nu sunt acceptate în bazele de date cu firme.</p>
+<p>Nu sunt considerate date cu caracter personal similitudini de adrese sau de denumiri, 
+    de exemplu, dacă o societate include numele unei persoane parțial sau integral 
+    sau că societatea funcționează la o adresă la care locuiește o persoană din conducerea firmei 
+    întrucât datele persoanei juridice sunt date de interes public iar adresa și 
+    denumirea au fost alese și publicate în cunoștință de cauză și pot fi oricând schimbate.</p>
+<p>Informațiile de identificare și de contact ale firmelor incluzând numele persoanelor de contact 
+    (asociați, administratori) sunt informații de interes public conform legea 31/1990, 
+    publicate în Monitorul Oficial partea a IV-a, iar numele beneficiarilor reali sunt informații cu caracter public conform legea 129/2019, 
+    republicabile conform legea 544/2001 și legea 109/2007, drepturile de informare, preluare și reutilizare a informațiilor
+     din surse publice prevăzute de legi permit prelucrarea datelor cu temei legal.</p>
+<p>Conform paragrafului 62 din GDPR, operatorul nu este obligat de a furniza informaţii privind prelucrarea datelor
+     persoanelor vizate în cazul în care înregistrarea sau divulgarea datelor cu caracter personal 
+     este prevăzută în mod expres de lege sau în cazul în care informarea persoanei vizate se dovedeşte imposibilă 
+     sau ar implica eforturi disproporţionate.</p>
+     <?php }?>
       <h3>Politica de confidențialitate</h3>
         <p><?php echo $strSiteOwner?> apreciază încrederea pe care o manifestați navigând pe site-ul nostru, scriindu-ne
             sau făcând comenzi on-line, de aceea dorim să vă asigurăm că nu vom furniza, vinde sau ceda nici unei alte
@@ -366,7 +396,7 @@ else
             își poate asuma nici o responsabilitate cu privire la modului în care aceste rețele procesează datele
             dumneavoastră.</p>
         <?php }?>
-              <p>Această pagină a fost revizuită la data de 19.12.2025</p>
+              <p>Această pagină a fost revizuită la data de 15.04.2026</p>
         <h2>Legislație aplicabilă și Jurisdicție</h2>
         <p>Această politică de confidențialitate și utilizarea acestui site sunt guvernate de legile din România.
             Instanțele competente din România vor avea jurisdicție exclusivă asupra oricăror și tuturor disputelor ce

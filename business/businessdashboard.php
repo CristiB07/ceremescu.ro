@@ -64,13 +64,13 @@ if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes"){
         <div class="large-4 medium-4 small-12 cell">
             <div class="callout">
                 <h5>ONRC</h5>
-                <p><strong>Total firme:</strong> <?php echo romanize($total_firme)?></p>
-                <p><strong>Total firme active (COD_STATUS=1048):</strong> <?php echo romanize($total_active)?></p>
+                <p><strong>Total firme:</strong> <?php echo romanize_int($total_firme)?></p>
+                <p><strong>Total firme active:</strong> <?php echo romanize_int($total_active)?></p>
                 <h6>Structură firme (top 50)</h6>
                 <ul>
                 <?php while ($row = ezpub_fetch_array($q_forma)){
                     $name = htmlspecialchars($row['FORMA_JURIDICA']);
-                    echo "<li>$name: " . romanize($row['c']) . "</li>";
+                    echo "<li>$name: " . romanize_int($row['c']) . "</li>";
                 } ?>
                 </ul>
             </div>
@@ -79,9 +79,9 @@ if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes"){
         <div class="large-4 medium-4 small-12 cell">
             <div class="callout">
                 <h5>ANAF</h5>
-                <p><strong>Total firme (date fiscale):</strong> <?php echo romanize($anaf_total)?></p>
+                <p><strong>Total firme (date fiscale):</strong> <?php echo romanize_int($anaf_total)?></p>
                 <h5>Bilanțuri</h5>
-                <p><strong>Total bilanțuri disponibile:</strong> <?php echo romanize($bilant_total)?></p>
+                <p><strong>Total bilanțuri disponibile:</strong> <?php echo romanize_int($bilant_total)?></p>
             </div>
         </div>
 
@@ -109,8 +109,8 @@ if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes"){
                     <?php while ($fy = ezpub_fetch_array($q_firms_year)){
                         echo '<tr>';
                         echo '<td>'.htmlspecialchars($fy['an_inmatriculare']).'</td>';
-                        echo '<td align="right">'.romanize($fy['firme']).'</td>';
-                        echo '<td align="right">'.romanize($fy['active']).'</td>';
+                        echo '<td align="right">'.romanize_int($fy['firme']).'</td>';
+                        echo '<td align="right">'.romanize_int($fy['active']).'</td>';
                         echo '</tr>';
                     } ?>
                     </tbody>
@@ -140,14 +140,14 @@ if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes"){
                 <?php while ($y = ezpub_fetch_array($q_year)){
                     echo '<tr>';
                     echo '<td>'.htmlspecialchars($y['an']).'</td>';
-                    echo '<td align="right">'.romanize($y['total_firme']).'</td>';
-                    echo '<td align="right">'.romanize($y['cifra_afaceri']).'</td>';
-                    echo '<td align="right">'.romanize($y['firme_pe_profit']).'</td>';
-                    echo '<td align="right">'.romanize($y['profit_total']).'</td>';
-                    echo '<td align="right">'.romanize($y['firme_pe_pierdere']).'</td>';
-                    echo '<td align="right">'.romanize($y['pierdere_total']).'</td>';
-                    echo '<td align="right">'.romanize($y['cifra_zero']).'</td>';
-                    echo '<td align="right">'.romanize($y['numar_angajati']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['total_firme']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['cifra_afaceri']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['firme_pe_profit']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['profit_total']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['firme_pe_pierdere']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['pierdere_total']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['cifra_zero']).'</td>';
+                    echo '<td align="right">'.romanize_int($y['numar_angajati']).'</td>';
                     echo '</tr>';
                 } ?>
                 </tbody>

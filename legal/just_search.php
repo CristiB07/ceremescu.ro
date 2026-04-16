@@ -2,6 +2,18 @@
 include '../settings.php';
 include '../classes/common.php';
 
+if(!isset($_SESSION)) 
+{ 
+	session_start(); 
+}
+if (!isSet($_SESSION['userlogedin']))
+{
+	header("location:$strSiteURL/login/index.php?message=MLF");
+}
+
+$uid=$_SESSION['uid'];
+$code=$_SESSION['code'];
+
 $strPageTitle = "Căutare legislație - legislatie.just.ro";
 // allow more time for remote SOAP calls from web context
 @set_time_limit(60);

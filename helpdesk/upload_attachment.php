@@ -9,10 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo 'Meto
 $ticketId = (int)($_POST['ticket_id'] ?? 0);
 $replyId  = (int)($_POST['reply_id'] ?? 0);
 try {
-    can_modify_ticket($pdo, $ticketId, $role, $ui);
-    $r = $pdo->prepare("SELECT reply_id, reply_ticketid FROM tickets_replies WHERE reply_id=:rid"); 
-    $r->execute([':rid'=>$replyId]); 
-    $rr=$r->fetch();
+    can_modify_ticket($ticketId, $role, $ui);
+    $stmt_r = mysqli_prepare($conn, "SELECT reply_id, reply_ticketid FROM tickets_replies WHERE reply_id=?");
+    mysqli_stmt_bind_param($stmt_r, "i", $replyId);
+    mysqli_stmt_execute($stmt_r);
+    $rr = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_r));
+    mysqli_stmt_close($stmt_r);
     if (!$rr || (int)$rr['reply_ticketid'] !== $ticketId) throw new RuntimeException('Reply invalid');
     $maxSize=10*1024*1024; 
     $allowed=['application/pdf','image/jpeg','image/png','image/gif','text/plain','application/zip','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/msword','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.ms-excel'];
@@ -32,12 +34,12 @@ try {
         $ext=safe_ext_from_mime($mime); 
         $stored=generate_safe_name($ext);
         $dest=$baseDir.'/'.$stored; if(!move_uploaded_file($tmp,$dest)) throw new RuntimeException('Nu pot salva'); @chmod($dest,0600);
-        insert_attachment($pdo, $ticketId, $replyId, [
+                insert_attachment($ticketId, $replyId, [
             'stored'=>$stored,'name'=>$orig,'mime'=>$mime,'size'=>$size,'is_internal'=>$is_internal,
             'uploaded_by_type'=>$role,'uploaded_by_ui'=>$ui
         ]);
     }
-    log_action($pdo, $ticketId, $role, $ui, 'ATTACH_UPLOAD', ['reply_id'=>$replyId, 'internal'=>$is_internal]);
+    log_action($ticketId, $role, $ui, 'ATTACH_UPLOAD', ['reply_id'=>$replyId, 'internal'=>$is_internal]);
     header('Location: ' . ($_POST['redirect'] ?? '/index.php'));
     exit;
 } catch (Throwable $e) { http_response_code(400); echo 'Eroare: ' . $e->getMessage(); }

@@ -203,6 +203,7 @@ else
 	$stmt_leaves->close();
 
 	$d=cal_days_in_month(CAL_GREGORIAN,$month,$year);
+	$dd = 0;
 for ( $i = 1; $i <= $d; $i ++) {
  $monthday=$i;
  $dayofmonth=$year."-".$month."-".$i;

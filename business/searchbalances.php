@@ -192,11 +192,13 @@ $min_ang = isset($_GET['min_ang']) ? intval($_GET['min_ang']) : 0;
     </div>
 
     <?php } // end if year provided ?>
+      <?php if (isset($pages)) { ?>
       <div class="grid-x grid-margin-x">
         <div class="large-12 cell">
 <div class="paginate"><?php echo $pages->display_pages()?></div>
 </div>
 </div>
+      <?php } ?>
 
 <?php
 include '../bottom.php';

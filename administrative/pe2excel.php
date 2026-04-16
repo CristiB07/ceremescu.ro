@@ -3,7 +3,7 @@
     { 
         session_start(); 
 	}
-	if (!isSet($_SESSION['$lang'])) {
+	if (!isSet($_SESSION['lang'])) {
 	$_SESSION['lang']="RO";
 	$lang=$_SESSION['lang'];
 }

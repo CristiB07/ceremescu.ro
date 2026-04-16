@@ -50,8 +50,9 @@ echo "<h1>$strPageTitle</h1>";
             <?php if ($_SESSION['clearence']=='ADMIN')
 {           echo "<li class=\"tabs-title\"><a href=\"#panel7\">$strInvoices</a></li>
             <li class=\"tabs-title\"><a href=\"#panel8\">$strBalances</a></li>
-            <li class=\"tabs-title\"><a href=\"#panel9\">$strFiscalData</a></li>
-            <li class=\"tabs-title\"><a href=\"#panel10\">$strCourtTrials</a></li>";
+            <li class=\"tabs-title\"><a href=\"#panel9\">$strFinancialAnalysis</a></li>
+            <li class=\"tabs-title\"><a href=\"#panel10\">$strFiscalData</a></li>
+            <li class=\"tabs-title\"><a href=\"#panel11\">$strCourtTrials</a></li>";
         }
         ?>
         </ul>
@@ -476,6 +477,7 @@ echo "</table>";
 }
 ?>
             </div>
+           
             <div class="tabs-panel" id="panel8">
                 <?php
 // Prepared statement pentru SQL injection prevention
@@ -498,7 +500,19 @@ if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
 
  ?>
             </div>
-            <div class="tabs-panel" id="panel9">
+             <div class="tabs-panel" id="panel9">
+                <?php
+                $stmt_cui8 = mysqli_prepare($conn, "SELECT Client_CIF FROM clienti_date WHERE ID_Client=?");
+                mysqli_stmt_bind_param($stmt_cui8, 'i', $clientID);
+                mysqli_stmt_execute($stmt_cui8);
+                $res_cui8 = mysqli_stmt_get_result($stmt_cui8);
+                $row_cui8 = $res_cui8->fetch_assoc();
+                mysqli_stmt_close($stmt_cui8);
+                $cui_numeric = preg_replace('/\D/', '', $row_cui8['Client_CIF'] ?? '');
+                include_once '../common/panel_analiza_financiara.php';
+                ?>
+            </div>
+            <div class="tabs-panel" id="panel10">
                 <!--   show fiscal data -->
                 <?php
                 $stmt = mysqli_prepare($conn, "SELECT Client_CIF from clienti_date WHERE ID_Client=?");
@@ -519,7 +533,7 @@ if ($cui_numeric && is_numeric($cui_numeric) && (int)$cui_numeric > 0) {
 }
 ?>
             </div>
-            <div class="tabs-panel" id="panel10">
+            <div class="tabs-panel" id="panel11">
                 <!--   show trials data -->
                 <?php
                 // Load client name and include the JUST search as an embedded tab.

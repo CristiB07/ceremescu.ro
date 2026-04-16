@@ -14,16 +14,26 @@ if ($_SERVER['REQUEST_METHOD']==='POST'){
         $agentUi = (int)($_POST['agent_ui'] ?? 0);
         $priority = $_POST['priority'] ?? null;
         if ($agentUi<=0) throw new RuntimeException('agent_ui invalid');
-        $sql = "UPDATE tickets SET ticket_asignedto=:agent, ticket_status=1, ticket_lastupdated=NOW(), ticket_lastupdatedby=:ADMIN";
-        $params = [':agent'=>$agentUi, ':ADMIN'=>$ui, ':tid'=>$ticketId];
-        if ($priority) { $sql .= ", ticket_importantance=:prio"; $params[':prio']=$priority; }
-        $sql .= " WHERE ticket_id=:tid";
-        $u = $pdo->prepare($sql); $u->execute($params);
-        log_action($pdo, $ticketId, 'ADMIN', $ui, 'ASSIGN_TICKET', ['agent_ui'=>$agentUi,'priority'=>$priority]);
+        $sql = "UPDATE tickets SET ticket_asignedto=?, ticket_status=1, ticket_lastupdated=NOW(), ticket_lastupdatedby=?";
+        $types = "ii";
+        $params = [$agentUi, $ui];
+        if ($priority) { $sql .= ", ticket_importantance=?"; $types .= "s"; $params[] = $priority; }
+        $sql .= " WHERE ticket_id=?";
+        $types .= "i"; $params[] = $ticketId;
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        log_action($ticketId, 'ADMIN', $ui, 'ASSIGN_TICKET', ['agent_ui'=>$agentUi,'priority'=>$priority]);
         $info='Actualizat';
     } catch (Throwable $e) { $error=$e->getMessage(); }
 }
-$t = $pdo->prepare("SELECT * FROM tickets WHERE ticket_id=:tid"); $t->execute([':tid'=>$ticketId]); $ticket=$t->fetch(); if(!$ticket){echo 'Ticket inexistent';exit;}
+$stmt_t = mysqli_prepare($conn, "SELECT * FROM tickets WHERE ticket_id=?");
+mysqli_stmt_bind_param($stmt_t, "i", $ticketId);
+mysqli_stmt_execute($stmt_t);
+$ticket = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_t));
+mysqli_stmt_close($stmt_t);
+if(!$ticket){echo 'Ticket inexistent';exit;}
 ?>
 <div class="grid-x grid-margin-x">
     <div class="large-12 medium-12 small-12 cell">

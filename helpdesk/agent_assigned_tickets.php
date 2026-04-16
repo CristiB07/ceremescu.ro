@@ -8,7 +8,13 @@ if ($role !== 'AGENT') { http_response_code(403); echo 'Acces interzis'; echo ex
 $strPageTitle="Agent — Tichete alocate";
 include '../dashboard/header.php';
 
-$s = $pdo->prepare("SELECT * FROM tickets WHERE ticket_asignedto=:ui ORDER BY ticket_lastupdated DESC"); $s->execute([':ui'=>$ui]); $tickets=$s->fetchAll();
+$stmt = mysqli_prepare($conn, "SELECT * FROM tickets WHERE ticket_asignedto=? ORDER BY ticket_lastupdated DESC");
+mysqli_stmt_bind_param($stmt, "i", $ui);
+mysqli_stmt_execute($stmt);
+$res = mysqli_stmt_get_result($stmt);
+$tickets = [];
+while ($row = mysqli_fetch_assoc($res)) { $tickets[] = $row; }
+mysqli_stmt_close($stmt);
 ?>
 
 <div class="grid-x grid-margin-x">

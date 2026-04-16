@@ -12,7 +12,9 @@ if ($role !== 'ADMIN') { http_response_code(403); echo 'Acces interzis'; exit; }
     <div class="large-12 medium-12 small-12 cell">
 <h1><?php echo $strTickets ?></h1>
 <?php
-$s = $pdo->query("SELECT * FROM tickets ORDER BY ticket_lastupdated DESC"); $tickets=$s->fetchAll();
+$res_t = mysqli_query($conn, "SELECT * FROM tickets ORDER BY ticket_lastupdated DESC");
+$tickets = [];
+while ($row = mysqli_fetch_assoc($res_t)) { $tickets[] = $row; }
 if (!$tickets): echo "<div class=\"callout alert\">".$strNoRecordsFound."</div>";
   
  else: 
@@ -52,7 +54,9 @@ if (!$tickets): echo "<div class=\"callout alert\">".$strNoRecordsFound."</div>"
 </table>
 
 <h2><?php echo $strRepliesPendingValidation ?></h2>
-<?php $rp = $pdo->query("SELECT r.*, t.ticket_title FROM tickets_replies r JOIN tickets t ON t.ticket_id=r.reply_ticketid WHERE r.reply_by_type='agent' AND r.reply_validated='pending' ORDER BY r.reply_at ASC")->fetchAll(); ?>
+<?php $res_rp = mysqli_query($conn, "SELECT r.*, t.ticket_title FROM tickets_replies r JOIN tickets t ON t.ticket_id=r.reply_ticketid WHERE r.reply_by_type='agent' AND r.reply_validated='pending' ORDER BY r.reply_at ASC");
+$rp = [];
+while ($row = mysqli_fetch_assoc($res_rp)) { $rp[] = $row; } ?>
 <?php if (!$rp): echo "<div class=\"callout alert\">".$strNoRecordsFound."</div>";
   
  else: 

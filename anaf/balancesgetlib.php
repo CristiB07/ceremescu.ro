@@ -62,7 +62,7 @@ function import_bilanturi_anaf($cui, $conn) {
             'Creante' => 'creante',
             'Casa si conturi la banci' => 'casa_banci',
             'Casa şi conturi la bănci' => 'casa_banci',
-            'DATORII ' => 'datorii'
+            'DATORII' => 'datorii'
         ];
         $row = [
             'an' => $data['an'],

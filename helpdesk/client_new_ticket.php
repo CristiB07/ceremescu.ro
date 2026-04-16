@@ -11,25 +11,28 @@ include '../dashboard/header.php';
 if ($role !== 'CLIENT') { http_response_code(403); echo 'Acces interzis'; exit; }
 $info=null;$error=null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $in_transaction = false;
     try {
         $title = trim($_POST['title'] ?? '');
         $content = trim($_POST['content'] ?? '');
         $priority = $_POST['priority'] ?? 'medium';
         if ($title === '' || $content === '') throw new RuntimeException('Titlu și conținut obligatorii');
-        $pdo->beginTransaction();
-        $stmt = $pdo->prepare("INSERT INTO tickets (ticket_createdby, ticket_title, ticket_content, ticket_importantance, ticket_status, ticket_lastupdated, ticket_lastupdatedby) VALUES (:cui, :title, :content, :prio, 0, NOW(), :cui)");
-        $stmt->execute([':cui'=>$ui, ':title'=>$title, ':content'=>$content, ':prio'=>$priority]);
-        $ticketId = (int)$pdo->lastInsertId();
-        log_action($pdo, $ticketId, 'CLIENT', $ui, 'CREATE_TICKET', ['title'=>$title, 'priority'=>$priority]);
-        // Notificare admin: ticket nou
-        notify_ticket_created($pdo, $ticketId, $ui);
-
-        // Dacă sunt atașamente, creăm un reply "placeholder" al clientului și legăm fișierele de el
+        mysqli_begin_transaction($conn);
+        $in_transaction = true;
+        $stmt_ins = mysqli_prepare($conn, "INSERT INTO tickets (ticket_createdby, ticket_title, ticket_content, ticket_importantance, ticket_status, ticket_lastupdated, ticket_lastupdatedby) VALUES (?, ?, ?, ?, 0, NOW(), ?)");
+        mysqli_stmt_bind_param($stmt_ins, "isssi", $ui, $title, $content, $priority, $ui);
+        mysqli_stmt_execute($stmt_ins);
+        $ticketId = (int)mysqli_insert_id($conn);
+        mysqli_stmt_close($stmt_ins);
+        log_action($ticketId, 'CLIENT', $ui, 'CREATE_TICKET', ['title'=>$title, 'priority'=>$priority]);
+        notify_ticket_created($ticketId, $ui);
         $replyIdForAttachments = null;
         if (!empty($_FILES['attachments']['name'][0])) {
-            $r = $pdo->prepare("INSERT INTO tickets_replies (reply_ticketid, reply_by_type, reply_by_ui, reply_content, is_internal, reply_validated) VALUES (:tid, 'CLIENT', :ui, '', 0, 'approved')");
-            $r->execute([':tid'=>$ticketId, ':ui'=>$ui]);
-            $replyIdForAttachments = (int)$pdo->lastInsertId();
+            $stmt_r = mysqli_prepare($conn, "INSERT INTO tickets_replies (reply_ticketid, reply_by_type, reply_by_ui, reply_content, is_internal, reply_validated) VALUES (?, 'CLIENT', ?, '', 0, 'approved')");
+            mysqli_stmt_bind_param($stmt_r, "ii", $ticketId, $ui);
+            mysqli_stmt_execute($stmt_r);
+            $replyIdForAttachments = (int)mysqli_insert_id($conn);
+            mysqli_stmt_close($stmt_r);
             $maxSize = 10 * 1024 * 1024;
             $allowed = ['application/pdf','image/jpeg','image/png','image/gif','text/plain','application/zip','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/msword','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.ms-excel'];
             $files = $_FILES['attachments'];
@@ -52,20 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $dest = $baseDir . '/' . $stored; 
                 if (!move_uploaded_file($tmp, $dest)) throw new RuntimeException('Nu pot salva fișierul'); 
                 @chmod($dest,0600);
-                insert_attachment($pdo, $ticketId, $replyIdForAttachments, 
+                insert_attachment($ticketId, $replyIdForAttachments, 
                 [
                     'stored'=>$stored,'name'=>$orig,'mime'=>$mime,'size'=>$size,'is_internal'=>0,
                     'uploaded_by_type'=>'CLIENT','uploaded_by_ui'=>$ui
-                ]
-              );
+                ]);
             }
-            log_action($pdo, $ticketId, 'CLIENT', $ui, 'ATTACH_UPLOAD', ['reply_id'=>$replyIdForAttachments]);
+            log_action($ticketId, 'CLIENT', $ui, 'ATTACH_UPLOAD', ['reply_id'=>$replyIdForAttachments]);
         }
-
-        $pdo->commit();
+        mysqli_commit($conn);
+        $in_transaction = false;
         $info = 'Ticket creat (#' . $ticketId . ')';
     } catch (Throwable $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack(); $error=$e->getMessage();
+        if ($in_transaction) mysqli_rollback($conn); $error=$e->getMessage();
     }
 }
 ?>

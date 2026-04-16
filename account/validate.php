@@ -125,6 +125,13 @@ if (password_verify(trim($mypassword), $row['account_password'])) {
       $_SESSION['function'] = $row['account_function'];
       $_SESSION['account_email'] = $row['account_email'];
       $_SESSION['account_name'] = $row['account_first_name'] . ' ' . $row['account_last_name'];
+
+      // Stocare session ID în baza de date pentru prevenirea accesului simultan
+      $current_session_id = session_id();
+      $stmt_sess = $conn->prepare("UPDATE site_accounts SET account_sessionid=? WHERE account_id=?");
+      $stmt_sess->bind_param("si", $current_session_id, $row['account_id']);
+      $stmt_sess->execute();
+      $stmt_sess->close();
       
       // Redirecționare către pagina dorită
       $redirect_url = $strSiteURL . '/' . ltrim($redirect, '/');

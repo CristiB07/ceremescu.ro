@@ -45,7 +45,8 @@ if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes"){
         <li class="tabs-title"><a href="#panel2">Vizite</a></li>
         <li class="tabs-title"><a href="#panel3">Date fiscale</a></li>
         <li class="tabs-title"><a href="#panel4">Bilanțuri</a></li>
-        <li class="tabs-title"><a href="#panel5">Procese</a></li>
+        <li class="tabs-title"><a href="#panel5">Analiză financiară</a></li>
+        <li class="tabs-title"><a href="#panel6">Procese</a></li>
     </ul>
 
     <div class="tabs-content" data-tabs-content="prospect-tabs">
@@ -87,6 +88,12 @@ if (!isSet($_SESSION['userlogedin']) OR $_SESSION['userlogedin']!="Yes"){
             ?>
         </div>
         <div class="tabs-panel" id="panel5">
+            <?php
+            $cui_numeric = preg_replace('/\D/', '', $prospect['prospect_cui'] ?? '');
+            include_once '../common/panel_analiza_financiara.php';
+            ?>
+        </div>
+        <div class="tabs-panel" id="panel6">
             <?php
             // Include clients/just_query.php directly (like clientprofile)
             // Set Client_Denumire so just_query.php auto-runs the search when included

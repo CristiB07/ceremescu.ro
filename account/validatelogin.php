@@ -70,6 +70,13 @@ $stmt_update->bind_param("si", $d, $row['account_id']);
 $stmt_update->execute();
 $stmt_update->close();
 
+// Stocare session ID în baza de date pentru prevenirea accesului simultan
+$current_session_id = session_id();
+$stmt_sess = $conn->prepare("UPDATE site_accounts SET account_sessionid=? WHERE account_id=?");
+$stmt_sess->bind_param("si", $current_session_id, $row['account_id']);
+$stmt_sess->execute();
+$stmt_sess->close();
+
 $stmt->close();
 header("location:$strSiteURL". "/dashboard/dashboard.php");
 exit();

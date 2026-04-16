@@ -127,7 +127,7 @@ if ($role=='ADMIN')
 <li>
     <a href="#"><?php echo $strProspects?></a>
     <ul class="menu">
-        <li><a href="<?php echo $strSiteURL ?>/sales/salesprospects.php"><i class="fa-xl fa fa-users"></i>&nbsp;<?php echo $strProspects?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/sales/salesprospects.php"><i class=" fa fa-users"></i>&nbsp;<?php echo $strProspects?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/sales/salesvisitreports.php"><i class="large fas fa-newspaper"></i>&nbsp;<?php echo $strVisits?></a></li>
         <li><a href="<?php echo $strSiteURL ?>/sales/salesplanning.php"><i class="fas fa-calendar-alt"></i>&nbsp;<?php echo $strSchedules?></a></li>
     </ul>
@@ -140,7 +140,7 @@ if ($role=='ADMIN')
 <li>
     <a href="#"><?php echo $strHelpdesk?></a>
     <ul class="menu">
-        <li><a href="<?php echo $strSiteURL ?>/helpdesk/admin_tickets_all.php"><i class="fa-xl fa fa-users"></i>&nbsp;<?php echo $strTickets?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/helpdesk/admin_tickets_all.php"><i class=" fa fa-users"></i>&nbsp;<?php echo $strTickets?></a></li>
     </ul>
 </li>
 <?php
@@ -215,13 +215,13 @@ elseif ($role=='USER')
  <li>
 	      <a href="#"><?php echo $strClients?></a>
 					<ul class="menu">		
-		<li><a href="<?php echo $strSiteURL ?>/clients/siteuserclients.php"><i class="fa fa-users fa-xl"></i>&nbsp;<?php echo $strClients?></a></li>
+		<li><a href="<?php echo $strSiteURL ?>/clients/siteuserclients.php"><i class="fa fa-users "></i>&nbsp;<?php echo $strClients?></a></li>
 		<li><a href="<?php echo $strSiteURL ?>/clients/siteclientaspects.php"><i class="far fa-file-alt"></i>&nbsp;<?php echo $strClientsAspects?></a></li>
-		<li><a href="<?php echo $strSiteURL ?>/clients/siteclientactivities.php"><i class="fa fa-hourglass-half fa-xl"></i>&nbsp;<?php echo $strActivities?></a></li>
-		<li><a href="<?php echo $strSiteURL ?>/clients/siteclientauthorizations.php"><i class="fa fa-certificate fa-xl"></i>&nbsp;<?php echo $strAuthorizations?></a></li>
-		<li><a href="<?php echo $strSiteURL ?>/clients/sitecontacts.php"><i class="fa fa-address-card fa-xl"></i>&nbsp;<?php echo $strContacts?></a></li>
-		<li><a href="<?php echo $strSiteURL ?>/clients/sitevisitreports.php"><i class="fas fa-newspaper fa-xl"></i>&nbsp;<?php echo $strVisits?></a></li>
-        <li><a href="<?php echo $strSiteURL ?>/clients/clientsplanning.php"><i class="fas fa-calendar fa-xl"></i>&nbsp;<?php echo $strSchedules?></a></li>
+		<li><a href="<?php echo $strSiteURL ?>/clients/siteclientactivities.php"><i class="fa fa-hourglass-half "></i>&nbsp;<?php echo $strActivities?></a></li>
+		<li><a href="<?php echo $strSiteURL ?>/clients/siteclientauthorizations.php"><i class="fa fa-certificate "></i>&nbsp;<?php echo $strAuthorizations?></a></li>
+		<li><a href="<?php echo $strSiteURL ?>/clients/sitecontacts.php"><i class="fa fa-address-card "></i>&nbsp;<?php echo $strContacts?></a></li>
+		<li><a href="<?php echo $strSiteURL ?>/clients/sitevisitreports.php"><i class="fas fa-newspaper "></i>&nbsp;<?php echo $strVisits?></a></li>
+        <li><a href="<?php echo $strSiteURL ?>/clients/clientsplanning.php"><i class="fas fa-calendar "></i>&nbsp;<?php echo $strSchedules?></a></li>
 							</ul>
 	</li>
     
@@ -297,7 +297,7 @@ elseif ($role=='AGENT')
  <li>
 	      <a href="#"><?php echo $strHelpdesk?></a>
 					<ul class="menu">		
-		<li><a href="<?php echo $strSiteURL ?>/helpdesk/agent_assigned_tickets.php"><i class="fas fa-calendar-check fa-xl"></i>&nbsp;<?php echo $strClients?></a></li>
+		<li><a href="<?php echo $strSiteURL ?>/helpdesk/agent_assigned_tickets.php"><i class="fas fa-calendar-check "></i>&nbsp;<?php echo $strClients?></a></li>
                     </ul>
 	</li>
 	</ul>

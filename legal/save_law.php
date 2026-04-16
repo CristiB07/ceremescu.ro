@@ -2,6 +2,19 @@
 include '../settings.php';
 include '../classes/common.php';
 
+if(!isset($_SESSION)) 
+{ 
+	session_start(); 
+}
+if (!isSet($_SESSION['userlogedin']))
+{
+	header("location:$strSiteURL/login/index.php?message=MLF");
+}
+
+$uid=$_SESSION['uid'];
+$code=$_SESSION['code'];
+$uid_to_use = ($userlegal == 1) ? $uid : 0;
+
 // buffer any accidental output so we always return valid JSON
 if (!headers_sent()) ob_start();
 // Basic anti-injection check
@@ -19,14 +32,14 @@ $Text = isset($_POST['Text']) ? trim($_POST['Text']) : null;
 $response = ['success' => false];
 
 // Prepare insert
-$sql = "INSERT INTO legislatie_salvata (tip_act, numar, titlu, data_vigoare, emitent, publicatie, link_html, text, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+$sql = "INSERT INTO legislatie_salvata (tip_act, numar, titlu, data_vigoare, emitent, publicatie, link_html, text, last_updated, uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
 $stmt = mysqli_prepare($conn, $sql);
 if (!$stmt) {
   $response['error'] = 'Prepare failed: ' . mysqli_error($conn);
   goto SEND_JSON;
 }
 
-if (!mysqli_stmt_bind_param($stmt, 'ssssssss', $TipAct, $Numar, $Titlu, $DataVigoare, $Emitent, $Publicatie, $LinkHtml, $Text)) {
+if (!mysqli_stmt_bind_param($stmt, 'ssssssssi', $TipAct, $Numar, $Titlu, $DataVigoare, $Emitent, $Publicatie, $LinkHtml, $Text, $uid_to_use)) {
   $response['error'] = 'Bind failed: ' . mysqli_stmt_error($stmt);
   goto SEND_JSON;
 }

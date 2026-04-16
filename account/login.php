@@ -79,7 +79,7 @@ $token = $_SESSION['_token'];
 $token_expire = $_SESSION["token_expire"];
 
 // Validate message parameter to prevent XSS
-$allowed_messages = ['WP', 'ER', 'AC', 'NL'];
+$allowed_messages = ['WP', 'ER', 'AC', 'NL', 'SES'];
 $message = isset($_GET['message']) ? $_GET['message'] : '';
 
 If ($message == "WP"){
@@ -93,6 +93,9 @@ echo "<div class=\"callout success\">$strAccountActivated</div>" ;
 }
 elseIf ($message == "NL"){
 echo "<div class=\"callout alert\">$strNotLogedIn</div>" ;
+}
+elseIf ($message == "SES"){
+echo "<div class=\"callout alert\">$strSessionExpired</div>" ;
 }?>
                 <div class="grid-x grid-margin-x">
                     <div class="large-4 medium-4 small-4 cell">
